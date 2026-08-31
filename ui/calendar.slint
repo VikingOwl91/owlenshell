@@ -1,0 +1,114 @@
+export struct DayRow {
+    d0: int,
+    d1: int,
+    d2: int,
+    d3: int,
+    d4: int,
+    d5: int,
+    d6: int,
+}
+
+component DayCell {
+    in property <int> day;
+    width: 44px;
+    height: 42px;
+    Rectangle {
+        background: day == 0 ? #03060a : #071017;
+        border-width: day == 0 ? 0px : 1px;
+        border-color: #123b46;
+
+        Text {
+            width: 100%;
+            height: 100%;
+            text: day == 0 ? "" : "\{day}";
+            color: #f4fbff;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            font-size: 13px;
+            font-weight: 600;
+        }
+    }
+}
+
+export component Calendar inherits Window {
+    in property <string> month-title: "";
+    in property <[DayRow]> weeks;
+    callback dismiss();
+    preferred-width: 320px;
+    preferred-height: 320px;
+    width: 320px;
+    height: 320px;
+    background: #020408;
+
+    Rectangle {
+        background: #03060a;
+        border-radius: 7px;
+
+        VerticalLayout {
+            padding: 0px;
+            spacing: 0px;
+
+            Rectangle {
+                height: 28px;
+                background: drag-area.pressed ? #092b20 : drag-area.has-hover ? #2a0928 : #06131a;
+
+                drag-area := TouchArea {}
+
+                HorizontalLayout {
+                    padding-left: 9px;
+                    padding-right: 4px;
+
+                    Text {
+                        text: month-title;
+                        color: drag-area.pressed ? #39ff88 : #00f5ff;
+                        vertical-alignment: center;
+                        font-size: 14px;
+                        font-weight: 700;
+                    }
+                    Rectangle { horizontal-stretch: 1; }
+                    Rectangle {
+                        width: 28px;
+                        background: close-area.pressed ? #39ff88 : close-area.has-hover ? #ff2bd6 : #111827;
+                        border-width: 1px;
+                        border-color: close-area.has-hover ? #ffffff : #ff2bd6;
+
+                        close-area := TouchArea {
+                            clicked => {
+                                root.dismiss();
+                            }
+                        }
+
+                        Text {
+                            text: "×";
+                            color: close-area.pressed ? #020408 : #ffffff;
+                            width: 100%;
+                            height: 100%;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                            font-size: 16px;
+                            font-weight: 700;
+                        }
+                    }
+                }
+            }
+
+            for week in weeks: HorizontalLayout {
+                padding-left: 6px;
+                DayCell { day: week.d0; }
+                DayCell { day: week.d1; }
+                DayCell { day: week.d2; }
+                DayCell { day: week.d3; }
+                DayCell { day: week.d4; }
+                DayCell { day: week.d5; }
+                DayCell { day: week.d6; }
+            }
+        }
+
+        Rectangle {
+            background: transparent;
+            border-width: 3px;
+            border-color: drag-area.pressed ? #39ff88 : drag-area.has-hover ? #ff2bd6 : #00f5ff;
+            border-radius: 7px;
+        }
+    }
+}

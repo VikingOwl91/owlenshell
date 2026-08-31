@@ -1,0 +1,47 @@
+export component Bar inherits Window {
+    in property <string> clock-text: "00:00:00";
+    callback open-calendar();
+    preferred-height: 32px;
+    background: #020408;
+
+    Rectangle {
+        background: #020408;
+
+        Rectangle {
+            y: parent.height - 3px;
+            width: parent.width;
+            height: 3px;
+            background: #00f5ff;
+        }
+
+        HorizontalLayout {
+            padding-top: 3px;
+            padding-right: 10px;
+            padding-bottom: 3px;
+            alignment: end;
+
+            Rectangle {
+                width: 104px;
+                background: clock-area.pressed ? #092b20 : clock-area.has-hover ? #2a0928 : #06131a;
+                border-width: 1px;
+                border-color: clock-area.pressed ? #39ff88 : clock-area.has-hover ? #ff2bd6 : #00f5ff;
+                border-radius: 4px;
+
+                clock-area := TouchArea {
+                    clicked => {
+                        root.open-calendar();
+                    }
+                }
+
+                Text {
+                    text: clock-text;
+                    color: clock-area.pressed ? #39ff88 : clock-area.has-hover ? #ffffff : #00f5ff;
+                    font-size: 14px;
+                    font-weight: 700;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+        }
+    }
+}
