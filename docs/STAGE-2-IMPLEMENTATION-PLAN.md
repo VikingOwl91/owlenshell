@@ -54,6 +54,19 @@ states that an internal diagnostic is being corrected:
 10. Movement remains the proven fixed-surface, drop-on-release behavior.
     Continuous live movement belongs to Stage 4.
 
+### Lifecycle and Geometry Invariants
+
+11. **Dynamic geometry consistency**: During native surface recreation,
+    placement geometry, clamping geometry, requested native geometry, and
+    render/window geometry must refer to the same effective logical size. No
+    hidden fallback constant may silently change placement.
+12. **Logical visibility survives native retirement**: Native surface
+    loss/close due to output removal, role recreation, or compositor-driven
+    native closure must not implicitly clear logical host visibility. Only
+    explicit user/application hide/dismiss intent may clear logical visibility.
+    A logically visible host whose native instance is retired must remain
+    eligible for reconciliation/recreation.
+
 ## Current Ownership Map
 
 ### Process Bootstrap: `src/main.rs`

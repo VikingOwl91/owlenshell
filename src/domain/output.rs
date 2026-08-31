@@ -130,4 +130,9 @@ impl OutputSnapshot {
     pub fn physical_size_mm(&self) -> (i32, i32) {
         self.identity.physical_size_mm.unwrap_or((0, 0))
     }
+
+    /// Returns true if the output has positive logical dimensions suitable for surface placement.
+    pub fn is_placement_capable(&self) -> bool {
+        matches!(self.logical_size, Some((w, h)) if w > 0 && h > 0)
+    }
 }

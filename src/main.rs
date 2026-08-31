@@ -2,11 +2,11 @@ use calloop::timer::{TimeoutAction, Timer};
 use calloop::EventLoop;
 use calloop_wayland_source::WaylandSource;
 use chrono::Datelike;
-use owlenshell::compositor;
 use owlenshell::domain::ids::HostId;
 use owlenshell::instrumentation;
 use owlenshell::model::{SurfaceKind, CALENDAR_KEY};
 use owlenshell::persistence::Placements;
+use owlenshell::platform::{compositor, OutputManager};
 use owlenshell::runtime::{drain_and_attach, hide_kind, pump, AppShared, AppState, OwlenPlatform};
 use slint::{ComponentHandle, ModelRc, VecModel};
 use smithay_client_toolkit::compositor::CompositorState;
@@ -44,14 +44,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         layer_shell,
         surfaces: RefCell::new(Vec::new()),
         new_adapters: RefCell::new(Vec::new()),
-        outputs: RefCell::new(Vec::new()),
-        wl_outputs: RefCell::new(Default::default()),
+        output_manager: RefCell::new(OutputManager::new(compositor::detect())),
         store: RefCell::new(Placements::load()),
         modifiers: Cell::new(Default::default()),
         keyboard_focus: Cell::new(None),
         drag: RefCell::new(None),
         topology_dirty: Cell::new(true),
-        backend: compositor::detect(),
         exit: Cell::new(false),
         first_frame: Cell::new(false),
         outputs_ready: Cell::new(false),

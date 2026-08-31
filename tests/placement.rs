@@ -2,8 +2,9 @@ use owlenshell::domain::ids::OutputId;
 use owlenshell::domain::output::{OutputIdentity, OutputPreference, OutputSnapshot};
 use owlenshell::domain::placement::{Anchor, ResolveReason, SavedPlacement};
 use owlenshell::placement::{
-    clamp_offset, containing_output, dragged_origin, nearest_corner, resolve,
-    HostPlacementConstraints, PlacementContext, PlacementEngine, MIN_VISIBLE,
+    clamp_offset, containing_output, dragged_origin, margins_from_offset, nearest_corner,
+    origin_from_margins, resolve, HostPlacementConstraints, PlacementContext, PlacementEngine,
+    MIN_VISIBLE,
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -704,6 +705,458 @@ fn semantic_placement_after_committed_move() {
     assert_eq!(cross_move.saved_placement.output.serial(), Some("SN2"));
     assert_eq!(cross_move.saved_placement.output.make(), Some("LG"));
     assert_eq!(cross_move.saved_placement.output.model(), Some("4K"));
+}
+
+#[test]
+fn cross_output_drop_vertically_and_horizontally_offset_outputs() {
+    // Source output at (0, 1440), target output at (1920, 0)
+    let mut out1 = snap(
+        1,
+        "DP-1",
+        "Gigabyte",
+        "MO27Q",
+        (590, 330),
+        Some((1920, 1080)),
+        Some("SN1"),
+        true,
+    );
+    out1.logical_position = Some((0, 1440));
+
+    let mut out2 = snap(
+        2,
+        "DP-2",
+        "Acer",
+        "VG270U",
+        (600, 340),
+        Some((2560, 1440)),
+        Some("SN2"),
+        false,
+    );
+    out2.logical_position = Some((1920, 0));
+
+    let outputs = [out1, out2];
+
+    // Calendar widget on out1 (0, 1440): start anchored TopRight with offset (24, 40)
+    let widget_size = (320, 320);
+    let start_anchor = Anchor::TopRight;
+    let start_offset = (24, 40);
+    let start_margins = margins_from_offset(start_anchor, start_offset); // (40, 24, 0, 0)
+    let grab = (10.0, 10.0);
+
+    // Initial widget origin on out1: (1920 - 320 - 24, 40) = (1576, 40)
+    // Global initial widget top-left: (0 + 1576, 1440 + 40) = (1576, 1480)
+
+    // User drags pointer to desktop global (2500, 300) on out2 (1920, 0)
+    // Wayland event position relative to source surface: (2500 - 1576, 300 - 1480) = (924.0, -1180.0)
+    let pointer = (924.0, -1180.0);
+
+    let committed = PlacementEngine::commit_move(
+        pointer,
+        grab,
+        widget_size,
+        start_margins,
+        start_anchor,
+        OutputId::new(1),
+        &outputs,
+        None,
+        MIN_VISIBLE,
+    )
+    .expect("cross-output move onto out2 must succeed");
+
+    // 1. Correct target output selected
+    assert_eq!(committed.target_output_id, OutputId::new(2));
+    assert_eq!(
+        committed.saved_placement.output.name.as_deref(),
+        Some("DP-2")
+    );
+
+    // 2. Expected target-local geometry:
+    // global drop (2500, 300) - target_out.logical_position (1920, 0) - grab (10, 10) = local (570, 290)
+    // Center: (570 + 160, 290 + 160) = (730, 450) on out2 (2560x1440) -> nearest corner is TopLeft
+    assert_eq!(committed.saved_placement.anchor, Anchor::TopLeft);
+    assert_eq!(committed.saved_placement.offset, (570, 290));
+
+    // 3. Converting semantic placement back to target geometry reproduces intended drop location
+    let target_margins = margins_from_offset(
+        committed.saved_placement.anchor,
+        committed.saved_placement.offset,
+    );
+    let target_origin = origin_from_margins(
+        committed.saved_placement.anchor,
+        target_margins,
+        widget_size,
+        (2560, 1440),
+    );
+    assert_eq!(target_origin, (570, 290));
+
+    let target_global_top_left = (1920 + target_origin.0, target_origin.1);
+    assert_eq!(target_global_top_left, (2490, 290));
+    assert_eq!(
+        (
+            target_global_top_left.0 + grab.0 as i32,
+            target_global_top_left.1 + grab.1 as i32
+        ),
+        (2500, 300),
+        "reconstructed global pointer position must match original drop position"
+    );
+}
+
+#[test]
+fn cross_output_drop_left_to_right_and_right_to_left() {
+    let mut out_left = snap(
+        1,
+        "DP-1",
+        "Make1",
+        "Model1",
+        (600, 340),
+        Some((1920, 1080)),
+        Some("SN1"),
+        true,
+    );
+    out_left.logical_position = Some((0, 0));
+
+    let mut out_right = snap(
+        2,
+        "DP-2",
+        "Make2",
+        "Model2",
+        (600, 340),
+        Some((1920, 1080)),
+        Some("SN2"),
+        false,
+    );
+    out_right.logical_position = Some((1920, 0));
+
+    let outputs = [out_left, out_right];
+    let widget_size = (320, 320);
+    let grab = (20.0, 20.0);
+
+    // Left -> Right: start on out_left TopLeft (50, 50), drop on out_right at global (2500, 400)
+    let start_margins = margins_from_offset(Anchor::TopLeft, (50, 50));
+    // Pointer relative to surface: (2500 - 50, 400 - 50) = (2450, 350)
+    let commit_r = PlacementEngine::commit_move(
+        (2450.0, 350.0),
+        grab,
+        widget_size,
+        start_margins,
+        Anchor::TopLeft,
+        OutputId::new(1),
+        &outputs,
+        None,
+        MIN_VISIBLE,
+    )
+    .expect("left to right move");
+
+    assert_eq!(commit_r.target_output_id, OutputId::new(2));
+    // Local top-left on out_right: (2500 - 1920 - 20, 400 - 0 - 20) = (560, 380)
+    // Center: (720, 540) on (1920, 1080) -> TopLeft
+    assert_eq!(commit_r.saved_placement.anchor, Anchor::TopLeft);
+    assert_eq!(commit_r.saved_placement.offset, (560, 380));
+
+    // Right -> Left: start on out_right TopRight (30, 40), drop on out_left at global (500, 500)
+    // Origin on out_right: (1920 - 320 - 30, 40) = (1570, 40)
+    // Global start top-left: (1920 + 1570, 0 + 40) = (3490, 40)
+    let start_margins_r = margins_from_offset(Anchor::TopRight, (30, 40));
+    // Pointer relative to surface: (500 - 3490, 500 - 40) = (-2990, 460)
+    let commit_l = PlacementEngine::commit_move(
+        (-2990.0, 460.0),
+        grab,
+        widget_size,
+        start_margins_r,
+        Anchor::TopRight,
+        OutputId::new(2),
+        &outputs,
+        None,
+        MIN_VISIBLE,
+    )
+    .expect("right to left move");
+
+    assert_eq!(commit_l.target_output_id, OutputId::new(1));
+    // Local top-left on out_left: (500 - 0 - 20, 500 - 0 - 20) = (480, 480)
+    // Center: (640, 640) on (1920, 1080): distance to BottomLeft is 640^2 + 440^2 = 603200 vs TopLeft 819200
+    // Nearest corner is BottomLeft with offset (480, 1080 - 480 - 320) = (480, 280)
+    assert_eq!(commit_l.saved_placement.anchor, Anchor::BottomLeft);
+    assert_eq!(commit_l.saved_placement.offset, (480, 280));
+
+    // Converting back reproduces exact local and global drop location:
+    let margins_l = margins_from_offset(
+        commit_l.saved_placement.anchor,
+        commit_l.saved_placement.offset,
+    );
+    let origin_l = origin_from_margins(
+        commit_l.saved_placement.anchor,
+        margins_l,
+        widget_size,
+        (1920, 1080),
+    );
+    assert_eq!(origin_l, (480, 480));
+    assert_eq!(
+        (origin_l.0 + grab.0 as i32, origin_l.1 + grab.1 as i32),
+        (500, 500)
+    );
+}
+
+#[test]
+fn cross_output_drop_target_with_non_zero_x_and_y() {
+    let mut out1 = snap(
+        1,
+        "DP-1",
+        "Make1",
+        "Model1",
+        (600, 340),
+        Some((1920, 1080)),
+        None,
+        false,
+    );
+    out1.logical_position = Some((0, 0));
+
+    let mut out2 = snap(
+        2,
+        "DP-2",
+        "Make2",
+        "Model2",
+        (600, 340),
+        Some((2560, 1440)),
+        None,
+        false,
+    );
+    out2.logical_position = Some((2560, 1440));
+
+    let outputs = [out1, out2];
+    let widget_size = (300, 300);
+    let grab = (0.0, 0.0);
+
+    // Start on out1 at (0, 0), drop on out2 at global (3000, 2000)
+    let start_margins = margins_from_offset(Anchor::TopLeft, (0, 0));
+    let commit = PlacementEngine::commit_move(
+        (3000.0, 2000.0),
+        grab,
+        widget_size,
+        start_margins,
+        Anchor::TopLeft,
+        OutputId::new(1),
+        &outputs,
+        None,
+        MIN_VISIBLE,
+    )
+    .expect("move onto diagonally offset output");
+
+    assert_eq!(commit.target_output_id, OutputId::new(2));
+    // Local on out2: (3000 - 2560 - 0, 2000 - 1440 - 0) = (440, 560)
+    // Center: (590, 710) on (2560, 1440) -> TopLeft
+    assert_eq!(commit.saved_placement.anchor, Anchor::TopLeft);
+    assert_eq!(commit.saved_placement.offset, (440, 560));
+}
+
+#[test]
+fn same_output_drop_preserves_exact_geometry() {
+    let mut out = snap(
+        1,
+        "DP-1",
+        "Make1",
+        "Model1",
+        (600, 340),
+        Some((2560, 1440)),
+        None,
+        true,
+    );
+    out.logical_position = Some((1920, 1440));
+
+    let outputs = [out];
+    let widget_size = (320, 320);
+    let grab = (15.0, 15.0);
+
+    // Start at TopRight (24, 40): origin = (2560 - 320 - 24, 40) = (2216, 40)
+    let start_margins = margins_from_offset(Anchor::TopRight, (24, 40));
+    // User moves pointer by (+100, +200) relative to grab: pointer = (15 + 100, 15 + 200) = (115, 215)
+    let commit = PlacementEngine::commit_move(
+        (115.0, 215.0),
+        grab,
+        widget_size,
+        start_margins,
+        Anchor::TopRight,
+        OutputId::new(1),
+        &outputs,
+        None,
+        MIN_VISIBLE,
+    )
+    .expect("same output move");
+
+    assert_eq!(commit.target_output_id, OutputId::new(1));
+    // Expected local origin: (2216 + 100, 40 + 200) = (2316, 240)
+    // Center: (2316 + 160, 240 + 160) = (2476, 400) on (2560, 1440) -> TopRight
+    // Offset TopRight: (2560 - 2316 - 320, 240) = (-76 -> clamped to 0, 240)
+    assert_eq!(commit.saved_placement.anchor, Anchor::TopRight);
+    assert_eq!(commit.saved_placement.offset, (0, 240));
+}
+
+#[test]
+fn runtime_try_attach_geometry_computation_uses_dynamic_preferred_size() {
+    use owlenshell::runtime::{compute_attach_geometry, SurfaceKind};
+    use slint::LogicalSize;
+
+    // Preferred size below 320: 240x180
+    let preferred = LogicalSize::new(240.0, 180.0);
+
+    // On an output of size 400x300, offset (150, 50) with Anchor::TopRight:
+    // With 240x180: max_span_x = 400 - 240 = 160, max_span_y = 300 - 180 = 120.
+    // Offset (150, 50) fits within [0, 160] and [0, 120], so clamped offset is (150, 50).
+    //
+    // Under the old bug (hardcoded 320x320 clamp):
+    // max_span_x = 400 - 320 = 80, max_span_y = 300 - 320 (clamped to 0) = 0.
+    // The old buggy logic clamped offset (150, 50) to (80, 0), shifting X by 70px and Y by 50px!
+    let placement = SavedPlacement {
+        output: OutputPreference::new().with_name("DP-1"),
+        anchor: Anchor::TopRight,
+        offset: (150, 50),
+    };
+
+    let geo = compute_attach_geometry(
+        SurfaceKind::Calendar,
+        Some(&placement),
+        preferred,
+        Some((400, 300)),
+    );
+
+    assert_eq!(
+        geo.effective_widget_size,
+        (240, 180),
+        "effective widget size must be derived from preferred size (240x180), not hardcoded 320x320"
+    );
+    assert_eq!(
+        geo.requested_size,
+        (240, 180),
+        "requested native size must equal preferred size (240x180)"
+    );
+    assert_eq!(
+        geo.offset,
+        (150, 50),
+        "offset (150, 50) must not be clamped to (80, 0) as would happen under a 320x320 assumption"
+    );
+    assert_eq!(
+        geo.margins,
+        (50, 150, 0, 0),
+        "margins must match the (150, 50) offset, not the buggy (0, 80, 0, 0)"
+    );
+}
+
+#[test]
+fn dynamic_preferred_size_below_320_recreation_consistency() {
+    let mut out1 = snap(
+        1,
+        "DP-1",
+        "Make1",
+        "Model1",
+        (600, 340),
+        Some((1920, 1080)),
+        Some("SN1"),
+        true,
+    );
+    out1.logical_position = Some((0, 0));
+
+    let mut out2 = snap(
+        2,
+        "DP-2",
+        "Make2",
+        "Model2",
+        (600, 340),
+        Some((2560, 1440)),
+        Some("SN2"),
+        false,
+    );
+    out2.logical_position = Some((1920, 0));
+
+    let outputs = [out1, out2];
+
+    // Preferred widget size below 320 in both dimensions: 240x180
+    let widget_size = (240, 180);
+    let start_anchor = Anchor::TopRight;
+    let start_offset = (20, 30);
+    let start_margins = margins_from_offset(start_anchor, start_offset); // (30, 20, 0, 0)
+    let grab = (10.0, 10.0);
+
+    // Initial widget origin on out1: (1920 - 240 - 20, 30) = (1660, 30)
+    let start_origin = origin_from_margins(start_anchor, start_margins, widget_size, (1920, 1080));
+    assert_eq!(start_origin, (1660, 30));
+
+    // 1. Move within out1 to target-local (1500, 50)
+    // Pointer event relative to surface: (1500 - 1660 + 10, 50 - 30 + 10) = (-150.0, 30.0)
+    let commit_same = PlacementEngine::commit_move(
+        (-150.0, 30.0),
+        grab,
+        widget_size,
+        start_margins,
+        start_anchor,
+        OutputId::new(1),
+        &outputs,
+        None,
+        MIN_VISIBLE,
+    )
+    .expect("same output move with 240x180");
+
+    assert_eq!(commit_same.target_output_id, OutputId::new(1));
+    assert_eq!(commit_same.saved_placement.anchor, Anchor::TopRight);
+    // With 240x180: offset.0 = 1920 - 1500 - 240 = 180.
+    // If it had clamped with 320x320, offset.0 would have shifted to 100.
+    assert_eq!(
+        commit_same.saved_placement.offset,
+        (180, 50),
+        "offset must be computed using actual 240x180 size without 320 clamp shift"
+    );
+
+    let margins_same = margins_from_offset(
+        commit_same.saved_placement.anchor,
+        commit_same.saved_placement.offset,
+    );
+    let origin_same = origin_from_margins(
+        commit_same.saved_placement.anchor,
+        margins_same,
+        widget_size,
+        (1920, 1080),
+    );
+    assert_eq!(origin_same, (1500, 50));
+
+    // 2. Cross-output move onto out2 at global (2400, 200)
+    // Global start top-left: (0 + 1660, 0 + 30) = (1660, 30)
+    // Pointer relative to surface: (2400 - 1660, 200 - 30) = (740.0, 170.0)
+    let commit_cross = PlacementEngine::commit_move(
+        (740.0, 170.0),
+        grab,
+        widget_size,
+        start_margins,
+        start_anchor,
+        OutputId::new(1),
+        &outputs,
+        None,
+        MIN_VISIBLE,
+    )
+    .expect("cross output move onto out2 with 240x180");
+
+    assert_eq!(commit_cross.target_output_id, OutputId::new(2));
+    // Local top-left on out2: (2400 - 1920 - 10, 200 - 0 - 10) = (470, 190)
+    // Center: (470 + 120, 190 + 90) = (590, 280) on (2560, 1440) -> TopLeft
+    assert_eq!(commit_cross.saved_placement.anchor, Anchor::TopLeft);
+    assert_eq!(commit_cross.saved_placement.offset, (470, 190));
+
+    // Clamping with 240x180 preserves exact (470, 190)
+    let clamped_offset = clamp_offset(
+        commit_cross.saved_placement.anchor,
+        commit_cross.saved_placement.offset,
+        widget_size,
+        Some((2560, 1440)),
+        None,
+        MIN_VISIBLE,
+    );
+    assert_eq!(clamped_offset, (470, 190));
+
+    let margins_cross = margins_from_offset(commit_cross.saved_placement.anchor, clamped_offset);
+    let origin_cross = origin_from_margins(
+        commit_cross.saved_placement.anchor,
+        margins_cross,
+        widget_size,
+        (2560, 1440),
+    );
+    assert_eq!(origin_cross, (470, 190));
 }
 
 #[test]

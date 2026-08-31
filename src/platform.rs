@@ -1,8 +1,14 @@
+pub mod compositor;
 pub mod output_manager;
 pub mod surface_manager;
 
+pub use compositor::{
+    detect as detect_compositor, CompositorAdapter, CompositorOutputFacts, GenericAdapter,
+    HyprlandAdapter,
+};
 pub use output_manager::{
-    NewOutput, OutputRegistry, TopologyEvent, TopologyGeneration, TopologySnapshot,
+    canonical_output_cmp, NewOutput, OutputManager, OutputRegistry, ProtocolOutput, TopologyEvent,
+    TopologyGeneration, TopologySnapshot,
 };
 pub use surface_manager::{
     SurfaceCommand, SurfaceGeneration, SurfaceGenerationRegistry, SurfaceLifecycleEvent,

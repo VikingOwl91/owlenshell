@@ -1,21 +1,20 @@
 pub mod placement_engine;
 
-use crate::compositor::CompositorBackend;
 use crate::domain::ids::OutputId;
-use crate::domain::output::OutputIdentity;
 use crate::instrumentation;
+pub use crate::model::SurfaceKind;
 use crate::model::{
-    Anchor, OutputSnapshot, SavedPlacement, SurfaceKind, BAR_HEIGHT, BTN_LEFT, CALENDAR_KEY,
-    HANDLE_HEIGHT,
+    Anchor, OutputSnapshot, SavedPlacement, BAR_HEIGHT, BTN_LEFT, CALENDAR_KEY, HANDLE_HEIGHT,
 };
 use crate::persistence::Placements;
 use crate::placement::{
     clamp_offset, margins_from_offset, resolve, PlacementContext, PlacementEngine, MIN_VISIBLE,
 };
+use crate::platform::OutputManager;
 use crate::window::OwlenWindowAdapter;
 use slint::platform::software_renderer::{PremultipliedRgbaColor, TargetPixel};
 use slint::platform::{Platform, PointerEventButton, WindowAdapter, WindowEvent};
-use slint::{LogicalPosition, PhysicalSize, PlatformError};
+use slint::{LogicalPosition, LogicalSize, PhysicalSize, PlatformError};
 use smithay_client_toolkit::compositor::{CompositorHandler, CompositorState, FrameCallbackData};
 use smithay_client_toolkit::delegate_registry;
 use smithay_client_toolkit::output::{OutputHandler, OutputState};
@@ -34,7 +33,6 @@ use smithay_client_toolkit::shell::WaylandSurface;
 use smithay_client_toolkit::shm::slot::{Buffer, SlotPool};
 use smithay_client_toolkit::shm::{Shm, ShmHandler};
 use std::cell::{Cell, RefCell};
-use std::collections::HashMap;
 use std::rc::Rc;
 use wayland_client::protocol::{wl_keyboard, wl_output, wl_pointer, wl_seat, wl_shm, wl_surface};
 use wayland_client::{backend::WaylandError, Connection, QueueHandle};
@@ -46,14 +44,12 @@ pub struct AppShared {
     pub layer_shell: LayerShell,
     pub surfaces: RefCell<Vec<SurfaceState>>,
     pub new_adapters: RefCell<Vec<Rc<OwlenWindowAdapter>>>,
-    pub outputs: RefCell<Vec<OutputSnapshot>>,
-    pub wl_outputs: RefCell<HashMap<u32, wl_output::WlOutput>>,
+    pub output_manager: RefCell<OutputManager>,
     pub store: RefCell<Placements>,
     pub modifiers: Cell<Modifiers>,
     pub keyboard_focus: Cell<Option<usize>>,
     pub drag: RefCell<Option<DragState>>,
     pub topology_dirty: Cell<bool>,
-    pub backend: Box<dyn CompositorBackend>,
     pub exit: Cell<bool>,
     pub first_frame: Cell<bool>,
     pub outputs_ready: Cell<bool>,
@@ -85,7 +81,7 @@ pub struct SurfaceState {
 pub struct LiveSurface {
     surface: wl_surface::WlSurface,
     layer: LayerSurface,
-    output_id: u32,
+    output_id: OutputId,
     anchor: Anchor,
     margins: (i32, i32, i32, i32),
     requested_size: (u32, u32),
@@ -98,7 +94,7 @@ pub struct DragState {
     grab: (f64, f64),
     start_margins: (i32, i32, i32, i32),
     anchor: Anchor,
-    output_id: u32,
+    output_id: OutputId,
 }
 
 pub struct OwlenPlatform {
@@ -173,6 +169,7 @@ pub fn hide_kind(shared: &AppShared, kind: SurfaceKind) {
         surf.adapter.surface.set(None);
         surf.wl = None;
         surf.configured = None;
+        surf.render_size = None;
         surf.frame_pending = false;
         if shared.keyboard_focus.get() == Some(idx) {
             shared.keyboard_focus.set(None);
@@ -209,41 +206,12 @@ pub fn pump(state: &mut AppState) -> Result<(), WaylandError> {
 }
 
 fn refresh_outputs(state: &mut AppState) {
-    let mut snaps = Vec::new();
-    let mut map = HashMap::new();
-    for output in state.output_state.outputs() {
-        let Some(info) = state.output_state.info(&output) else {
-            continue;
-        };
-        map.insert(info.id, output.clone());
-        snaps.push(OutputSnapshot {
-            id: OutputId::new(info.id),
-            name: info.name.clone(),
-            identity: OutputIdentity {
-                make: if info.make.is_empty() {
-                    None
-                } else {
-                    Some(info.make.clone())
-                },
-                model: if info.model.is_empty() {
-                    None
-                } else {
-                    Some(info.model.clone())
-                },
-                physical_size_mm: Some(info.physical_size),
-                serial: None,
-            },
-            logical_position: info.logical_position,
-            logical_size: info.logical_size,
-            logical_role: None,
-            scale: info.scale_factor,
-            preferred: false,
-        });
-    }
-    state.shared.backend.enrich_outputs(&mut snaps);
-    let has_outputs = !snaps.is_empty();
-    *state.shared.wl_outputs.borrow_mut() = map;
-    *state.shared.outputs.borrow_mut() = snaps;
+    let _ = state
+        .shared
+        .output_manager
+        .borrow_mut()
+        .refresh_sctk(&state.output_state);
+    let has_outputs = !state.shared.output_manager.borrow().snapshot().is_empty();
     if has_outputs && !state.shared.outputs_ready.replace(true) {
         instrumentation::milestone("outputs-ready");
     }
@@ -251,13 +219,13 @@ fn refresh_outputs(state: &mut AppState) {
 
 fn resolve_ctx(shared: &AppShared) -> PlacementContext {
     PlacementContext {
-        spawn_output_id: bar_output_id(shared).map(OutputId::new),
-        preferred_name: shared.backend.preferred_output(),
+        spawn_output_id: bar_output_id(shared),
+        preferred_name: shared.output_manager.borrow().preferred_output_name(),
         focused_output_id: None,
     }
 }
 
-fn bar_output_id(shared: &AppShared) -> Option<u32> {
+fn bar_output_id(shared: &AppShared) -> Option<OutputId> {
     shared.surfaces.borrow().iter().find_map(|s| {
         if s.kind == SurfaceKind::Bar {
             s.wl.as_ref().map(|l| l.output_id)
@@ -270,13 +238,19 @@ fn bar_output_id(shared: &AppShared) -> Option<u32> {
 fn reconcile(shared: &AppShared) {
     let n = shared.surfaces.borrow().len();
     let ctx = resolve_ctx(shared);
+    let output_manager = shared.output_manager.borrow();
+    let snapshot = output_manager.snapshot();
+    let placement_candidates: Vec<OutputSnapshot> =
+        snapshot.placement_capable_outputs().cloned().collect();
+    drop(output_manager);
+
     for i in 0..n {
         let (visible, current, pref) = {
             let surfaces = shared.surfaces.borrow();
             let s = &surfaces[i];
             (
                 s.visible,
-                s.wl.as_ref().map(|l| OutputId::new(l.output_id)),
+                s.wl.as_ref().map(|l| l.output_id),
                 s.placement
                     .as_ref()
                     .map(|p| p.output.clone())
@@ -286,16 +260,14 @@ fn reconcile(shared: &AppShared) {
         if !visible {
             continue;
         }
-        let outputs = shared.outputs.borrow();
-        let result = resolve(&pref, &outputs, &ctx);
+        let result = resolve(&pref, &placement_candidates, &ctx);
         let target = result.target_output_id();
         let name = target.and_then(|id| {
-            outputs
+            placement_candidates
                 .iter()
                 .find(|o| o.id == id)
                 .and_then(|o| o.name.clone())
         });
-        drop(outputs);
         instrumentation::placement_decision(
             match shared.surfaces.borrow()[i].kind {
                 SurfaceKind::Bar => "bar",
@@ -309,13 +281,67 @@ fn reconcile(shared: &AppShared) {
             let mut surfaces = shared.surfaces.borrow_mut();
             surfaces[i].wl = None;
             surfaces[i].configured = None;
+            surfaces[i].render_size = None;
+            surfaces[i].frame_pending = false;
             continue;
         }
         if current != target {
             let mut surfaces = shared.surfaces.borrow_mut();
             surfaces[i].wl = None;
             surfaces[i].configured = None;
+            surfaces[i].render_size = None;
             surfaces[i].frame_pending = false;
+            WindowAdapter::request_redraw(&*surfaces[i].adapter.window);
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AttachGeometry {
+    pub anchor: Anchor,
+    pub margins: (i32, i32, i32, i32),
+    pub requested_size: (u32, u32),
+    pub effective_widget_size: (i32, i32),
+    pub offset: (i32, i32),
+}
+
+pub fn compute_attach_geometry(
+    kind: SurfaceKind,
+    placement: Option<&SavedPlacement>,
+    preferred: LogicalSize,
+    output_logical_size: Option<(i32, i32)>,
+) -> AttachGeometry {
+    match kind {
+        SurfaceKind::Bar => AttachGeometry {
+            anchor: Anchor::TopLeft,
+            margins: (0, 0, 0, 0),
+            requested_size: (0, BAR_HEIGHT),
+            effective_widget_size: (0, BAR_HEIGHT as i32),
+            offset: (0, 0),
+        },
+        SurfaceKind::Calendar => {
+            let anchor = placement.map(|p| p.anchor).unwrap_or(Anchor::TopRight);
+            let raw_offset = placement.map(|p| p.offset).unwrap_or((24, 40));
+            let widget_w = preferred.width.max(1.0) as i32;
+            let widget_h = preferred.height.max(1.0) as i32;
+            let offset = clamp_offset(
+                anchor,
+                raw_offset,
+                (widget_w, widget_h),
+                output_logical_size,
+                None,
+                MIN_VISIBLE,
+            );
+            let margins = margins_from_offset(anchor, offset);
+            let w = widget_w as u32;
+            let h = widget_h as u32;
+            AttachGeometry {
+                anchor,
+                margins,
+                requested_size: (w, h),
+                effective_widget_size: (widget_w, widget_h),
+                offset,
+            }
         }
     }
 }
@@ -331,19 +357,25 @@ fn try_attach(shared: &AppShared, idx: usize) {
         .map(|p| p.output.clone())
         .unwrap_or_default();
     let ctx = resolve_ctx(shared);
-    let outputs = shared.outputs.borrow();
-    let result = resolve(&pref, &outputs, &ctx);
+    let output_manager = shared.output_manager.borrow();
+    let snapshot = output_manager.snapshot();
+    let placement_candidates: Vec<OutputSnapshot> =
+        snapshot.placement_capable_outputs().cloned().collect();
+    let result = resolve(&pref, &placement_candidates, &ctx);
     let Some(output_id) = result.target_output_id() else {
         return;
     };
-    let snap = outputs.iter().find(|o| o.id == output_id).cloned();
-    drop(outputs);
+    let snap = placement_candidates
+        .iter()
+        .find(|o| o.id == output_id)
+        .cloned();
     let Some(snap) = snap else {
         return;
     };
-    let Some(output) = shared.wl_outputs.borrow().get(&output_id.raw()).cloned() else {
+    let Some(output) = output_manager.get_wl_output(output_id) else {
         return;
     };
+    drop(output_manager);
 
     let wl_surface = shared.compositor.create_surface(&shared.qh);
     let (ns, kb) = match kind {
@@ -358,41 +390,21 @@ fn try_attach(shared: &AppShared, idx: usize) {
         Some(&output),
     );
 
-    let (anchor, margins) = match kind {
-        SurfaceKind::Bar => (Anchor::TopLeft, (0, 0, 0, 0)),
-        SurfaceKind::Calendar => {
-            let p = placement.as_ref();
-            let anchor = p.map(|p| p.anchor).unwrap_or(Anchor::TopRight);
-            let offset = p.map(|p| p.offset).unwrap_or((24, 40));
-            let offset = clamp_offset(
-                anchor,
-                offset,
-                (320, 320),
-                snap.logical_size,
-                None,
-                MIN_VISIBLE,
-            );
-            (anchor, margins_from_offset(anchor, offset))
-        }
-    };
+    let geo = compute_attach_geometry(kind, placement.as_ref(), preferred, snap.logical_size);
 
-    let requested_size = match kind {
+    match kind {
         SurfaceKind::Bar => {
             layer.set_anchor(LayerAnchor::TOP | LayerAnchor::LEFT | LayerAnchor::RIGHT);
-            layer.set_size(0, BAR_HEIGHT);
+            layer.set_size(geo.requested_size.0, geo.requested_size.1);
             layer.set_exclusive_zone(BAR_HEIGHT as i32);
-            (0, BAR_HEIGHT)
         }
         SurfaceKind::Calendar => {
-            layer.set_anchor(anchor.as_layer_anchor());
-            let w = preferred.width.max(1.0) as u32;
-            let h = preferred.height.max(1.0) as u32;
-            layer.set_size(w, h);
+            layer.set_anchor(geo.anchor.as_layer_anchor());
+            layer.set_size(geo.requested_size.0, geo.requested_size.1);
             layer.set_exclusive_zone(0);
-            layer.set_margin(margins.0, margins.1, margins.2, margins.3);
-            (w, h)
+            layer.set_margin(geo.margins.0, geo.margins.1, geo.margins.2, geo.margins.3);
         }
-    };
+    }
     layer.set_keyboard_interactivity(kb);
     layer.commit();
 
@@ -405,15 +417,17 @@ fn try_attach(shared: &AppShared, idx: usize) {
     surfaces[idx].wl = Some(LiveSurface {
         surface,
         layer,
-        output_id: output_id.raw(),
-        anchor,
-        margins,
-        requested_size,
+        output_id,
+        anchor: geo.anchor,
+        margins: geo.margins,
+        requested_size: geo.requested_size,
         pool: None,
         buffer: None,
     });
     surfaces[idx].configured = None;
+    surfaces[idx].render_size = None;
     surfaces[idx].frame_pending = false;
+    WindowAdapter::request_redraw(&*surfaces[idx].adapter.window);
 }
 
 fn sync_size(shared: &AppShared, idx: usize) {
@@ -655,36 +669,19 @@ impl OutputHandler for AppState {
         _qh: &QueueHandle<Self>,
         output: wl_output::WlOutput,
     ) {
-        let removed_id = self
-            .output_state
-            .info(&output)
-            .map(|info| info.id)
-            .or_else(|| {
-                self.shared
-                    .wl_outputs
-                    .borrow()
-                    .iter()
-                    .find_map(|(id, candidate)| (candidate == &output).then_some(*id))
-            });
-
-        let active_output_ids = {
-            let mut outputs = self.shared.wl_outputs.borrow_mut();
-            if let Some(removed_id) = removed_id {
-                outputs.remove(&removed_id);
-            }
-            outputs.retain(|_, candidate| candidate != &output);
-            outputs.keys().copied().collect::<Vec<_>>()
-        };
-        self.shared
-            .outputs
+        let removed = self
+            .shared
+            .output_manager
             .borrow_mut()
-            .retain(|snapshot| active_output_ids.contains(&snapshot.id.raw()));
+            .remove_wl_output(&output);
+        let removed_id = removed.as_ref().map(|(id, _, _)| *id);
+
         let drag_targets_removed_output = self
             .shared
             .drag
             .borrow()
             .as_ref()
-            .is_some_and(|drag| !active_output_ids.contains(&drag.output_id));
+            .is_some_and(|drag| Some(drag.output_id) == removed_id);
         if drag_targets_removed_output {
             self.shared.drag.borrow_mut().take();
         }
@@ -711,11 +708,11 @@ impl LayerShellHandler for AppState {
             if surfaces[idx].kind == SurfaceKind::Bar {
                 self.shared.exit.set(true);
             }
-            surfaces[idx].visible = false;
-            surfaces[idx].adapter.surface.set(None);
             surfaces[idx].wl = None;
             surfaces[idx].configured = None;
+            surfaces[idx].render_size = None;
             surfaces[idx].frame_pending = false;
+            WindowAdapter::request_redraw(&*surfaces[idx].adapter.window);
             if self.shared.keyboard_focus.get() == Some(idx) {
                 self.shared.keyboard_focus.set(None);
                 self.shared.modifiers.set(Modifiers::default());
@@ -723,6 +720,7 @@ impl LayerShellHandler for AppState {
             if self.shared.drag.borrow().as_ref().map(|drag| drag.idx) == Some(idx) {
                 self.shared.drag.borrow_mut().take();
             }
+            self.shared.topology_dirty.set(true);
         }
     }
 
@@ -996,23 +994,25 @@ fn finish_drag(shared: &AppShared, drag: &DragState, pointer: (f64, f64)) {
                 .unwrap_or(drag.start_margins),
         )
     };
-    let outputs = shared.outputs.borrow();
+    let output_manager = shared.output_manager.borrow();
+    let snapshot = output_manager.snapshot();
+    let outputs: Vec<OutputSnapshot> = snapshot.placement_capable_outputs().cloned().collect();
     let commit = PlacementEngine::commit_move(
         pointer,
         drag.grab,
         widget,
         margins,
         drag.anchor,
-        OutputId::new(drag.output_id),
+        drag.output_id,
         &outputs,
         None,
         MIN_VISIBLE,
     );
-    drop(outputs);
+    drop(output_manager);
     let Some(commit) = commit else {
         return;
     };
-    let target_output_id = commit.target_output_id.raw();
+    let target_output_id = commit.target_output_id;
     let placement = commit.saved_placement;
 
     {
@@ -1032,6 +1032,9 @@ fn finish_drag(shared: &AppShared, drag: &DragState, pointer: (f64, f64)) {
         if recreate {
             surfaces[drag.idx].wl = None;
             surfaces[drag.idx].configured = None;
+            surfaces[drag.idx].render_size = None;
+            surfaces[drag.idx].frame_pending = false;
+            WindowAdapter::request_redraw(&*surfaces[drag.idx].adapter.window);
         } else if let Some(live) = surfaces[drag.idx].wl.as_mut() {
             live.anchor = placement.anchor;
             live.margins = margins_from_offset(placement.anchor, placement.offset);
