@@ -1,4 +1,4 @@
-use crate::model::OutputSnapshot;
+use crate::domain::output::OutputSnapshot;
 use serde::Deserialize;
 use std::cell::{Cell, RefCell};
 use std::process::Command;
@@ -72,13 +72,13 @@ impl CompositorBackend for HyprlandBackend {
                 continue;
             };
             if !m.serial.is_empty() {
-                o.serial = Some(m.serial.clone());
+                o.identity.serial = Some(m.serial.clone());
             }
-            if !m.make.is_empty() && o.make.is_empty() {
-                o.make = m.make.clone();
+            if !m.make.is_empty() && o.identity.make.as_ref().is_none_or(|s| s.is_empty()) {
+                o.identity.make = Some(m.make.clone());
             }
-            if !m.model.is_empty() && o.model.is_empty() {
-                o.model = m.model.clone();
+            if !m.model.is_empty() && o.identity.model.as_ref().is_none_or(|s| s.is_empty()) {
+                o.identity.model = Some(m.model.clone());
             }
             if m.focused {
                 o.preferred = true;

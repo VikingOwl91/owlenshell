@@ -272,6 +272,20 @@ Potential capabilities:
 
 Generic behavior must remain usable when an adapter is unavailable.
 
+### Session and UWSM Integration
+
+Owns session lifecycle detection, systemd user session cooperation, and session-aware application launching.
+
+When running inside a UWSM-managed session:
+
+- Detects UWSM environment variables and systemd user session state.
+- Emits ready/stop notifications to cooperate with session lifecycle management.
+- Delegates desktop application and action launches to `uwsm app -- ...` for clean cgroups and environment isolation.
+- Avoids conflicting environment exports or duplicate session management.
+- Degrades gracefully to standard POSIX process spawning when UWSM is absent.
+
+All session and UWSM mechanisms live behind a platform integration trait and never leak into widget implementations or pure domain models.
+
 ## Widget vs Surface
 
 A widget and an atomic surface are not identical concepts.

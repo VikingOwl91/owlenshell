@@ -1,4 +1,8 @@
+pub mod placement_engine;
+
 use crate::compositor::CompositorBackend;
+use crate::domain::ids::OutputId;
+use crate::domain::output::OutputIdentity;
 use crate::instrumentation;
 use crate::model::{
     Anchor, OutputSnapshot, SavedPlacement, SurfaceKind, BAR_HEIGHT, BTN_LEFT, CALENDAR_KEY,
@@ -6,8 +10,7 @@ use crate::model::{
 };
 use crate::persistence::Placements;
 use crate::placement::{
-    clamp_offset, containing_output, dragged_origin, margins_from_offset, nearest_corner,
-    origin_from_margins, resolve, ResolveContext,
+    clamp_offset, margins_from_offset, resolve, PlacementContext, PlacementEngine, MIN_VISIBLE,
 };
 use crate::window::OwlenWindowAdapter;
 use slint::platform::software_renderer::{PremultipliedRgbaColor, TargetPixel};
@@ -96,8 +99,6 @@ pub struct DragState {
     start_margins: (i32, i32, i32, i32),
     anchor: Anchor,
     output_id: u32,
-    output_size: (i32, i32),
-    output_origin: Option<(i32, i32)>,
 }
 
 pub struct OwlenPlatform {
@@ -216,15 +217,26 @@ fn refresh_outputs(state: &mut AppState) {
         };
         map.insert(info.id, output.clone());
         snaps.push(OutputSnapshot {
-            id: info.id,
+            id: OutputId::new(info.id),
             name: info.name.clone(),
-            make: info.make.clone(),
-            model: info.model.clone(),
-            physical_size_mm: info.physical_size,
+            identity: OutputIdentity {
+                make: if info.make.is_empty() {
+                    None
+                } else {
+                    Some(info.make.clone())
+                },
+                model: if info.model.is_empty() {
+                    None
+                } else {
+                    Some(info.model.clone())
+                },
+                physical_size_mm: Some(info.physical_size),
+                serial: None,
+            },
             logical_position: info.logical_position,
             logical_size: info.logical_size,
+            logical_role: None,
             scale: info.scale_factor,
-            serial: None,
             preferred: false,
         });
     }
@@ -237,10 +249,11 @@ fn refresh_outputs(state: &mut AppState) {
     }
 }
 
-fn resolve_ctx(shared: &AppShared) -> ResolveContext {
-    ResolveContext {
-        spawn_output_id: bar_output_id(shared),
+fn resolve_ctx(shared: &AppShared) -> PlacementContext {
+    PlacementContext {
+        spawn_output_id: bar_output_id(shared).map(OutputId::new),
         preferred_name: shared.backend.preferred_output(),
+        focused_output_id: None,
     }
 }
 
@@ -263,7 +276,7 @@ fn reconcile(shared: &AppShared) {
             let s = &surfaces[i];
             (
                 s.visible,
-                s.wl.as_ref().map(|l| l.output_id),
+                s.wl.as_ref().map(|l| OutputId::new(l.output_id)),
                 s.placement
                     .as_ref()
                     .map(|p| p.output.clone())
@@ -275,7 +288,7 @@ fn reconcile(shared: &AppShared) {
         }
         let outputs = shared.outputs.borrow();
         let result = resolve(&pref, &outputs, &ctx);
-        let target = result.output_id;
+        let target = result.target_output_id();
         let name = target.and_then(|id| {
             outputs
                 .iter()
@@ -288,11 +301,9 @@ fn reconcile(shared: &AppShared) {
                 SurfaceKind::Bar => "bar",
                 SurfaceKind::Calendar => "calendar",
             },
-            format!("{:?}", result.reason).as_str(),
+            format!("{:?}", result.reason()).as_str(),
             name.as_deref(),
-            result.reason != crate::placement::ResolveReason::ExactName
-                && result.reason != crate::placement::ResolveReason::Serial
-                && result.reason != crate::placement::ResolveReason::Fingerprint,
+            result.is_fallback(),
         );
         if target.is_none() {
             let mut surfaces = shared.surfaces.borrow_mut();
@@ -322,7 +333,7 @@ fn try_attach(shared: &AppShared, idx: usize) {
     let ctx = resolve_ctx(shared);
     let outputs = shared.outputs.borrow();
     let result = resolve(&pref, &outputs, &ctx);
-    let Some(output_id) = result.output_id else {
+    let Some(output_id) = result.target_output_id() else {
         return;
     };
     let snap = outputs.iter().find(|o| o.id == output_id).cloned();
@@ -330,7 +341,7 @@ fn try_attach(shared: &AppShared, idx: usize) {
     let Some(snap) = snap else {
         return;
     };
-    let Some(output) = shared.wl_outputs.borrow().get(&output_id).cloned() else {
+    let Some(output) = shared.wl_outputs.borrow().get(&output_id.raw()).cloned() else {
         return;
     };
 
@@ -353,7 +364,14 @@ fn try_attach(shared: &AppShared, idx: usize) {
             let p = placement.as_ref();
             let anchor = p.map(|p| p.anchor).unwrap_or(Anchor::TopRight);
             let offset = p.map(|p| p.offset).unwrap_or((24, 40));
-            let offset = clamp_offset(offset, (320, 320), snap.logical_size);
+            let offset = clamp_offset(
+                anchor,
+                offset,
+                (320, 320),
+                snap.logical_size,
+                None,
+                MIN_VISIBLE,
+            );
             (anchor, margins_from_offset(anchor, offset))
         }
     };
@@ -387,7 +405,7 @@ fn try_attach(shared: &AppShared, idx: usize) {
     surfaces[idx].wl = Some(LiveSurface {
         surface,
         layer,
-        output_id,
+        output_id: output_id.raw(),
         anchor,
         margins,
         requested_size,
@@ -660,7 +678,7 @@ impl OutputHandler for AppState {
         self.shared
             .outputs
             .borrow_mut()
-            .retain(|snapshot| active_output_ids.contains(&snapshot.id));
+            .retain(|snapshot| active_output_ids.contains(&snapshot.id.raw()));
         let drag_targets_removed_output = self
             .shared
             .drag
@@ -912,28 +930,13 @@ impl PointerHandler for AppState {
                                 let live = surfaces[idx].wl.as_ref().unwrap();
                                 (live.margins, live.anchor, live.output_id)
                             };
-                            let output_geometry = {
-                                let outputs = self.shared.outputs.borrow();
-                                let snap = outputs.iter().find(|o| o.id == output_id);
-                                snap.and_then(|o| o.logical_size)
-                                    .map(|size| (size, snap.and_then(|o| o.logical_position)))
-                            };
-                            if let Some((output_size, output_origin)) = output_geometry {
-                                *self.shared.drag.borrow_mut() = Some(DragState {
-                                    idx,
-                                    grab: event.position,
-                                    start_margins: margins,
-                                    anchor,
-                                    output_id,
-                                    output_size,
-                                    output_origin,
-                                });
-                            } else {
-                                tracing::warn!(
-                                    output_id,
-                                    "drag deferred: output geometry unavailable"
-                                );
-                            }
+                            *self.shared.drag.borrow_mut() = Some(DragState {
+                                idx,
+                                grab: event.position,
+                                start_margins: margins,
+                                anchor,
+                                output_id,
+                            });
                         }
                     }
                     dispatch_pointer(
@@ -993,63 +996,46 @@ fn finish_drag(shared: &AppShared, drag: &DragState, pointer: (f64, f64)) {
                 .unwrap_or(drag.start_margins),
         )
     };
-    let origin = origin_from_margins(drag.anchor, margins, widget, drag.output_size);
-    let global = drag.output_origin.map(|output_origin| {
-        (
-            output_origin.0 + origin.0 + pointer.0 as i32,
-            output_origin.1 + origin.1 + pointer.1 as i32,
-        )
-    });
     let outputs = shared.outputs.borrow();
-    let target = global
-        .and_then(|point| containing_output(point, &outputs))
-        .cloned()
-        .or_else(|| outputs.iter().find(|o| o.id == drag.output_id).cloned());
+    let commit = PlacementEngine::commit_move(
+        pointer,
+        drag.grab,
+        widget,
+        margins,
+        drag.anchor,
+        OutputId::new(drag.output_id),
+        &outputs,
+        None,
+        MIN_VISIBLE,
+    );
     drop(outputs);
-
-    let Some(target) = target else {
+    let Some(commit) = commit else {
         return;
     };
-    let out_size = target.logical_size.unwrap_or(drag.output_size);
-    let local = if target.id == drag.output_id {
-        dragged_origin(origin, drag.grab, pointer)
-    } else {
-        let Some(pos) = target.logical_position else {
-            return;
-        };
-        let Some(global) = global else {
-            return;
-        };
-        (
-            global.0 - pos.0 - drag.grab.0 as i32,
-            global.1 - pos.1 - drag.grab.1 as i32,
-        )
-    };
-    let (anchor, offset) = nearest_corner(local, widget, out_size);
-    let offset = clamp_offset(offset, widget, Some(out_size));
-    let placement = SavedPlacement {
-        output: target.to_preference(),
-        anchor,
-        offset,
-    };
+    let target_output_id = commit.target_output_id.raw();
+    let placement = commit.saved_placement;
+
     {
         let mut store = shared.store.borrow_mut();
-        store.set(CALENDAR_KEY, placement.clone());
+        store.set(
+            crate::domain::ids::HostId::new(CALENDAR_KEY),
+            placement.clone(),
+        );
         if let Err(err) = store.save() {
             tracing::warn!(%err, "failed to persist placement");
         }
     }
-    let recreate = target.id != drag.output_id;
+    let recreate = target_output_id != drag.output_id;
     {
         let mut surfaces = shared.surfaces.borrow_mut();
-        surfaces[drag.idx].placement = Some(placement);
+        surfaces[drag.idx].placement = Some(placement.clone());
         if recreate {
             surfaces[drag.idx].wl = None;
             surfaces[drag.idx].configured = None;
         } else if let Some(live) = surfaces[drag.idx].wl.as_mut() {
-            live.anchor = anchor;
-            live.margins = margins_from_offset(anchor, offset);
-            live.layer.set_anchor(anchor.as_layer_anchor());
+            live.anchor = placement.anchor;
+            live.margins = margins_from_offset(placement.anchor, placement.offset);
+            live.layer.set_anchor(placement.anchor.as_layer_anchor());
             live.layer.set_margin(
                 live.margins.0,
                 live.margins.1,
@@ -1060,9 +1046,9 @@ fn finish_drag(shared: &AppShared, drag: &DragState, pointer: (f64, f64)) {
         }
     }
     tracing::info!(
-        output = target.name.as_deref(),
-        ?anchor,
-        ?offset,
+        output = placement.output.name.as_deref(),
+        anchor = ?placement.anchor,
+        offset = ?placement.offset,
         recreate,
         "calendar placed"
     );

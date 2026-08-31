@@ -256,6 +256,18 @@ Adapters may provide additional information such as:
 
 Missing compositor-specific functionality should cause graceful degradation rather than breaking the shell.
 
+## Session Management and UWSM Integration
+
+Owlenshell natively supports Universal Wayland Session Manager (UWSM) when running inside a UWSM-managed session.
+
+UWSM support is first-class but strictly optional:
+
+- **Optional Baseline**: Owlenshell remains fully functional without UWSM in standalone or compositor-launched environments.
+- **Session Lifecycle Cooperation**: When UWSM is active, Owlenshell detects the environment, coordinates with the surrounding systemd user session lifecycle, and cooperates on startup/shutdown signals.
+- **Clean Application Spawning**: Launcher and action subsystems use UWSM application invocation (`uwsm app -- ...`) where available to ensure clean cgroup management and environment propagation without leaking parent process state.
+- **No Duplicate Management**: Owlenshell avoids conflicting or redundant environment manipulation when UWSM is already governing the session environment.
+- **Strict Boundary**: All UWSM-specific detection and mechanics remain isolated behind a platform/session integration boundary and never leak into widgets or pure domain logic.
+
 ## Self-Contained
 
 Owlenshell should not depend on GTK, Qt, GJS, QML or a browser runtime as its desktop shell foundation.

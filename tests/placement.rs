@@ -1,7 +1,9 @@
-use owlenshell::model::{Anchor, OutputPreference, OutputSnapshot, MIN_VISIBLE};
+use owlenshell::domain::ids::OutputId;
+use owlenshell::domain::output::{OutputIdentity, OutputPreference, OutputSnapshot};
+use owlenshell::domain::placement::{Anchor, ResolveReason, SavedPlacement};
 use owlenshell::placement::{
-    clamp_offset, containing_output, dragged_origin, nearest_corner, resolve, ResolveContext,
-    ResolveReason,
+    clamp_offset, containing_output, dragged_origin, nearest_corner, resolve,
+    HostPlacementConstraints, PlacementContext, PlacementEngine, MIN_VISIBLE,
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -16,24 +18,32 @@ fn snap(
     preferred: bool,
 ) -> OutputSnapshot {
     OutputSnapshot {
-        id,
+        id: OutputId::new(id),
         name: Some(name.into()),
-        make: make.into(),
-        model: model.into(),
-        physical_size_mm: phys,
+        identity: OutputIdentity {
+            make: if make.is_empty() {
+                None
+            } else {
+                Some(make.into())
+            },
+            model: if model.is_empty() {
+                None
+            } else {
+                Some(model.into())
+            },
+            physical_size_mm: Some(phys),
+            serial: serial.map(|s| s.into()),
+        },
         logical_position: Some((0, 0)),
         logical_size: logical,
+        logical_role: None,
         scale: 1,
-        serial: serial.map(|s| s.into()),
         preferred,
     }
 }
 
 fn pref_name(name: &str) -> OutputPreference {
-    OutputPreference {
-        name: Some(name.into()),
-        ..OutputPreference::default()
-    }
+    OutputPreference::new().with_name(name)
 }
 
 #[test]
@@ -48,9 +58,12 @@ fn single_monitor_exact_name() {
         None,
         true,
     )];
-    let r = resolve(&pref_name("DP-1"), &outs, &ResolveContext::default());
-    assert_eq!(r.reason, ResolveReason::ExactName);
-    assert_eq!(r.output_id, Some(1));
+    let r = resolve(&pref_name("DP-1"), &outs, &PlacementContext::default());
+    assert_eq!(r.reason(), ResolveReason::ExactName);
+    assert_eq!(r.target_output_id(), Some(OutputId::new(1)));
+    assert!(!r.is_fallback());
+    assert!(!r.is_deferred());
+    assert!(r.is_reachable());
 }
 
 #[test]
@@ -65,9 +78,10 @@ fn output_absent_falls_back() {
         None,
         false,
     )];
-    let r = resolve(&pref_name("DP-1"), &outs, &ResolveContext::default());
-    assert_eq!(r.reason, ResolveReason::Any);
-    assert_eq!(r.output_id, Some(2));
+    let r = resolve(&pref_name("DP-1"), &outs, &PlacementContext::default());
+    assert_eq!(r.reason(), ResolveReason::Any);
+    assert_eq!(r.target_output_id(), Some(OutputId::new(2)));
+    assert!(r.is_fallback(), "absent output must be marked as fallback");
 }
 
 #[test]
@@ -82,16 +96,16 @@ fn serial_survives_connector_rename() {
         Some("25392F001456"),
         false,
     )];
-    let pref = OutputPreference {
-        name: Some("DP-1".into()),
-        serial: Some("25392F001456".into()),
-        make: Some("GB".into()),
-        model: Some("MO27Q28G".into()),
-        physical_size_mm: Some((600, 340)),
-    };
-    let r = resolve(&pref, &outs, &ResolveContext::default());
-    assert_eq!(r.reason, ResolveReason::Serial);
-    assert_eq!(r.output_id, Some(9));
+    let pref = OutputPreference::new()
+        .with_name("DP-1")
+        .with_serial("25392F001456")
+        .with_make("GB")
+        .with_model("MO27Q28G")
+        .with_physical_size_mm((600, 340));
+    let r = resolve(&pref, &outs, &PlacementContext::default());
+    assert_eq!(r.reason(), ResolveReason::Serial);
+    assert_eq!(r.target_output_id(), Some(OutputId::new(9)));
+    assert!(!r.is_fallback());
 }
 
 #[test]
@@ -118,16 +132,15 @@ fn unique_fingerprint_when_name_missing() {
             false,
         ),
     ];
-    let pref = OutputPreference {
-        name: Some("OLD-1".into()),
-        make: Some("Acer".into()),
-        model: Some("VG270".into()),
-        physical_size_mm: Some((600, 340)),
-        serial: None,
-    };
-    let r = resolve(&pref, &outs, &ResolveContext::default());
-    assert_eq!(r.reason, ResolveReason::Fingerprint);
-    assert_eq!(r.output_id, Some(1));
+    let pref = OutputPreference::new()
+        .with_name("OLD-1")
+        .with_make("Acer")
+        .with_model("VG270")
+        .with_physical_size_mm((600, 340));
+    let r = resolve(&pref, &outs, &PlacementContext::default());
+    assert_eq!(r.reason(), ResolveReason::Fingerprint);
+    assert_eq!(r.target_output_id(), Some(OutputId::new(1)));
+    assert!(!r.is_fallback());
 }
 
 #[test]
@@ -154,23 +167,23 @@ fn ambiguous_fingerprint_skips() {
             false,
         ),
     ];
-    let pref = OutputPreference {
-        name: Some("GONE".into()),
-        make: Some("Dell".into()),
-        model: Some("U2720Q".into()),
-        physical_size_mm: Some((600, 340)),
-        serial: None,
-    };
+    let pref = OutputPreference::new()
+        .with_name("GONE")
+        .with_make("Dell")
+        .with_model("U2720Q")
+        .with_physical_size_mm((600, 340));
     let r = resolve(
         &pref,
         &outs,
-        &ResolveContext {
-            spawn_output_id: Some(2),
+        &PlacementContext {
+            spawn_output_id: Some(OutputId::new(2)),
             preferred_name: None,
+            focused_output_id: None,
         },
     );
-    assert_eq!(r.reason, ResolveReason::SpawnOutput);
-    assert_eq!(r.output_id, Some(2));
+    assert_eq!(r.reason(), ResolveReason::SpawnOutput);
+    assert_eq!(r.target_output_id(), Some(OutputId::new(2)));
+    assert!(r.is_fallback());
 }
 
 #[test]
@@ -186,17 +199,68 @@ fn ambiguous_serial_skips() {
         false,
     );
     let mut second = first.clone();
-    second.id = 2;
+    second.id = OutputId::new(2);
     second.name = Some("DP-2".into());
     first.preferred = false;
-    let pref = OutputPreference {
-        name: Some("OLD".into()),
-        serial: Some("placeholder".into()),
-        ..OutputPreference::default()
-    };
-    let r = resolve(&pref, &[first, second], &ResolveContext::default());
-    assert_eq!(r.reason, ResolveReason::Any);
-    assert_eq!(r.output_id, Some(1));
+    let pref = OutputPreference::new()
+        .with_name("OLD")
+        .with_serial("placeholder");
+    let r = resolve(&pref, &[first, second], &PlacementContext::default());
+    assert_eq!(r.reason(), ResolveReason::Any);
+    assert_eq!(r.target_output_id(), Some(OutputId::new(1)));
+    assert!(r.is_fallback());
+}
+
+#[test]
+fn logical_role_matching_is_honest() {
+    let mut out1 = snap(
+        1,
+        "DP-1",
+        "Vendor1",
+        "Panel1",
+        (600, 340),
+        Some((1920, 1080)),
+        None,
+        false,
+    );
+    let mut out2 = snap(
+        2,
+        "DP-2",
+        "Vendor2",
+        "Panel2",
+        (600, 340),
+        Some((1920, 1080)),
+        None,
+        false,
+    );
+    out2.logical_role = Some("status-panel".into());
+    out1.logical_role = Some("main-workspace".into());
+
+    let pref = OutputPreference::new().with_logical_role("status-panel");
+    let r = resolve(&pref, &[out1, out2], &PlacementContext::default());
+
+    assert_eq!(r.reason(), ResolveReason::LogicalRole);
+    assert_eq!(r.target_output_id(), Some(OutputId::new(2)));
+    assert!(!r.is_fallback());
+
+    // If role does not match, does NOT match connector name accidentally
+    let pref_missing_role = OutputPreference::new().with_logical_role("non-existent-role");
+    let r_missing = resolve(
+        &pref_missing_role,
+        &[snap(
+            1,
+            "non-existent-role",
+            "A",
+            "M",
+            (1, 1),
+            Some((1920, 1080)),
+            None,
+            false,
+        )],
+        &PlacementContext::default(),
+    );
+    // Should fall through to Any because logical_role did not match output's logical_role
+    assert_eq!(r_missing.reason(), ResolveReason::Any);
 }
 
 #[test]
@@ -226,32 +290,38 @@ fn preferred_then_any() {
     let r = resolve(
         &OutputPreference::default(),
         &outs,
-        &ResolveContext::default(),
+        &PlacementContext::default(),
     );
-    assert_eq!(r.reason, ResolveReason::Preferred);
-    assert_eq!(r.output_id, Some(3));
+    assert_eq!(r.reason(), ResolveReason::Preferred);
+    assert_eq!(r.target_output_id(), Some(OutputId::new(3)));
 }
 
 #[test]
-fn any_picks_minimum_id() {
+fn deterministic_fallback_orders_by_stable_properties_ahead_of_runtime_id() {
     let outs = [
-        snap(8, "DP-2", "A", "A", (1, 1), Some((800, 600)), None, false),
-        snap(4, "DP-1", "B", "B", (1, 1), Some((800, 600)), None, false),
+        snap(1, "HDMI-1", "B", "B", (1, 1), Some((800, 600)), None, false),
+        snap(99, "DP-1", "A", "A", (1, 1), Some((800, 600)), None, false),
     ];
     let r = resolve(
         &OutputPreference::default(),
         &outs,
-        &ResolveContext::default(),
+        &PlacementContext::default(),
     );
-    assert_eq!(r.reason, ResolveReason::Any);
-    assert_eq!(r.output_id, Some(4));
+    assert_eq!(r.reason(), ResolveReason::Any);
+    assert_eq!(
+        r.target_output_id(),
+        Some(OutputId::new(99)),
+        "stable property (name DP-1) must order before HDMI-1 regardless of runtime OutputId"
+    );
 }
 
 #[test]
 fn no_outputs_defers() {
-    let r = resolve(&pref_name("DP-1"), &[], &ResolveContext::default());
-    assert_eq!(r.reason, ResolveReason::Deferred);
-    assert_eq!(r.output_id, None);
+    let r = resolve(&pref_name("DP-1"), &[], &PlacementContext::default());
+    assert_eq!(r.reason(), ResolveReason::Deferred);
+    assert_eq!(r.target_output_id(), None);
+    assert!(r.is_deferred());
+    assert!(!r.is_reachable());
 }
 
 #[test]
@@ -276,25 +346,22 @@ fn fallback_does_not_change_home_resolution() {
         None,
         false,
     );
-    let pref = OutputPreference {
-        name: Some("DP-1".into()),
-        serial: Some("home-serial".into()),
-        ..OutputPreference::default()
-    };
+    let pref = OutputPreference::new()
+        .with_name("DP-1")
+        .with_serial("home-serial");
 
-    assert_eq!(
-        resolve(
-            &pref,
-            std::slice::from_ref(&fallback),
-            &ResolveContext::default()
-        )
-        .output_id,
-        Some(2)
+    let r_fallback = resolve(
+        &pref,
+        std::slice::from_ref(&fallback),
+        &PlacementContext::default(),
     );
-    assert_eq!(
-        resolve(&pref, &[fallback, home], &ResolveContext::default()).output_id,
-        Some(1)
-    );
+    assert_eq!(r_fallback.target_output_id(), Some(OutputId::new(2)));
+    assert!(r_fallback.is_fallback());
+
+    let r_home = resolve(&pref, &[fallback, home], &PlacementContext::default());
+    assert_eq!(r_home.target_output_id(), Some(OutputId::new(1)));
+    assert_eq!(r_home.reason(), ResolveReason::ExactName);
+    assert!(!r_home.is_fallback());
 }
 
 #[test]
@@ -316,8 +383,8 @@ fn repeated_empty_and_restore_topologies_are_stable() {
         Vec::new(),
         vec![output.clone()],
     ] {
-        let result = resolve(&pref, &outputs, &ResolveContext::default());
-        assert_eq!(result.output_id, outputs.first().map(|o| o.id));
+        let result = resolve(&pref, &outputs, &PlacementContext::default());
+        assert_eq!(result.target_output_id(), outputs.first().map(|o| o.id));
     }
 }
 
@@ -343,43 +410,183 @@ fn removed_output_cannot_win_post_removal_resolution() {
         None,
         false,
     );
-    let pref = OutputPreference {
-        name: removed.name.clone(),
-        serial: removed.serial.clone(),
-        ..OutputPreference::default()
-    };
-    let context = ResolveContext {
+    let pref = OutputPreference::new()
+        .with_name("DP-1")
+        .with_serial("removed-serial");
+    let context = PlacementContext {
         spawn_output_id: Some(removed.id),
         preferred_name: removed.name.clone(),
+        focused_output_id: None,
     };
 
     let result = resolve(&pref, std::slice::from_ref(&remaining), &context);
 
-    assert_eq!(result.output_id, Some(remaining.id));
-    assert_eq!(result.reason, ResolveReason::Any);
+    assert_eq!(result.target_output_id(), Some(remaining.id));
+    assert_eq!(result.reason(), ResolveReason::Any);
+    assert!(result.is_fallback());
 }
 
 #[test]
 fn clamp_oversized_offset() {
-    let got = clamp_offset((5000, 4000), (320, 320), Some((1920, 1080)));
+    let got = clamp_offset(
+        Anchor::TopLeft,
+        (5000, 4000),
+        (320, 320),
+        Some((1920, 1080)),
+        None,
+        MIN_VISIBLE,
+    );
     assert_eq!(got, (1920 - 320, 1080 - 320));
 }
 
 #[test]
 fn clamp_oversized_widget() {
-    let got = clamp_offset((10, 10), (4000, 3000), Some((1920, 1080)));
+    let got = clamp_offset(
+        Anchor::TopLeft,
+        (10, 10),
+        (4000, 3000),
+        Some((1920, 1080)),
+        None,
+        MIN_VISIBLE,
+    );
     assert_eq!(got, (0, 0));
 }
 
 #[test]
 fn clamp_tiny_widget_keeps_grabbable() {
-    let got = clamp_offset((2000, 2000), (10, 10), Some((1920, 1080)));
+    let got = clamp_offset(
+        Anchor::TopLeft,
+        (2000, 2000),
+        (10, 10),
+        Some((1920, 1080)),
+        None,
+        MIN_VISIBLE,
+    );
     assert_eq!(got, (1920 - MIN_VISIBLE, 1080 - MIN_VISIBLE));
 }
 
 #[test]
+fn clamp_anchor_top_left_with_non_zero_origin() {
+    // Work area: top 32px and left 48px reserved
+    let work_area = Some(((48, 32), (1872, 1048)));
+    let got = clamp_offset(
+        Anchor::TopLeft,
+        (10, 5),
+        (300, 200),
+        Some((1920, 1080)),
+        work_area,
+        MIN_VISIBLE,
+    );
+    assert_eq!(
+        got,
+        (48, 32),
+        "TopLeft anchor offset must clamp to non-zero work area origin (left=48, top=32)"
+    );
+}
+
+#[test]
+fn clamp_anchor_top_right_with_right_reserved_area() {
+    // Output 1920x1080, Work area width 1820 (right 100px reserved for panel/dock)
+    let work_area = Some(((0, 0), (1820, 1080)));
+    let got = clamp_offset(
+        Anchor::TopRight,
+        (10, 40), // wants 10px from right edge
+        (300, 200),
+        Some((1920, 1080)),
+        work_area,
+        MIN_VISIBLE,
+    );
+    assert_eq!(
+        got,
+        (100, 40),
+        "TopRight anchor offset must clamp to right-side reserved bound (right=100)"
+    );
+}
+
+#[test]
+fn clamp_anchor_bottom_left_with_bottom_reserved_area() {
+    // Output 1920x1080, Work area height 1020 (bottom 60px reserved for bottom bar)
+    let work_area = Some(((0, 0), (1920, 1020)));
+    let got = clamp_offset(
+        Anchor::BottomLeft,
+        (50, 10), // wants 10px from bottom edge
+        (300, 200),
+        Some((1920, 1080)),
+        work_area,
+        MIN_VISIBLE,
+    );
+    assert_eq!(
+        got,
+        (50, 60),
+        "BottomLeft anchor offset must clamp to bottom reserved bound (bottom=60)"
+    );
+}
+
+#[test]
+fn clamp_anchor_bottom_right_with_origin_and_reserved_bounds() {
+    // Output 1920x1080. Work area: left 40, top 30, right 50, bottom 40
+    // Origin (40, 30), Size (1830, 1010) -> right reserved = 1920 - (40+1830) = 50, bottom reserved = 1080 - (30+1010) = 40
+    let work_area = Some(((40, 30), (1830, 1010)));
+    let got = clamp_offset(
+        Anchor::BottomRight,
+        (10, 5), // wants 10px right, 5px bottom
+        (300, 200),
+        Some((1920, 1080)),
+        work_area,
+        MIN_VISIBLE,
+    );
+    assert_eq!(
+        got,
+        (50, 40),
+        "BottomRight anchor offset must clamp to both right (50) and bottom (40) reserved bounds"
+    );
+
+    let got_max = clamp_offset(
+        Anchor::BottomRight,
+        (5000, 5000), // oversized offset
+        (300, 200),
+        Some((1920, 1080)),
+        work_area,
+        MIN_VISIBLE,
+    );
+    // Max span x = 1830 - 300 = 1530 -> max offset x = 50 + 1530 = 1580 (which leaves widget left edge at 1920 - 1580 - 300 = 40)
+    // Max span y = 1010 - 200 = 810 -> max offset y = 40 + 810 = 850 (which leaves widget top edge at 1080 - 850 - 200 = 30)
+    assert_eq!(
+        got_max,
+        (1580, 850),
+        "BottomRight anchor offset must clamp to maximum usable work-area span"
+    );
+}
+
+#[test]
+fn clamp_oversized_widget_with_non_top_left_anchor() {
+    // Output 1920x1080, Work area with right 50px and bottom 40px reserved
+    let work_area = Some(((0, 0), (1870, 1040)));
+    let got = clamp_offset(
+        Anchor::BottomRight,
+        (10, 10),
+        (3000, 2000), // oversized widget
+        Some((1920, 1080)),
+        work_area,
+        MIN_VISIBLE,
+    );
+    assert_eq!(
+        got,
+        (50, 40),
+        "Oversized widget with BottomRight anchor must clamp to reserved boundary (50, 40) to stay grabbable"
+    );
+}
+
+#[test]
 fn clamp_skipped_without_logical_size() {
-    let got = clamp_offset((999, 999), (320, 320), None);
+    let got = clamp_offset(
+        Anchor::TopLeft,
+        (999, 999),
+        (320, 320),
+        None,
+        None,
+        MIN_VISIBLE,
+    );
     assert_eq!(got, (999, 999));
 }
 
@@ -412,4 +619,129 @@ fn release_drag_uses_delta_from_fixed_surface() {
         dragged_origin((100, 80), (20.0, 10.0), (75.0, 42.0)),
         (155, 112)
     );
+}
+
+#[test]
+fn semantic_placement_after_committed_move() {
+    let mut out1 = snap(
+        1,
+        "DP-1",
+        "Dell",
+        "U2720Q",
+        (600, 340),
+        Some((1920, 1080)),
+        Some("SN1"),
+        true,
+    );
+    out1.logical_position = Some((0, 0));
+
+    let mut out2 = snap(
+        2,
+        "DP-2",
+        "LG",
+        "4K",
+        (600, 340),
+        Some((1920, 1080)),
+        Some("SN2"),
+        false,
+    );
+    out2.logical_position = Some((1920, 0));
+
+    let outputs = [out1, out2];
+
+    // Drag within output 1: start at top-right, drag toward bottom-left
+    let committed = PlacementEngine::commit_move(
+        (50.0, 50.0),   // pointer
+        (10.0, 10.0),   // grab
+        (300, 400),     // widget size
+        (20, 30, 0, 0), // start margins (TopRight: top 20, right 30)
+        Anchor::TopRight,
+        OutputId::new(1),
+        &outputs,
+        None,
+        MIN_VISIBLE,
+    )
+    .expect("committed move should succeed");
+
+    assert_eq!(committed.target_output_id, OutputId::new(1));
+    assert_eq!(
+        committed.saved_placement.output.name.as_deref(),
+        Some("DP-1")
+    );
+    assert_eq!(committed.saved_placement.output.serial(), Some("SN1"));
+    assert_eq!(committed.saved_placement.output.make(), Some("Dell"));
+    assert_eq!(committed.saved_placement.output.model(), Some("U2720Q"));
+    assert_eq!(
+        committed.saved_placement.output.physical_size_mm(),
+        Some((600, 340))
+    );
+    assert_eq!(committed.saved_placement.anchor, Anchor::TopRight);
+    assert_eq!(committed.saved_placement.offset, (0, 60));
+
+    // Cross-output move: pointer at global coordinate (2000, 100) on output 2
+    let cross_move = PlacementEngine::commit_move(
+        (450.0, 50.0), // pointer moving across boundary onto output 2
+        (10.0, 10.0),
+        (300, 400),
+        (20, 30, 0, 0),
+        Anchor::TopRight,
+        OutputId::new(1),
+        &outputs,
+        None,
+        MIN_VISIBLE,
+    )
+    .expect("cross output move must resolve target output 2");
+
+    assert_eq!(
+        cross_move.target_output_id,
+        OutputId::new(2),
+        "target output must specifically be OutputId(2)"
+    );
+    assert_eq!(
+        cross_move.saved_placement.output.name.as_deref(),
+        Some("DP-2")
+    );
+    assert_eq!(cross_move.saved_placement.output.serial(), Some("SN2"));
+    assert_eq!(cross_move.saved_placement.output.make(), Some("LG"));
+    assert_eq!(cross_move.saved_placement.output.model(), Some("4K"));
+}
+
+#[test]
+fn pure_placement_engine_records_diagnostics_and_margins() {
+    let out = snap(
+        1,
+        "DP-1",
+        "Make",
+        "Model",
+        (600, 340),
+        Some((1920, 1080)),
+        None,
+        false,
+    );
+    let saved = SavedPlacement {
+        output: OutputPreference::new().with_name("DP-1"),
+        anchor: Anchor::BottomLeft,
+        offset: (50, 60),
+    };
+    let constraints = HostPlacementConstraints {
+        min_visible: 32,
+        widget_size: (300, 200),
+        work_area: None,
+    };
+
+    let decision = PlacementEngine::resolve(
+        Some(&saved),
+        std::slice::from_ref(&out),
+        &PlacementContext::default(),
+        &constraints,
+    );
+
+    assert_eq!(decision.target_output_id(), Some(OutputId::new(1)));
+    assert_eq!(decision.reason(), ResolveReason::ExactName);
+    assert_eq!(decision.anchor(), Anchor::BottomLeft);
+    assert_eq!(decision.offset(), (50, 60));
+    assert_eq!(decision.margins(), (0, 0, 60, 50));
+    assert!(!decision.is_fallback());
+    assert!(!decision.is_deferred());
+    assert!(decision.is_reachable());
 }

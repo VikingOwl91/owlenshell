@@ -3,6 +3,7 @@ use calloop::EventLoop;
 use calloop_wayland_source::WaylandSource;
 use chrono::Datelike;
 use owlenshell::compositor;
+use owlenshell::domain::ids::HostId;
 use owlenshell::instrumentation;
 use owlenshell::model::{SurfaceKind, CALENDAR_KEY};
 use owlenshell::persistence::Placements;
@@ -99,7 +100,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             });
             let _ = cal.show();
-            let placement = shared.store.borrow().get(CALENDAR_KEY).cloned();
+            let placement = shared
+                .store
+                .borrow()
+                .get(&HostId::new(CALENDAR_KEY))
+                .cloned();
             drain_and_attach(&shared, SurfaceKind::Calendar, placement);
             *calendar_ui.borrow_mut() = Some(cal);
         }
