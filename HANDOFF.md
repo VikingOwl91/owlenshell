@@ -1,4 +1,4 @@
-# Project Handoff: Owlenbar
+# Project Handoff: Owlenshell
 
 ## Goal
 
@@ -16,7 +16,7 @@ Build a native Wayland shell/bar runtime focused on:
 
 Working name:
 
-`owlenbar`
+`owlenshell`
 
 The long-term goal is explicitly **not** merely "another Waybar clone".
 
@@ -599,7 +599,7 @@ resolver detects preferred target
 restore widget to original placement
 ```
 
-This must work without restarting Owlenbar.
+This must work without restarting Owlenshell.
 
 Monitor disconnect/reconnect should not corrupt persisted placement.
 
@@ -635,7 +635,7 @@ Generic Wayland protocols should be preferred wherever possible.
 
 A compositor-specific integration must not leak through the rest of the architecture.
 
-Owlenbar should remain usable when the user changes compositor.
+Owlenshell should remain usable when the user changes compositor.
 
 ---
 
@@ -754,7 +754,7 @@ drop calendar
 ↓
 placement saved
 ↓
-restart owlenbar
+restart owlenshell
 ↓
 calendar restores at saved position
 ```
@@ -883,14 +883,14 @@ Do NOT require all optional services to become ready before first paint.
 Evaluate this rather than blindly following it:
 
 ```text
-owlenbar/
+owlenshell/
 ├── crates/
-│   ├── owlenbar-core/
-│   ├── owlenbar-wayland/
-│   ├── owlenbar-placement/
-│   ├── owlenbar-ui/
-│   ├── owlenbar-script/
-│   └── owlenbar-services/
+│   ├── owlenshell-core/
+│   ├── owlenshell-wayland/
+│   ├── owlenshell-placement/
+│   ├── owlenshell-ui/
+│   ├── owlenshell-script/
+│   └── owlenshell-services/
 │
 ├── ui/
 │   ├── components/
@@ -1116,7 +1116,7 @@ Treat these as hard requirements unless Wayland itself makes one impossible.
 
 # Long-Term Direction
 
-If the Vertical Slice succeeds, Owlenbar can gradually evolve from a bar into a native Wayland shell runtime.
+If the Vertical Slice succeeds, Owlenshell can gradually evolve from a bar into a native Wayland shell runtime.
 
 Potential future scope:
 
@@ -1270,4 +1270,4 @@ The first question to answer is:
 
 Then build the smallest Vertical Slice that proves or disproves it.
 
-If that works, Owlenbar has its foundation.
+If that works, Owlenshell has its foundation.

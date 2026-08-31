@@ -110,7 +110,7 @@ via xdg-output (optional, unstable): logical position/size and description.
 The complete placement lifecycle was exercised on the Hyprland test system:
 
 - The calendar was placed on `HDMI-A-1`, moved across outputs, persisted, and
-  restored after an Owlenbar restart.
+  restored after an Owlenshell restart.
 - Physically disconnecting `HDMI-A-1` migrated the open calendar to a remaining
   output without changing its saved preferred placement.
 - Reconnecting `HDMI-A-1` returned the calendar to that output without user
@@ -124,7 +124,7 @@ removal. Powering the panel off briefly disconnects and reconnects its Wayland
 output, after which the compositor continues reporting the output as connected
 and active while the panel remains off. Generic Wayland and the tested
 compositor state therefore cannot reliably reveal the panel's physical power
-state. Owlenbar correctly follows the reported output topology; this behavior
+state. Owlenshell correctly follows the reported output topology; this behavior
 is not a hotplug failure.
 
 ## Explicit limitations (accepted, not hacked around)

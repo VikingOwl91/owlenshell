@@ -1,10 +1,10 @@
-use owlenbar::model::{Anchor, OutputPreference, SavedPlacement};
-use owlenbar::persistence::Placements;
+use owlenshell::model::{Anchor, OutputPreference, SavedPlacement};
+use owlenshell::persistence::Placements;
 use std::path::PathBuf;
 
 fn test_path(name: &str) -> PathBuf {
     std::env::temp_dir().join(format!(
-        "owlenbar-{name}-{}-{}.toml",
+        "owlenshell-{name}-{}-{}.toml",
         std::process::id(),
         std::thread::current().name().unwrap_or("test")
     ))

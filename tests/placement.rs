@@ -1,5 +1,5 @@
-use owlenbar::model::{Anchor, OutputPreference, OutputSnapshot, MIN_VISIBLE};
-use owlenbar::placement::{
+use owlenshell::model::{Anchor, OutputPreference, OutputSnapshot, MIN_VISIBLE};
+use owlenshell::placement::{
     clamp_offset, containing_output, dragged_origin, nearest_corner, resolve, ResolveContext,
     ResolveReason,
 };

@@ -336,8 +336,8 @@ fn try_attach(shared: &AppShared, idx: usize) {
 
     let wl_surface = shared.compositor.create_surface(&shared.qh);
     let (ns, kb) = match kind {
-        SurfaceKind::Bar => ("owlenbar-bar", KeyboardInteractivity::None),
-        SurfaceKind::Calendar => ("owlenbar-calendar", KeyboardInteractivity::OnDemand),
+        SurfaceKind::Bar => ("owlenshell-bar", KeyboardInteractivity::None),
+        SurfaceKind::Calendar => ("owlenshell-calendar", KeyboardInteractivity::OnDemand),
     };
     let layer = shared.layer_shell.create_layer_surface(
         &shared.qh,

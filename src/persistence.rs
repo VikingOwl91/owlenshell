@@ -27,7 +27,7 @@ impl Placements {
                 let home = std::env::var_os("HOME").unwrap_or_else(|| "/tmp".into());
                 PathBuf::from(home).join(".local/state")
             });
-        base.join("owlenbar/placements.toml")
+        base.join("owlenshell/placements.toml")
     }
 
     pub fn load() -> Self {
