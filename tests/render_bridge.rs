@@ -278,30 +278,29 @@ fn native_recreation_transition_preserves_adapter_and_triggers_no_new_registrati
         .expect("adapter must be registered in bridge");
     assert_eq!(bridge.adapter_count(), 1);
 
-    // 2. Initialize runtime surface state with active native handles
+    // 2. Initialize runtime surface state with active native handles in SurfaceManager
     let mut surface = owlenshell::runtime::SurfaceState {
         host_id: host_id.clone(),
         kind: owlenshell::model::SurfaceKind::Calendar,
         adapter: initial_adapter.clone(),
         placement: None,
         visible: true,
-        scale: 1,
-        configured: Some((320, 320)),
-        frame_pending: true,
-        render_size: Some((320, 320)),
-        dispatched_scale: 1,
-        wl: None,
     };
 
-    // 3. Execute actual runtime retirement transition (used on closed/disconnect/target-change)
-    surface.retire_native_surface();
+    let mut surface_manager = owlenshell::platform::SurfaceManager::new();
+    let token1 = surface_manager
+        .generation_registry_mut_for_test()
+        .allocate(host_id.clone());
+    assert_eq!(token1.generation.raw(), 1);
 
-    // Invariant: Native state cleared, logical visibility preserved
+    // 3. Execute actual runtime retirement transition (used on closed/disconnect/target-change)
+    let retired_token = surface_manager.retire(&host_id);
+    assert_eq!(retired_token, Some(token1));
+
+    // Invariant: Native token retired, logical visibility preserved
     assert!(surface.visible);
-    assert_eq!(surface.configured, None);
-    assert_eq!(surface.render_size, None);
-    assert!(!surface.frame_pending);
-    assert!(surface.wl.is_none());
+    assert!(!surface_manager.has_native_instance(&host_id));
+    assert_eq!(surface_manager.current_token(&host_id), None);
 
     // 4. Execute actual runtime recreation preparation transition (used by attach_host on reattach)
     let reattached_adapter = bridge

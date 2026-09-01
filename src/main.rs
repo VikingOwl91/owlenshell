@@ -6,7 +6,9 @@ use owlenshell::domain::ids::HostId;
 use owlenshell::instrumentation;
 use owlenshell::model::{SurfaceKind, CALENDAR_KEY};
 use owlenshell::persistence::Placements;
-use owlenshell::platform::{compositor, OutputManager, OwlenPlatform, RenderBridge};
+use owlenshell::platform::{
+    compositor, OutputManager, OwlenPlatform, RenderBridge, SurfaceManager,
+};
 use owlenshell::runtime::{attach_host, hide_host, pump, AppShared, AppState};
 use slint::{ComponentHandle, ModelRc, VecModel};
 use smithay_client_toolkit::compositor::CompositorState;
@@ -45,6 +47,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         compositor,
         layer_shell,
         surfaces: RefCell::new(Vec::new()),
+        surface_manager: RefCell::new(SurfaceManager::new()),
         render_bridge: render_bridge.clone(),
         output_manager: RefCell::new(OutputManager::new(compositor::detect())),
         store: RefCell::new(Placements::load()),

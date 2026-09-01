@@ -11,7 +11,7 @@ use owlenshell::platform::output_manager::{
 };
 use owlenshell::platform::surface_manager::{
     SurfaceCommand, SurfaceGeneration, SurfaceGenerationRegistry, SurfaceLifecycleEvent,
-    SurfaceSpec, SurfaceToken,
+    SurfaceManager, SurfaceSpec, SurfaceToken,
 };
 use owlenshell::platform::{PlatformError, PlatformEvent};
 use std::cell::RefCell;
@@ -701,4 +701,34 @@ fn surface_lifecycle_host_recreation_on_output_target_change() {
 
     // Old token remains invalid
     assert!(!registry.validate(&host_id, &token_output1));
+}
+
+#[test]
+fn surface_manager_token_validation_and_stale_callback_rejection() {
+    let mut sm = SurfaceManager::new();
+    let host_id = HostId::new("calendar");
+
+    let token_gen1 = sm
+        .generation_registry_mut_for_test()
+        .allocate(host_id.clone());
+    assert_eq!(token_gen1.generation.raw(), 1);
+    assert!(sm.is_current(&token_gen1));
+
+    // Invalidate gen1 by allocating gen2
+    let token_gen2 = sm.generation_registry_mut_for_test().recreate(&host_id);
+    assert_eq!(token_gen2.generation.raw(), 2);
+
+    // gen2 is current, gen1 is stale and rejected
+    assert!(sm.is_current(&token_gen2));
+    assert!(!sm.is_current(&token_gen1));
+
+    // Stale callback token validation fails
+    assert!(!sm.generation_registry().validate(&host_id, &token_gen1));
+    assert!(sm.generation_registry().validate(&host_id, &token_gen2));
+
+    // Retiring leaves no active surface token
+    let retired = sm.retire(&host_id);
+    assert_eq!(retired, Some(token_gen2));
+    assert_eq!(sm.current_token(&host_id), None);
+    assert!(!sm.has_native_instance(&host_id));
 }

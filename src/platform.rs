@@ -16,7 +16,8 @@ pub use render_bridge::{
     PendingWindowCreation, RenderBridge, RenderBridgeError,
 };
 pub use surface_manager::{
-    SurfaceCommand, SurfaceGeneration, SurfaceGenerationRegistry, SurfaceLifecycleEvent,
+    anchor_to_layer_anchor, LiveSurfaceInstance, NativeSurfaceParams, SurfaceCommand,
+    SurfaceGeneration, SurfaceGenerationRegistry, SurfaceLifecycleEvent, SurfaceManager,
     SurfaceSlot, SurfaceSpec, SurfaceToken,
 };
 
