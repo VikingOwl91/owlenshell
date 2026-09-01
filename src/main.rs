@@ -1,9 +1,11 @@
 use calloop::timer::{TimeoutAction, Timer};
 use calloop::EventLoop;
+use owlenshell::domain::default_shell::{
+    ShellSpec, DEFAULT_BAR_HOST_ID, DEFAULT_CALENDAR_HOST_ID, DEFAULT_CALENDAR_WIDGET_ID,
+    DEFAULT_CLOCK_WIDGET_ID,
+};
 use owlenshell::domain::ids::{HostId, WidgetId};
-use owlenshell::domain::widget::WidgetAction;
 use owlenshell::instrumentation;
-use owlenshell::model::{SurfaceKind, CALENDAR_KEY};
 use owlenshell::persistence::Placements;
 use owlenshell::platform::{
     compositor, detect_session, OutputManager, OwlenPlatform, RenderBridge, SurfaceManager,
@@ -63,101 +65,85 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     slint::platform::set_platform(Box::new(OwlenPlatform::new(render_bridge.clone())))?;
     instrumentation::milestone("platform");
 
-    // 1. Initialize BarHost
-    let bar_id = HostId::new("bar");
-    let bar = render_bridge.with_host_creation(bar_id.clone(), Bar::new)?;
-    coordinator.attach_host(bar_id.clone(), SurfaceKind::Bar, None);
+    // 1. Establish the declarative default shell composition and register with Coordinator
+    let shell_spec = ShellSpec::default_shell();
+    coordinator.apply_shell_spec(&shell_spec);
 
-    // 2. Initialize ClockWidget controller and attach to BarHost
-    let cal_id = HostId::new(CALENDAR_KEY);
-    let clock_controller = Rc::new(ClockWidgetController::new(
-        WidgetId::new("bar_clock"),
-        Some(cal_id.clone()),
-    ));
-    coordinator.attach_widget(&bar_id, clock_controller.id().clone());
-    bar.set_clock_text(clock_controller.current_text());
-    instrumentation::milestone("bar");
+    let bar_id = HostId::new(DEFAULT_BAR_HOST_ID);
+    let cal_id = HostId::new(DEFAULT_CALENDAR_HOST_ID);
+    let clock_id = WidgetId::new(DEFAULT_CLOCK_WIDGET_ID);
+    let cal_widget_id = WidgetId::new(DEFAULT_CALENDAR_WIDGET_ID);
 
-    // 3. Initialize CalendarWidget controller (logical lifetime independent of native surface)
+    // 2. Initialize ClockWidget controller sourced from composition
+    let clock_controller = Rc::new(ClockWidgetController::new(clock_id, Some(cal_id.clone())));
+
+    // 3. Initialize CalendarWidget controller sourced from composition
     let calendar_controller = Rc::new(RefCell::new(CalendarWidgetController::new(
-        WidgetId::new("popup_calendar"),
+        cal_widget_id,
         cal_id.clone(),
     )));
 
-    // 4. Temporary Slint Calendar UI handle container
+    // 4. Materialize the initial BarHost UI component
+    let bar = render_bridge.with_host_creation(bar_id.clone(), Bar::new)?;
+    bar.set_clock_text(clock_controller.current_text());
+    instrumentation::milestone("bar");
+
+    // 5. Container for temporary Slint Calendar UI handle
     let calendar_ui: Rc<RefCell<Option<Calendar>>> = Rc::new(RefCell::new(None));
 
-    // Connect clock action to generic Coordinator action dispatch
+    // Connect clock interaction to generic HostCommand dispatch
     bar.on_open_calendar({
         let coordinator = coordinator.clone();
         let clock_controller = clock_controller.clone();
         let calendar_controller = calendar_controller.clone();
         let calendar_ui = calendar_ui.clone();
         let render_bridge = render_bridge.clone();
+        let cal_id = cal_id.clone();
         move || {
             if let Some(action) = clock_controller.handle_click() {
-                if let WidgetAction::ToggleHost(target_id) = action.clone() {
-                    let host_exists = coordinator.get_host(&target_id).is_some();
-                    let was_visible = coordinator
-                        .get_host(&target_id)
-                        .map(|h| h.visible)
-                        .unwrap_or(false);
+                let was_visible = coordinator
+                    .get_host(&cal_id)
+                    .map(|h| h.visible)
+                    .unwrap_or(false);
 
-                    if !host_exists {
-                        // Initial registration sets visible = true and attaches calendar widget
-                        let placement = coordinator.placements_store().get(&target_id).cloned();
-                        coordinator.attach_host(
-                            target_id.clone(),
-                            SurfaceKind::Calendar,
-                            placement,
-                        );
-                        coordinator
-                            .attach_widget(&target_id, calendar_controller.borrow().id().clone());
-                    } else {
-                        // Existing host toggles through Coordinator dispatch
-                        coordinator.dispatch_action(action);
+                // Generic logical state transition executed via Coordinator
+                coordinator.dispatch_action(action);
+
+                let is_visible = coordinator
+                    .get_host(&cal_id)
+                    .map(|h| h.visible)
+                    .unwrap_or(false);
+
+                // Materialize / tear down Calendar UI bound to controller state
+                match (was_visible, is_visible) {
+                    (true, false) => {
+                        *calendar_ui.borrow_mut() = None;
+                        render_bridge.remove_adapter(&cal_id);
                     }
-
-                    let is_visible = coordinator
-                        .get_host(&target_id)
-                        .map(|h| h.visible)
-                        .unwrap_or(false);
-
-                    // Materialize / tear down Calendar UI bound to controller state
-                    match (was_visible, is_visible) {
-                        (true, false) => {
-                            *calendar_ui.borrow_mut() = None;
-                            render_bridge.remove_adapter(&target_id);
-                        }
-                        (false, true) => {
-                            let cal = render_bridge
-                                .with_host_creation(target_id.clone(), Calendar::new)
-                                .expect("calendar");
-                            let controller = calendar_controller.borrow();
-                            cal.set_month_title(controller.month_title().into());
-                            cal.set_weeks(bind_calendar_weeks(&controller.week_rows()));
-                            cal.on_dismiss({
-                                let coordinator = coordinator.clone();
-                                let calendar_controller = calendar_controller.clone();
-                                let calendar_ui = calendar_ui.clone();
-                                let render_bridge = render_bridge.clone();
-                                move || {
-                                    let dismiss_action =
-                                        calendar_controller.borrow().handle_dismiss();
-                                    if let WidgetAction::HideHost(dismiss_target_id) =
-                                        dismiss_action.clone()
-                                    {
-                                        coordinator.dispatch_action(dismiss_action);
-                                        *calendar_ui.borrow_mut() = None;
-                                        render_bridge.remove_adapter(&dismiss_target_id);
-                                    }
-                                }
-                            });
-                            let _ = cal.show();
-                            *calendar_ui.borrow_mut() = Some(cal);
-                        }
-                        _ => {}
+                    (false, true) => {
+                        let cal = render_bridge
+                            .with_host_creation(cal_id.clone(), Calendar::new)
+                            .expect("calendar");
+                        let controller = calendar_controller.borrow();
+                        cal.set_month_title(controller.month_title().into());
+                        cal.set_weeks(bind_calendar_weeks(&controller.week_rows()));
+                        cal.on_dismiss({
+                            let coordinator = coordinator.clone();
+                            let calendar_controller = calendar_controller.clone();
+                            let calendar_ui = calendar_ui.clone();
+                            let render_bridge = render_bridge.clone();
+                            let cal_id = cal_id.clone();
+                            move || {
+                                let dismiss_action = calendar_controller.borrow().handle_dismiss();
+                                coordinator.dispatch_action(dismiss_action);
+                                *calendar_ui.borrow_mut() = None;
+                                render_bridge.remove_adapter(&cal_id);
+                            }
+                        });
+                        let _ = cal.show();
+                        *calendar_ui.borrow_mut() = Some(cal);
                     }
+                    _ => {}
                 }
             }
         }

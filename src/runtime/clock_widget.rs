@@ -1,5 +1,5 @@
 use crate::domain::ids::{HostId, WidgetId};
-use crate::domain::widget::{WidgetAction, WidgetSpec};
+use crate::domain::widget::{HostCommand, WidgetAction, WidgetSpec};
 use std::time::Duration;
 
 /// Formats the current local time for standard Clock widget display (e.g. "15:04:05").
@@ -51,6 +51,6 @@ impl ClockWidgetController {
         self.toggle_target
             .as_ref()
             .cloned()
-            .map(WidgetAction::ToggleHost)
+            .map(|target_id| WidgetAction::Command(HostCommand::Toggle(target_id)))
     }
 }

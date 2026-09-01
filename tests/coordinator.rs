@@ -688,3 +688,65 @@ fn calendar_widget_state_survives_host_hide_show_and_native_retirement() {
     assert_eq!(attached_after, vec![WidgetId::new("calendar_main")]);
     assert_eq!(calendar_controller.month_title(), "December 2026");
 }
+
+#[test]
+fn coordinator_apply_shell_spec_and_generic_command_execution() {
+    use owlenshell::domain::default_shell::{
+        ShellSpec, DEFAULT_BAR_HOST_ID, DEFAULT_CALENDAR_HOST_ID, DEFAULT_CALENDAR_WIDGET_ID,
+        DEFAULT_CLOCK_WIDGET_ID,
+    };
+    use owlenshell::domain::ids::WidgetId;
+    use owlenshell::domain::widget::HostCommand;
+
+    let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
+    let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
+    let render_bridge = RenderBridge::new();
+
+    let coordinator = Coordinator::new(
+        output_manager.clone(),
+        surface_manager.clone(),
+        render_bridge.clone(),
+        Placements::default(),
+    );
+
+    let shell_spec = ShellSpec::default_shell();
+    coordinator.apply_shell_spec(&shell_spec);
+
+    let bar_id = HostId::new(DEFAULT_BAR_HOST_ID);
+    let cal_id = HostId::new(DEFAULT_CALENDAR_HOST_ID);
+    let clock_id = WidgetId::new(DEFAULT_CLOCK_WIDGET_ID);
+    let cal_widget_id = WidgetId::new(DEFAULT_CALENDAR_WIDGET_ID);
+
+    // 1. Invariants after apply_shell_spec:
+    // Bar host is visible with clock widget attached
+    let bar_state = coordinator.get_host(&bar_id).expect("bar host must exist");
+    assert!(bar_state.visible);
+    assert_eq!(bar_state.attached_widgets, vec![clock_id]);
+
+    // Calendar host is logically present but hidden, with calendar widget attached
+    let cal_state = coordinator.get_host(&cal_id).expect("cal host must exist");
+    assert!(!cal_state.visible, "Calendar must be initially hidden");
+    assert_eq!(cal_state.attached_widgets, vec![cal_widget_id]);
+
+    // 2. Generic HostCommand::Toggle execution (e.g. clock click)
+    coordinator.execute_command(HostCommand::Toggle(cal_id.clone()));
+    assert!(
+        coordinator.get_host(&cal_id).unwrap().visible,
+        "Toggle must show hidden calendar"
+    );
+
+    // 3. Generic HostCommand::Toggle again
+    coordinator.execute_command(HostCommand::Toggle(cal_id.clone()));
+    assert!(
+        !coordinator.get_host(&cal_id).unwrap().visible,
+        "Second toggle must hide calendar"
+    );
+
+    // 4. Generic HostCommand::Show
+    coordinator.execute_command(HostCommand::Show(cal_id.clone()));
+    assert!(coordinator.get_host(&cal_id).unwrap().visible);
+
+    // 5. Generic HostCommand::Hide (e.g. calendar dismiss)
+    coordinator.execute_command(HostCommand::Hide(cal_id.clone()));
+    assert!(!coordinator.get_host(&cal_id).unwrap().visible);
+}

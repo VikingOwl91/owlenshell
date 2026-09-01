@@ -1,5 +1,5 @@
 use crate::domain::ids::{HostId, WidgetId};
-use crate::domain::widget::{WidgetAction, WidgetSpec};
+use crate::domain::widget::{HostCommand, WidgetAction, WidgetSpec};
 use chrono::{Datelike, NaiveDate};
 
 /// Presentation data for a single day row in the Slint calendar view.
@@ -128,6 +128,6 @@ impl CalendarWidgetController {
 
     /// Emits a generic `WidgetAction` to dismiss / hide the calendar host.
     pub fn handle_dismiss(&self) -> WidgetAction {
-        WidgetAction::HideHost(self.host_id.clone())
+        WidgetAction::Command(HostCommand::Hide(self.host_id.clone()))
     }
 }

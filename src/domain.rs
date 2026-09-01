@@ -1,3 +1,4 @@
+pub mod default_shell;
 pub mod host;
 pub mod ids;
 pub mod input;
@@ -5,6 +6,7 @@ pub mod output;
 pub mod placement;
 pub mod widget;
 
+pub use default_shell::*;
 pub use host::*;
 pub use ids::*;
 pub use input::*;

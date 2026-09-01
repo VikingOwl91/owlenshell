@@ -1,5 +1,16 @@
 use crate::domain::ids::{HostId, WidgetId};
 
+/// Generic host-level command dispatched to manipulate host state.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum HostCommand {
+    /// Shows the target host.
+    Show(HostId),
+    /// Hides the target host.
+    Hide(HostId),
+    /// Toggles the logical visibility of the target host.
+    Toggle(HostId),
+}
+
 /// Generic logical action emitted by an interactive widget.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WidgetAction {
@@ -7,6 +18,14 @@ pub enum WidgetAction {
     ToggleHost(HostId),
     /// Hides a target host.
     HideHost(HostId),
+    /// Direct execution of a generic host command.
+    Command(HostCommand),
+}
+
+impl From<HostCommand> for WidgetAction {
+    fn from(cmd: HostCommand) -> Self {
+        WidgetAction::Command(cmd)
+    }
 }
 
 /// Classification of first-party widget content kinds.

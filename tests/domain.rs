@@ -298,9 +298,12 @@ fn clock_widget_controller_instantiation_and_action_dispatch() {
     let text = controller.current_text();
     assert!(!text.is_empty());
 
-    // handle_click emits generic WidgetAction::ToggleHost
+    // handle_click emits generic WidgetAction::Command(HostCommand::Toggle)
     let action = controller.handle_click().expect("action must be emitted");
-    assert_eq!(action, WidgetAction::ToggleHost(cal_host_id));
+    assert_eq!(
+        action,
+        WidgetAction::Command(owlenshell::domain::widget::HostCommand::Toggle(cal_host_id))
+    );
 }
 
 #[test]
@@ -315,7 +318,7 @@ fn clock_widget_controller_without_target_emits_no_action() {
 #[test]
 fn calendar_widget_controller_state_and_content_generation() {
     use owlenshell::domain::ids::WidgetId;
-    use owlenshell::domain::widget::WidgetAction;
+    use owlenshell::domain::widget::{HostCommand, WidgetAction};
     use owlenshell::runtime::CalendarWidgetController;
 
     let host_id = HostId::new("calendar_host");
@@ -347,9 +350,9 @@ fn calendar_widget_controller_state_and_content_generation() {
     assert_eq!(rows[4].d2, 30);
     assert_eq!(rows[4].d3, 0);
 
-    // Dismiss action emits generic HideHost
+    // Dismiss action emits generic HostCommand::Hide
     let action = controller.handle_dismiss();
-    assert_eq!(action, WidgetAction::HideHost(host_id));
+    assert_eq!(action, WidgetAction::Command(HostCommand::Hide(host_id)));
 }
 
 #[test]
@@ -369,4 +372,75 @@ fn calendar_widget_controller_state_mutation_survives_independently() {
     assert_eq!(controller.selected_year(), 2026);
     assert_eq!(controller.selected_month(), 12);
     assert_eq!(controller.month_title(), "December 2026");
+}
+
+#[test]
+fn default_shell_spec_composition_invariants() {
+    use owlenshell::domain::default_shell::{
+        ShellSpec, DEFAULT_BAR_HOST_ID, DEFAULT_CALENDAR_HOST_ID, DEFAULT_CALENDAR_WIDGET_ID,
+        DEFAULT_CLOCK_WIDGET_ID,
+    };
+    use owlenshell::domain::host::{HostLayer, HostMode, HostMovementPolicy, HostSize};
+    use owlenshell::domain::ids::{HostId, WidgetId};
+    use owlenshell::domain::placement::Anchor;
+    use owlenshell::domain::widget::WidgetKind;
+
+    let shell = ShellSpec::default_shell();
+
+    // 1. Expected host declarations
+    assert_eq!(shell.hosts.len(), 2);
+    let bar_id = HostId::new(DEFAULT_BAR_HOST_ID);
+    let cal_id = HostId::new(DEFAULT_CALENDAR_HOST_ID);
+
+    let bar_host = shell.get_host(&bar_id).expect("bar host must exist");
+    assert_eq!(bar_host.namespace, "owlenshell-bar");
+    assert_eq!(bar_host.mode, HostMode::Cover);
+    assert_eq!(bar_host.layer, HostLayer::Top);
+    assert_eq!(bar_host.size, HostSize::OutputWidth { height: 32 });
+    assert_eq!(bar_host.movement_policy, HostMovementPolicy::Fixed);
+    assert!(bar_host.primary_milestone);
+    assert!(bar_host.exit_on_close);
+
+    let cal_host = shell.get_host(&cal_id).expect("calendar host must exist");
+    assert_eq!(cal_host.namespace, "owlenshell-calendar");
+    assert_eq!(cal_host.mode, HostMode::Float);
+    assert_eq!(cal_host.layer, HostLayer::Top);
+    assert_eq!(cal_host.size, HostSize::ContentPreferred);
+    assert_eq!(cal_host.default_anchor, Anchor::TopRight);
+    assert_eq!(cal_host.default_offset, (24, 40));
+    assert_eq!(cal_host.movement_policy, HostMovementPolicy::Movable);
+    assert!(!cal_host.primary_milestone);
+    assert!(!cal_host.exit_on_close);
+
+    // 2. Expected widget declarations
+    assert_eq!(shell.widgets.len(), 2);
+    let clock_id = WidgetId::new(DEFAULT_CLOCK_WIDGET_ID);
+    let cal_widget_id = WidgetId::new(DEFAULT_CALENDAR_WIDGET_ID);
+
+    let clock_widget = shell
+        .get_widget(&clock_id)
+        .expect("clock widget must exist");
+    assert_eq!(clock_widget.kind, WidgetKind::Clock);
+    assert_eq!(clock_widget.title, "Clock");
+
+    let cal_widget = shell
+        .get_widget(&cal_widget_id)
+        .expect("calendar widget must exist");
+    assert_eq!(cal_widget.kind, WidgetKind::Calendar);
+    assert_eq!(cal_widget.title, "Calendar");
+
+    // 3. Attachments
+    assert_eq!(shell.attachments.len(), 2);
+    assert!(shell
+        .attachments
+        .iter()
+        .any(|a| a.host_id == bar_id && a.widget_id == clock_id));
+    assert!(shell
+        .attachments
+        .iter()
+        .any(|a| a.host_id == cal_id && a.widget_id == cal_widget_id));
+
+    // 4. Initial visibility
+    assert!(shell.is_initially_visible(&bar_id));
+    assert!(!shell.is_initially_visible(&cal_id));
 }

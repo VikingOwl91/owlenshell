@@ -158,6 +158,23 @@ impl HostState {
         }
     }
 
+    /// Constructs a new logical `HostState` with explicit initial visibility and saved placement.
+    pub fn with_initial_visibility(
+        spec: HostSpec,
+        visible: bool,
+        saved_placement: Option<SavedPlacement>,
+    ) -> Self {
+        Self {
+            id: spec.id.clone(),
+            spec,
+            visible,
+            attached_widgets: Vec::new(),
+            saved_placement,
+            current_decision: None,
+            decision_generation: None,
+        }
+    }
+
     /// Attaches a widget to this host if not already attached.
     pub fn attach_widget(&mut self, widget_id: WidgetId) {
         if !self.attached_widgets.contains(&widget_id) {

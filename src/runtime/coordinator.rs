@@ -1,7 +1,8 @@
+use crate::domain::default_shell::ShellSpec;
 use crate::domain::host::{HostMovementPolicy, HostSpec, HostState};
 use crate::domain::ids::{HostId, OutputId, WidgetId};
 use crate::domain::placement::{Anchor, SavedPlacement};
-use crate::domain::widget::WidgetAction;
+use crate::domain::widget::{HostCommand, WidgetAction};
 use crate::instrumentation;
 use crate::model::SurfaceKind;
 use crate::persistence::Placements;
@@ -68,23 +69,46 @@ impl Coordinator {
         }
     }
 
-    /// Primary production API: Attaches or updates a logical host using a declarative `HostSpec`.
-    pub fn attach_host_spec(&self, spec: HostSpec, saved_placement: Option<SavedPlacement>) {
+    /// Primary production API: Applies a complete declarative `ShellSpec`.
+    /// Registers all hosts, establishes initial visibility from spec, and sets up widget attachments.
+    pub fn apply_shell_spec(&self, spec: &ShellSpec) {
+        for host_spec in &spec.hosts {
+            let saved = self.store.borrow().get(&host_spec.id).cloned();
+            let initially_visible = spec.is_initially_visible(&host_spec.id);
+            self.register_host_spec(host_spec.clone(), initially_visible, saved);
+        }
+
+        for attachment in &spec.attachments {
+            self.attach_widget(&attachment.host_id, attachment.widget_id.clone());
+        }
+    }
+
+    /// Primary production API: Registers a logical host specification with explicit initial visibility.
+    pub fn register_host_spec(
+        &self,
+        spec: HostSpec,
+        visible: bool,
+        saved_placement: Option<SavedPlacement>,
+    ) {
         let host_id = spec.id.clone();
         let mut hosts = self.hosts.borrow_mut();
         if let Some(host) = hosts.get_mut(&host_id) {
             host.spec = spec;
             host.saved_placement = saved_placement;
-            host.visible = true;
-            // Invalidate current decision to force re-resolution
+            host.visible = visible;
             host.current_decision = None;
             host.decision_generation = None;
         } else {
             hosts.insert(
                 host_id.clone(),
-                HostState::with_saved_placement(spec, saved_placement),
+                HostState::with_initial_visibility(spec, visible, saved_placement),
             );
         }
+    }
+
+    /// Primary production API: Attaches or updates a logical host using a declarative `HostSpec`.
+    pub fn attach_host_spec(&self, spec: HostSpec, saved_placement: Option<SavedPlacement>) {
+        self.register_host_spec(spec, true, saved_placement);
     }
 
     /// Compatibility API: Attaches or updates a logical host using legacy `SurfaceKind`.
@@ -179,6 +203,17 @@ impl Coordinator {
         }
     }
 
+    /// Primary production API: Executes a generic `HostCommand`.
+    pub fn execute_command(&self, cmd: HostCommand) {
+        match cmd {
+            HostCommand::Show(host_id) => self.show_host(&host_id),
+            HostCommand::Hide(host_id) => self.hide_host(&host_id),
+            HostCommand::Toggle(host_id) => {
+                let _ = self.toggle_host(&host_id);
+            }
+        }
+    }
+
     /// Primary production API: Dispatches a generic `WidgetAction`.
     pub fn dispatch_action(&self, action: WidgetAction) {
         match action {
@@ -187,6 +222,9 @@ impl Coordinator {
             }
             WidgetAction::HideHost(host_id) => {
                 self.hide_host(&host_id);
+            }
+            WidgetAction::Command(cmd) => {
+                self.execute_command(cmd);
             }
         }
     }
