@@ -2,6 +2,7 @@ pub mod coordinator;
 pub mod placement_engine;
 pub mod poc_compat;
 
+pub use crate::domain::host::{HostSpec, HostState};
 pub use crate::model::SurfaceKind;
 pub use coordinator::{Coordinator, DragState, LogicalHostState};
 pub use placement_engine::PlacementEngine;

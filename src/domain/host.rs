@@ -60,7 +60,7 @@ pub enum HostMovementPolicy {
 
 /// Generic specification of a shell surface host container.
 ///
-/// Contains spatial and layer-shell policies, but NO widget-specific fields
+/// Contains spatial, layer-shell, and lifecycle policies, but NO widget-specific fields
 /// or calendar/clock variants.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct HostSpec {
@@ -75,6 +75,7 @@ pub struct HostSpec {
     pub keyboard_interactivity: KeyboardInteractivityPolicy,
     pub movement_policy: HostMovementPolicy,
     pub primary_milestone: bool,
+    pub exit_on_close: bool,
 }
 
 impl HostSpec {
@@ -92,6 +93,7 @@ impl HostSpec {
             keyboard_interactivity: KeyboardInteractivityPolicy::None,
             movement_policy: HostMovementPolicy::Fixed,
             primary_milestone: true,
+            exit_on_close: true,
         }
     }
 
@@ -109,6 +111,7 @@ impl HostSpec {
             keyboard_interactivity: KeyboardInteractivityPolicy::OnDemand,
             movement_policy: HostMovementPolicy::Movable,
             primary_milestone: false,
+            exit_on_close: false,
         }
     }
 }
@@ -116,36 +119,42 @@ impl HostSpec {
 /// Runtime logical state of a surface host.
 ///
 /// Acts as the single source of truth for attached widget IDs.
+/// Invariant: Every valid host state in the runtime owns a declarative `HostSpec`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct HostState {
     pub id: HostId,
-    pub spec: Option<HostSpec>,
+    pub spec: HostSpec,
     pub visible: bool,
     pub attached_widgets: Vec<WidgetId>,
     pub saved_placement: Option<SavedPlacement>,
     pub current_decision: Option<PlacementDecision>,
+    pub decision_generation: Option<crate::platform::TopologyGeneration>,
 }
 
 impl HostState {
-    pub fn new(id: HostId) -> Self {
+    /// Constructs a new logical `HostState` with the given declarative `HostSpec`.
+    pub fn new(spec: HostSpec) -> Self {
         Self {
-            id,
-            spec: None,
-            visible: false,
+            id: spec.id.clone(),
+            spec,
+            visible: true,
             attached_widgets: Vec::new(),
             saved_placement: None,
             current_decision: None,
+            decision_generation: None,
         }
     }
 
-    pub fn with_spec(spec: HostSpec) -> Self {
+    /// Constructs a new logical `HostState` with saved placement.
+    pub fn with_saved_placement(spec: HostSpec, saved_placement: Option<SavedPlacement>) -> Self {
         Self {
             id: spec.id.clone(),
-            spec: Some(spec),
-            visible: false,
+            spec,
+            visible: true,
             attached_widgets: Vec::new(),
-            saved_placement: None,
+            saved_placement,
             current_decision: None,
+            decision_generation: None,
         }
     }
 

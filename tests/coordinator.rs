@@ -423,3 +423,141 @@ fn handle_height_boundary_is_28_pixels() {
     assert!(inside_pointer_y < owlenshell::runtime::HANDLE_HEIGHT);
     assert!(outside_pointer_y >= owlenshell::runtime::HANDLE_HEIGHT);
 }
+
+#[test]
+fn coordinator_generic_host_and_widget_attachment_lifecycle() {
+    use owlenshell::domain::host::{HostMovementPolicy, HostSize, HostSpec};
+    use owlenshell::domain::ids::WidgetId;
+
+    let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
+    let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
+    let render_bridge = RenderBridge::new();
+
+    let coordinator = Coordinator::new(
+        output_manager.clone(),
+        surface_manager.clone(),
+        render_bridge.clone(),
+        Placements::default(),
+    );
+
+    let bar_spec = HostSpec::top_bar(HostId::new("primary_bar"), 32);
+    coordinator.attach_host_spec(bar_spec.clone(), None);
+
+    // 1. Host carries HostSpec in HostState
+    let host_state = coordinator.get_host(&HostId::new("primary_bar")).unwrap();
+    assert_eq!(host_state.spec.id.as_str(), "primary_bar");
+    assert_eq!(host_state.spec.size, HostSize::OutputWidth { height: 32 });
+    assert!(host_state.spec.primary_milestone);
+    assert_eq!(host_state.spec.movement_policy, HostMovementPolicy::Fixed);
+
+    // 2. Generic widget attachment
+    let clock_id = WidgetId::new("clock_widget");
+    let battery_id = WidgetId::new("battery_widget");
+    assert!(coordinator.attach_widget(&HostId::new("primary_bar"), clock_id.clone()));
+    assert!(coordinator.attach_widget(&HostId::new("primary_bar"), battery_id.clone()));
+
+    // 3. attached_widgets is the canonical containment relation
+    let attached = coordinator
+        .attached_widgets(&HostId::new("primary_bar"))
+        .unwrap();
+    assert_eq!(attached, vec![clock_id.clone(), battery_id.clone()]);
+
+    // 4. Detachment
+    assert!(coordinator.detach_widget(&HostId::new("primary_bar"), &clock_id));
+    let attached_after = coordinator
+        .attached_widgets(&HostId::new("primary_bar"))
+        .unwrap();
+    assert_eq!(attached_after, vec![battery_id]);
+}
+
+#[test]
+fn coordinator_reconcile_derives_placement_constraints_from_host_spec() {
+    use owlenshell::domain::host::HostSpec;
+
+    let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
+    let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
+    let render_bridge = RenderBridge::new();
+
+    output_manager
+        .borrow_mut()
+        .sync_protocol_facts(&[make_proto_output(1, "DP-1", (0, 0), Some((1920, 1080)))]);
+
+    let coordinator = Coordinator::new(
+        output_manager.clone(),
+        surface_manager.clone(),
+        render_bridge.clone(),
+        Placements::default(),
+    );
+
+    let bar_spec = HostSpec::top_bar(HostId::new("bar"), 32);
+    let float_spec = HostSpec::floating(HostId::new("float_popup"));
+
+    coordinator.attach_host_spec(bar_spec, None);
+    coordinator.attach_host_spec(float_spec, None);
+
+    coordinator.reconcile();
+
+    let bar_state = coordinator.get_host(&HostId::new("bar")).unwrap();
+    let float_state = coordinator.get_host(&HostId::new("float_popup")).unwrap();
+
+    assert!(bar_state.current_decision.is_some());
+    assert!(float_state.current_decision.is_some());
+}
+
+#[test]
+fn coordinator_lifecycle_exit_on_close_and_primary_milestone_are_independent() {
+    use owlenshell::domain::host::HostSpec;
+    use owlenshell::platform::{PlatformLifecycleEvent, SurfaceGeneration, SurfaceToken};
+
+    let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
+    let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
+    let render_bridge = RenderBridge::new();
+
+    let coordinator = Coordinator::new(
+        output_manager.clone(),
+        surface_manager.clone(),
+        render_bridge.clone(),
+        Placements::default(),
+    );
+
+    // Host 1: primary_milestone = true, exit_on_close = false
+    let mut host1_spec = HostSpec::top_bar(HostId::new("milestone_only"), 32);
+    host1_spec.exit_on_close = false;
+    coordinator.attach_host_spec(host1_spec, None);
+
+    // Host 2: primary_milestone = false, exit_on_close = true
+    let mut host2_spec = HostSpec::floating(HostId::new("exit_only"));
+    host2_spec.exit_on_close = true;
+    coordinator.attach_host_spec(host2_spec, None);
+
+    // 1. FrameRendered on host1 (primary_milestone = true) fires first-frame / shell-ready
+    assert!(!coordinator.first_frame_fired());
+    coordinator.process_lifecycle_event(PlatformLifecycleEvent::FrameRendered {
+        host_id: HostId::new("milestone_only"),
+        token: SurfaceToken::new(HostId::new("milestone_only"), SurfaceGeneration::INITIAL),
+    });
+    assert!(coordinator.first_frame_fired());
+
+    // FrameRendered on host2 (primary_milestone = false) does not affect state
+    assert!(!coordinator.should_exit());
+
+    // 2. Closed on host1 (exit_on_close = false) does NOT request exit
+    coordinator.process_lifecycle_event(PlatformLifecycleEvent::Closed {
+        host_id: HostId::new("milestone_only"),
+        token: SurfaceToken::new(HostId::new("milestone_only"), SurfaceGeneration::INITIAL),
+    });
+    assert!(
+        !coordinator.should_exit(),
+        "Host with exit_on_close=false must not exit"
+    );
+
+    // 3. Closed on host2 (exit_on_close = true) requests exit
+    coordinator.process_lifecycle_event(PlatformLifecycleEvent::Closed {
+        host_id: HostId::new("exit_only"),
+        token: SurfaceToken::new(HostId::new("exit_only"), SurfaceGeneration::INITIAL),
+    });
+    assert!(
+        coordinator.should_exit(),
+        "Host with exit_on_close=true must exit"
+    );
+}

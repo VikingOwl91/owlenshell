@@ -279,11 +279,8 @@ fn native_recreation_transition_preserves_adapter_and_triggers_no_new_registrati
     assert_eq!(bridge.adapter_count(), 1);
 
     // 2. Initialize logical host state and native surface manager
-    let mut logical_state = owlenshell::runtime::LogicalHostState::new(
-        host_id.clone(),
-        owlenshell::model::SurfaceKind::Calendar,
-        None,
-    );
+    let float_spec = owlenshell::domain::host::HostSpec::floating(host_id.clone());
+    let mut logical_state = owlenshell::domain::host::HostState::new(float_spec);
 
     let mut surface_manager = owlenshell::platform::SurfaceManager::new();
     let token1 = surface_manager
@@ -302,7 +299,7 @@ fn native_recreation_transition_preserves_adapter_and_triggers_no_new_registrati
 
     // 4. Execute actual runtime reattachment: adapter survives, logical state remains visible
     let reattached_adapter = bridge
-        .get_adapter(&logical_state.host_id)
+        .get_adapter(&logical_state.id)
         .expect("host adapter must survive native retirement");
     logical_state.visible = true;
 

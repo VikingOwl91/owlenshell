@@ -1,5 +1,6 @@
-use crate::domain::ids::{HostId, OutputId};
-use crate::domain::placement::{Anchor, PlacementDecision, SavedPlacement};
+use crate::domain::host::{HostMovementPolicy, HostSpec, HostState};
+use crate::domain::ids::{HostId, OutputId, WidgetId};
+use crate::domain::placement::{Anchor, SavedPlacement};
 use crate::instrumentation;
 use crate::model::SurfaceKind;
 use crate::persistence::Placements;
@@ -8,47 +9,16 @@ use crate::placement::{
 };
 use crate::platform::{
     OutputManager, PlatformLifecycleEvent, PlatformPointerEvent, RenderBridge, SurfaceManager,
-    TopologyGeneration, TopologySnapshot, WaylandPlatform,
+    TopologySnapshot, WaylandPlatform,
 };
-use crate::runtime::poc_compat::{
-    compute_attach_geometry, is_bar_host, is_calendar_host, surface_spec_for, HANDLE_HEIGHT,
-};
+use crate::runtime::poc_compat::{compute_attach_geometry, HANDLE_HEIGHT};
 use slint::platform::{PointerEventButton, WindowAdapter};
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
 use std::rc::Rc;
 
-/// Logical state tracked per shell host within the Coordinator.
-///
-/// Contains logical visibility, optional user-saved placement intent,
-/// current placement decision, and the topology generation against which
-/// that decision was resolved.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct LogicalHostState {
-    pub host_id: HostId,
-    pub kind: SurfaceKind,
-    pub visible: bool,
-    pub saved_placement: Option<SavedPlacement>,
-    pub current_decision: Option<PlacementDecision>,
-    pub decision_generation: Option<TopologyGeneration>,
-}
-
-impl LogicalHostState {
-    pub fn new(
-        host_id: HostId,
-        kind: SurfaceKind,
-        saved_placement: Option<SavedPlacement>,
-    ) -> Self {
-        Self {
-            host_id,
-            kind,
-            visible: true,
-            saved_placement,
-            current_decision: None,
-            decision_generation: None,
-        }
-    }
-}
+/// Compatibility alias preserving the previous type name for existing tests/callers.
+pub type LogicalHostState = HostState;
 
 /// Active user drag interaction state, keyed by logical `HostId`.
 #[derive(Debug, Clone, PartialEq)]
@@ -65,7 +35,7 @@ pub struct DragState {
 ///
 /// Holds zero Wayland/SCTK protocol types.
 pub struct Coordinator {
-    hosts: RefCell<BTreeMap<HostId, LogicalHostState>>,
+    hosts: RefCell<BTreeMap<HostId, HostState>>,
     surface_manager: Rc<RefCell<SurfaceManager>>,
     render_bridge: Rc<RenderBridge>,
     output_manager: Rc<RefCell<OutputManager>>,
@@ -97,16 +67,12 @@ impl Coordinator {
         }
     }
 
-    /// Primary production API: Attaches or updates a logical host.
-    pub fn attach_host(
-        &self,
-        host_id: HostId,
-        kind: SurfaceKind,
-        saved_placement: Option<SavedPlacement>,
-    ) {
+    /// Primary production API: Attaches or updates a logical host using a declarative `HostSpec`.
+    pub fn attach_host_spec(&self, spec: HostSpec, saved_placement: Option<SavedPlacement>) {
+        let host_id = spec.id.clone();
         let mut hosts = self.hosts.borrow_mut();
         if let Some(host) = hosts.get_mut(&host_id) {
-            host.kind = kind;
+            host.spec = spec;
             host.saved_placement = saved_placement;
             host.visible = true;
             // Invalidate current decision to force re-resolution
@@ -115,9 +81,57 @@ impl Coordinator {
         } else {
             hosts.insert(
                 host_id.clone(),
-                LogicalHostState::new(host_id, kind, saved_placement),
+                HostState::with_saved_placement(spec, saved_placement),
             );
         }
+    }
+
+    /// Compatibility API: Attaches or updates a logical host using legacy `SurfaceKind`.
+    /// Preserves exact historical namespace ("owlenshell-calendar" for Calendar).
+    pub fn attach_host(
+        &self,
+        host_id: HostId,
+        kind: SurfaceKind,
+        saved_placement: Option<SavedPlacement>,
+    ) {
+        let spec = match kind {
+            SurfaceKind::Bar => HostSpec::top_bar(host_id, crate::model::BAR_HEIGHT),
+            SurfaceKind::Calendar => {
+                let mut s = HostSpec::floating(host_id);
+                s.namespace = "owlenshell-calendar".into();
+                s
+            }
+        };
+        self.attach_host_spec(spec, saved_placement);
+    }
+
+    /// Attaches a widget to a host in canonical `HostState.attached_widgets`.
+    pub fn attach_widget(&self, host_id: &HostId, widget_id: WidgetId) -> bool {
+        let mut hosts = self.hosts.borrow_mut();
+        if let Some(host) = hosts.get_mut(host_id) {
+            host.attach_widget(widget_id);
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Detaches a widget from a host in canonical `HostState.attached_widgets`.
+    pub fn detach_widget(&self, host_id: &HostId, widget_id: &WidgetId) -> bool {
+        let mut hosts = self.hosts.borrow_mut();
+        if let Some(host) = hosts.get_mut(host_id) {
+            host.detach_widget(widget_id)
+        } else {
+            false
+        }
+    }
+
+    /// Returns the attached widget IDs for a host.
+    pub fn attached_widgets(&self, host_id: &HostId) -> Option<Vec<WidgetId>> {
+        self.hosts
+            .borrow()
+            .get(host_id)
+            .map(|h| h.attached_widgets.clone())
     }
 
     /// Primary production API: Hides a logical host and cancels active drag if targeting it.
@@ -137,20 +151,21 @@ impl Coordinator {
         }
     }
 
-    /// Primary production API: Hides all hosts matching a given SurfaceKind.
+    /// Compatibility API: Hides all hosts matching a given SurfaceKind.
     pub fn hide_kind(&self, kind: SurfaceKind) {
-        let mut hosts = self.hosts.borrow_mut();
-        for (host_id, host) in hosts.iter_mut().filter(|(_, h)| h.kind == kind) {
-            host.visible = false;
-            self.surface_manager.borrow_mut().retire(host_id);
-            let dragging_this = self
-                .drag
-                .borrow()
-                .as_ref()
-                .is_some_and(|d| &d.host_id == host_id);
-            if dragging_this {
-                self.drag.borrow_mut().take();
-            }
+        let host_ids: Vec<HostId> = {
+            let hosts = self.hosts.borrow();
+            hosts
+                .iter()
+                .filter(|(_, h)| match kind {
+                    SurfaceKind::Bar => h.spec.primary_milestone,
+                    SurfaceKind::Calendar => !h.spec.primary_milestone,
+                })
+                .map(|(id, _)| id.clone())
+                .collect()
+        };
+        for host_id in host_ids {
+            self.hide_host(&host_id);
         }
     }
 
@@ -185,7 +200,7 @@ impl Coordinator {
     }
 
     /// Returns a snapshot of a host's logical state.
-    pub fn get_host(&self, host_id: &HostId) -> Option<LogicalHostState> {
+    pub fn get_host(&self, host_id: &HostId) -> Option<HostState> {
         self.hosts.borrow().get(host_id).cloned()
     }
 
@@ -215,7 +230,8 @@ impl Coordinator {
             PlatformLifecycleEvent::FrameRendered { host_id, .. } => {
                 let hosts = self.hosts.borrow();
                 if let Some(host) = hosts.get(&host_id) {
-                    if is_bar_host(host.kind) && !self.first_frame.replace(true) {
+                    // Primary milestone hosts trigger shell-ready
+                    if host.spec.primary_milestone && !self.first_frame.replace(true) {
                         instrumentation::milestone("first-frame");
                         instrumentation::milestone("shell-ready");
                     }
@@ -224,8 +240,8 @@ impl Coordinator {
             PlatformLifecycleEvent::Closed { host_id, .. } => {
                 let hosts = self.hosts.borrow();
                 if let Some(host) = hosts.get(&host_id) {
-                    // Bar close requests application exit
-                    if is_bar_host(host.kind) {
+                    // Host close requests application exit if configured by policy
+                    if host.spec.exit_on_close {
                         self.exit.set(true);
                     }
                     // Native surface close cancels active drag targeting that surface
@@ -242,13 +258,13 @@ impl Coordinator {
         }
     }
 
-    /// Builds current placement context from active topology and bar placement.
+    /// Builds current placement context from active topology and primary bar placement.
     pub fn resolve_ctx(&self) -> PlacementContext {
         let spawn_output_id = {
             let hosts = self.hosts.borrow();
             hosts.values().find_map(|h| {
-                if is_bar_host(h.kind) {
-                    self.surface_manager.borrow().output_id_for_host(&h.host_id)
+                if h.spec.primary_milestone {
+                    self.surface_manager.borrow().output_id_for_host(&h.id)
                 } else {
                     None
                 }
@@ -276,22 +292,27 @@ impl Coordinator {
         drop(output_manager);
 
         let ctx = self.resolve_ctx();
-        let constraints = HostPlacementConstraints::default();
-
         let host_keys: Vec<HostId> = self.hosts.borrow().keys().cloned().collect();
 
         for host_id in host_keys {
-            let (kind, visible, saved) = {
+            let (spec, visible, saved) = {
                 let hosts = self.hosts.borrow();
                 let Some(host) = hosts.get(&host_id) else {
                     continue;
                 };
-                (host.kind, host.visible, host.saved_placement.clone())
+                (
+                    host.spec.clone(),
+                    host.visible,
+                    host.saved_placement.clone(),
+                )
             };
 
             if !visible {
                 continue;
             }
+
+            // Derive placement constraints directly from HostSpec
+            let constraints = HostPlacementConstraints::from(&spec);
 
             // Check if existing decision is valid and matching current topology generation
             let needs_resolution = {
@@ -316,10 +337,7 @@ impl Coordinator {
                 });
 
                 instrumentation::placement_decision(
-                    match kind {
-                        SurfaceKind::Bar => "bar",
-                        SurfaceKind::Calendar => "calendar",
-                    },
+                    spec.namespace.as_str(),
                     format!("{:?}", dec.reason()).as_str(),
                     target_name.as_deref(),
                     dec.is_fallback(),
@@ -360,13 +378,13 @@ impl Coordinator {
 
     /// Attaches or recreates a native surface instance on the platform if needed.
     fn try_attach_host(&self, platform: &mut WaylandPlatform, host_id: &HostId) {
-        let (kind, visible, saved, decision) = {
+        let (spec, visible, saved, decision) = {
             let hosts = self.hosts.borrow();
             let Some(host) = hosts.get(host_id) else {
                 return;
             };
             (
-                host.kind,
+                host.spec.clone(),
                 host.visible,
                 host.saved_placement.clone(),
                 host.current_decision.clone(),
@@ -400,12 +418,17 @@ impl Coordinator {
         drop(output_manager);
 
         let preferred = adapter.preferred.get();
-        let spec = surface_spec_for(kind);
+        let surface_spec = crate::platform::SurfaceSpec::from(&spec);
+        let kind = if spec.primary_milestone {
+            SurfaceKind::Bar
+        } else {
+            SurfaceKind::Calendar
+        };
         let geo = compute_attach_geometry(kind, saved.as_ref(), preferred, snap.logical_size);
 
         let params = crate::platform::NativeSurfaceParams {
             host_id: host_id.clone(),
-            spec,
+            spec: surface_spec,
             output_id: target_output_id,
             output_scale: snap.scale,
             anchor: geo.anchor,
@@ -550,7 +573,8 @@ impl Coordinator {
                 } => {
                     let hosts = self.hosts.borrow();
                     if let Some(host) = hosts.get(&host_id) {
-                        if is_calendar_host(host.kind) {
+                        // Check movement policy on the host spec
+                        if host.spec.movement_policy == HostMovementPolicy::Movable {
                             let mods = platform.modifiers();
                             let handle = position.1 < HANDLE_HEIGHT;
                             if (mods.ctrl && mods.alt) || handle {
@@ -595,10 +619,7 @@ impl Coordinator {
                 let Some(host) = hosts.get(&host_id) else {
                     continue;
                 };
-                let has_native = self
-                    .surface_manager
-                    .borrow()
-                    .has_native_instance(&host.host_id);
+                let has_native = self.surface_manager.borrow().has_native_instance(&host.id);
                 (host.visible, !has_native && host.visible)
             };
 

@@ -65,14 +65,15 @@ fn host_spec_is_generic_without_widget_variants() {
         keyboard_interactivity: KeyboardInteractivityPolicy::OnDemand,
         movement_policy: HostMovementPolicy::Movable,
         primary_milestone: false,
+        exit_on_close: false,
     };
 
     assert_eq!(spec.mode, HostMode::Float);
     assert_eq!(spec.layer, HostLayer::Top);
     assert_eq!(spec.movement_policy, HostMovementPolicy::Movable);
 
-    let mut state = HostState::new(spec.id.clone());
-    assert!(!state.visible);
+    let mut state = HostState::new(spec);
+    assert!(state.visible);
     state.attach_widget(WidgetId::new("generic-widget-1"));
     assert_eq!(state.attached_widgets().len(), 1);
     assert_eq!(state.attached_widgets()[0].as_str(), "generic-widget-1");
@@ -98,7 +99,7 @@ fn bar_host_policy_without_clock_knowledge() {
     assert_eq!(surface_spec.exclusive_zone, ExclusiveZonePolicy::Fixed(32));
 
     // Can host an arbitrary non-clock widget
-    let mut state = HostState::with_spec(bar_spec);
+    let mut state = HostState::new(bar_spec);
     state.attach_widget(WidgetId::new("system_monitor"));
     assert_eq!(state.attached_widgets()[0].as_str(), "system_monitor");
 }
@@ -120,7 +121,7 @@ fn floating_host_policy_without_calendar_knowledge() {
     assert_eq!(surface_spec.exclusive_zone, ExclusiveZonePolicy::None);
 
     // Can host an arbitrary non-calendar widget
-    let mut state = HostState::with_spec(float_spec);
+    let mut state = HostState::new(float_spec);
     state.attach_widget(WidgetId::new("quick_notes"));
     assert_eq!(state.attached_widgets()[0].as_str(), "quick_notes");
 }
@@ -260,4 +261,17 @@ fn host_spec_to_placement_constraints_conversion() {
     fill_spec.size = HostSize::FillOutput;
     let fill_constraints = HostPlacementConstraints::from(&fill_spec);
     assert_eq!(fill_constraints.widget_size, (0, 0));
+}
+
+#[test]
+fn host_spec_output_height_to_placement_constraints_conversion() {
+    use owlenshell::domain::host::HostSize;
+    use owlenshell::placement::HostPlacementConstraints;
+
+    let mut side_bar_spec = HostSpec::floating(HostId::new("side_bar"));
+    side_bar_spec.size = HostSize::OutputHeight { width: 48 };
+    let constraints = HostPlacementConstraints::from(&side_bar_spec);
+    assert_eq!(constraints.widget_size, (48, 0));
+    assert_eq!(constraints.min_visible, 32);
+    assert!(constraints.work_area.is_none());
 }
