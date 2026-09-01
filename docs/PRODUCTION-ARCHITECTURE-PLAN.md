@@ -396,14 +396,43 @@ Calendar arithmetic is widget or domain logic, not a system service.
 
 ## Deferred Boundaries
 
-### Configuration
+### Configuration and Graphical Settings UI
 
 Do not begin by designing a complete TOML language. First represent defaults as
 typed `AppSpec` data. Once the generic calendar slice works, add:
 
 ```text
-parse -> validate -> construct candidate AppSpec -> reconcile transactionally
+Built-in defaults
+        \
+File configuration
+         > Typed Configuration Model
+Settings UI
+        /
+         -> validation / transactional configuration update
+         -> runtime reconciliation
+         -> HostSpec / WidgetSpec composition
 ```
+
+Owlenshell ships a batteries-included native graphical settings UI for common
+shell customization (e.g. bar position, bar size, output preferences, widget
+enable/disable, widget ordering, common widget options, and later theme/styling).
+
+Key architectural invariants:
+- **Unified Public Model**: The settings UI is NOT a separate configuration
+  system. Both GUI and file configuration consume and produce the exact same
+  typed public configuration model. There is zero GUI-only runtime mutation or
+  divergent configuration path.
+- **Transactional Safety**: Invalid changes (from file edits or UI actions) are
+  rejected during validation and never destroy the currently valid running
+  composition.
+- **Live Reconciliation**: Settings updates reconcile live without process restart
+  where practical.
+- **Non-Mandatory GUI**: The graphical settings UI must never become required for
+  declarative, headless, or manual file-based configuration.
+- **Revert to Defaults**: The system natively supports resetting or reverting to
+  useful built-in defaults.
+- **Rune Separation**: Rune remains an isolated behavioral/scripting extension
+  mechanism, distinct from core configuration.
 
 An invalid reload keeps the previous valid runtime.
 
@@ -552,10 +581,11 @@ Acceptance gates:
 - Ambiguous identities never cause arbitrary migration.
 - Zero-output startup and reconnect preserve logical host and widget state.
 
-### Stage 6: Add Typed Default Configuration
+### Stage 6: Add Typed Default Configuration and Transactional Loading
 
 Represent the dogfood shell through typed defaults, then add transactional file
-loading.
+loading. The typed configuration model must be designed from the start to serve
+both declarative file configuration and the graphical settings UI.
 
 Acceptance gates:
 
@@ -563,6 +593,21 @@ Acceptance gates:
 - Invalid configuration leaves the running composition unchanged.
 - Host and widget add, update, and removal reconcile without process restart.
 - Persisted runtime intent and declarative configuration remain separate.
+
+### Stage 6b: Native Graphical Settings UI
+
+Build the batteries-included graphical settings UI on top of the Stage 6 typed
+configuration model.
+
+Acceptance gates:
+
+- Settings UI directly reads and modifies the shared typed configuration model.
+- Common settings (bar position/size, output preference, widget enable/disable/ordering)
+  can be configured graphically.
+- Settings apply live without process restart where practical.
+- Reset/revert to built-in defaults is supported.
+- Zero divergent or GUI-only configuration state.
+- Declarative file configuration remains fully supported and never requires the GUI.
 
 ### Stage 7: Harden the Slice
 
