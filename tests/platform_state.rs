@@ -8,6 +8,7 @@ use owlenshell::placement::{resolve, PlacementContext};
 use owlenshell::platform::compositor::{CompositorAdapter, CompositorOutputFacts, GenericAdapter};
 use owlenshell::platform::output_manager::{
     NewOutput, OutputManager, OutputRegistry, ProtocolOutput, TopologyEvent, TopologyGeneration,
+    TopologySnapshot,
 };
 use owlenshell::platform::surface_manager::{
     SurfaceCommand, SurfaceGeneration, SurfaceGenerationRegistry, SurfaceLifecycleEvent,
@@ -731,4 +732,269 @@ fn surface_manager_token_validation_and_stale_callback_rejection() {
     assert_eq!(retired, Some(token_gen2));
     assert_eq!(sm.current_token(&host_id), None);
     assert!(!sm.has_native_instance(&host_id));
+}
+
+#[test]
+fn platform_typed_pointer_and_keyboard_events_isolate_protocol_details() {
+    use owlenshell::platform::{PlatformKeyboardEvent, PlatformPointerEvent};
+    use slint::platform::PointerEventButton;
+    use smithay_client_toolkit::seat::keyboard::Modifiers;
+
+    let host_id = HostId::new("calendar");
+
+    // Pointer events preserve typed domain HostId and logical positions
+    let enter_ev = PlatformPointerEvent::Enter {
+        host_id: host_id.clone(),
+        position: (10.0, 20.0),
+    };
+    let press_ev = PlatformPointerEvent::Press {
+        host_id: host_id.clone(),
+        position: (15.0, 25.0),
+        button: PointerEventButton::Left,
+    };
+    let release_ev = PlatformPointerEvent::Release {
+        host_id: host_id.clone(),
+        position: (15.0, 25.0),
+        button: PointerEventButton::Left,
+    };
+    let leave_ev = PlatformPointerEvent::Leave {
+        host_id: host_id.clone(),
+    };
+
+    match enter_ev {
+        PlatformPointerEvent::Enter {
+            host_id: h,
+            position: (x, y),
+        } => {
+            assert_eq!(h, host_id);
+            assert_eq!((x, y), (10.0, 20.0));
+        }
+        _ => panic!("unexpected event"),
+    }
+    match press_ev {
+        PlatformPointerEvent::Press { button, .. } => {
+            assert_eq!(button, PointerEventButton::Left);
+        }
+        _ => panic!("unexpected event"),
+    }
+    match release_ev {
+        PlatformPointerEvent::Release { button, .. } => {
+            assert_eq!(button, PointerEventButton::Left);
+        }
+        _ => panic!("unexpected event"),
+    }
+    match leave_ev {
+        PlatformPointerEvent::Leave { host_id: h } => {
+            assert_eq!(h, host_id);
+        }
+        _ => panic!("unexpected event"),
+    }
+
+    // Keyboard events preserve typed focus and modifiers
+    let focus_in = PlatformKeyboardEvent::FocusChanged {
+        host_id: Some(host_id.clone()),
+    };
+    let key_press = PlatformKeyboardEvent::KeyPressed {
+        host_id: host_id.clone(),
+        text: "a".to_string(),
+    };
+    let mods = PlatformKeyboardEvent::ModifiersChanged {
+        modifiers: Modifiers::default(),
+    };
+    let focus_out = PlatformKeyboardEvent::FocusChanged { host_id: None };
+
+    match focus_in {
+        PlatformKeyboardEvent::FocusChanged { host_id: Some(h) } => assert_eq!(h, host_id),
+        _ => panic!("unexpected event"),
+    }
+    match key_press {
+        PlatformKeyboardEvent::KeyPressed { host_id: h, text } => {
+            assert_eq!(h, host_id);
+            assert_eq!(text, "a");
+        }
+        _ => panic!("unexpected event"),
+    }
+    match mods {
+        PlatformKeyboardEvent::ModifiersChanged { modifiers } => {
+            assert!(!modifiers.ctrl && !modifiers.alt);
+        }
+        _ => panic!("unexpected event"),
+    }
+    match focus_out {
+        PlatformKeyboardEvent::FocusChanged { host_id: None } => {}
+        _ => panic!("unexpected event"),
+    }
+}
+
+#[test]
+fn platform_lifecycle_event_and_drag_cancellation_invariants() {
+    use owlenshell::domain::output::OutputSnapshot;
+    use owlenshell::model::{Anchor, SurfaceKind};
+    use owlenshell::persistence::Placements;
+    use owlenshell::platform::{
+        detect_compositor, OutputManager, OwlenWindowAdapter, PlatformLifecycleEvent, RenderBridge,
+        SurfaceManager,
+    };
+    use owlenshell::runtime::{
+        cancel_drag_if_output_missing, process_lifecycle_event, AppShared, DragState, SurfaceState,
+    };
+    use std::cell::{Cell, RefCell};
+    use std::rc::Rc;
+
+    let output_manager = Rc::new(RefCell::new(OutputManager::new(detect_compositor())));
+    let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
+    let render_bridge = RenderBridge::new();
+
+    let shared = Rc::new(AppShared {
+        surfaces: RefCell::new(Vec::new()),
+        surface_manager: surface_manager.clone(),
+        render_bridge: render_bridge.clone(),
+        output_manager: output_manager.clone(),
+        store: RefCell::new(Placements::load()),
+        drag: RefCell::new(None),
+        outputs_ready: Cell::new(false),
+        exit: Cell::new(false),
+        first_frame: Cell::new(false),
+    });
+
+    let bar_id = HostId::new("bar");
+    let cal_id = HostId::new("calendar");
+
+    let bar_adapter = OwlenWindowAdapter::new(bar_id.clone());
+    let cal_adapter = OwlenWindowAdapter::new(cal_id.clone());
+
+    shared.surfaces.borrow_mut().push(SurfaceState {
+        host_id: bar_id.clone(),
+        kind: SurfaceKind::Bar,
+        adapter: bar_adapter,
+        placement: None,
+        visible: true,
+    });
+    shared.surfaces.borrow_mut().push(SurfaceState {
+        host_id: cal_id.clone(),
+        kind: SurfaceKind::Calendar,
+        adapter: cal_adapter,
+        placement: None,
+        visible: true,
+    });
+
+    // 1. FrameRendered for bar triggers first-frame milestone via production helper
+    let bar_token = surface_manager
+        .borrow_mut()
+        .generation_registry_mut_for_test()
+        .allocate(bar_id.clone());
+
+    let frame_bar = PlatformLifecycleEvent::FrameRendered {
+        host_id: bar_id.clone(),
+        token: bar_token.clone(),
+    };
+    process_lifecycle_event(&shared, frame_bar);
+    assert!(
+        shared.first_frame.get(),
+        "FrameRendered for Bar must set first_frame milestone"
+    );
+
+    // 2. FrameRendered for non-Bar (calendar) does not reset or duplicate milestone
+    shared.first_frame.set(false);
+    let cal_token = surface_manager
+        .borrow_mut()
+        .generation_registry_mut_for_test()
+        .allocate(cal_id.clone());
+
+    let frame_cal = PlatformLifecycleEvent::FrameRendered {
+        host_id: cal_id.clone(),
+        token: cal_token.clone(),
+    };
+    process_lifecycle_event(&shared, frame_cal);
+    assert!(
+        !shared.first_frame.get(),
+        "FrameRendered for non-Bar must not trigger Bar milestone"
+    );
+
+    // 3. Set active drag on calendar (index 1) on output 42
+    *shared.drag.borrow_mut() = Some(DragState {
+        idx: 1,
+        grab: (100.0, 100.0),
+        start_margins: (0, 0, 0, 0),
+        anchor: Anchor::TopLeft,
+        output_id: OutputId::new(42),
+    });
+    assert!(shared.drag.borrow().is_some());
+
+    // 4. Closed for unrelated host (bar) preserves calendar drag
+    let close_bar_when_dragging_cal = PlatformLifecycleEvent::Closed {
+        host_id: bar_id.clone(),
+        token: bar_token.clone(),
+    };
+    process_lifecycle_event(&shared, close_bar_when_dragging_cal);
+    assert!(shared.exit.get(), "Bar close must request application exit");
+    assert!(
+        shared.drag.borrow().is_some(),
+        "unrelated host close must preserve active drag on calendar"
+    );
+
+    // Reset exit flag for next assertion
+    shared.exit.set(false);
+
+    // 5. Closed for actively dragged host (calendar) cancels drag via production helper without setting exit
+    let close_cal = PlatformLifecycleEvent::Closed {
+        host_id: cal_id.clone(),
+        token: cal_token,
+    };
+    process_lifecycle_event(&shared, close_cal);
+    assert!(
+        !shared.exit.get(),
+        "non-bar close must not request application exit"
+    );
+    assert!(
+        shared.drag.borrow().is_none(),
+        "closing dragged surface must cancel active drag via production helper"
+    );
+
+    // 6. Test topology drag cancellation helper when output is removed vs present
+    let out1 = OutputId::new(101);
+    let out2 = OutputId::new(102);
+
+    let snap_with_out1 = TopologySnapshot::new(
+        TopologyGeneration::INITIAL,
+        vec![OutputSnapshot {
+            id: out1,
+            name: Some("DP-1".into()),
+            identity: Default::default(),
+            logical_position: Some((0, 0)),
+            logical_size: Some((1920, 1080)),
+            logical_role: None,
+            scale: 1,
+            preferred: false,
+        }],
+    );
+
+    // Set drag targeting out2 (which is absent in snap_with_out1)
+    *shared.drag.borrow_mut() = Some(DragState {
+        idx: 1,
+        grab: (50.0, 50.0),
+        start_margins: (0, 0, 0, 0),
+        anchor: Anchor::TopLeft,
+        output_id: out2,
+    });
+
+    let cancelled = cancel_drag_if_output_missing(&shared, &snap_with_out1);
+    assert!(cancelled, "drag targeting absent output must be cancelled");
+    assert!(shared.drag.borrow().is_none());
+
+    // Set drag targeting out1 (which is present in snap_with_out1)
+    *shared.drag.borrow_mut() = Some(DragState {
+        idx: 1,
+        grab: (50.0, 50.0),
+        start_margins: (0, 0, 0, 0),
+        anchor: Anchor::TopLeft,
+        output_id: out1,
+    });
+
+    let cancelled = cancel_drag_if_output_missing(&shared, &snap_with_out1);
+    assert!(
+        !cancelled,
+        "drag targeting present output must remain active"
+    );
+    assert!(shared.drag.borrow().is_some());
 }

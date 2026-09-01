@@ -1,27 +1,18 @@
 use calloop::timer::{TimeoutAction, Timer};
 use calloop::EventLoop;
-use calloop_wayland_source::WaylandSource;
 use chrono::Datelike;
 use owlenshell::domain::ids::HostId;
 use owlenshell::instrumentation;
 use owlenshell::model::{SurfaceKind, CALENDAR_KEY};
 use owlenshell::persistence::Placements;
 use owlenshell::platform::{
-    compositor, OutputManager, OwlenPlatform, RenderBridge, SurfaceManager,
+    compositor, OutputManager, OwlenPlatform, RenderBridge, SurfaceManager, WaylandPlatform,
 };
-use owlenshell::runtime::{attach_host, hide_host, pump, AppShared, AppState};
+use owlenshell::runtime::{attach_host, hide_host, pump, AppShared};
 use slint::{ComponentHandle, ModelRc, VecModel};
-use smithay_client_toolkit::compositor::CompositorState;
-use smithay_client_toolkit::output::OutputState;
-use smithay_client_toolkit::registry::RegistryState;
-use smithay_client_toolkit::seat::SeatState;
-use smithay_client_toolkit::shell::wlr_layer::LayerShell;
-use smithay_client_toolkit::shm::Shm;
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::Duration;
-use wayland_client::globals::registry_queue_init;
-use wayland_client::Connection;
 
 slint::include_modules!();
 
@@ -29,46 +20,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     instrumentation::init();
     instrumentation::milestone("start");
 
-    let conn = Connection::connect_to_env()?;
-    let (globals, event_queue) = registry_queue_init(&conn)?;
-    let qh = event_queue.handle();
-
-    let compositor = CompositorState::bind(&globals, &qh)?;
-    let layer_shell = LayerShell::bind(&globals, &qh)?;
-    let shm = Shm::bind(&globals, &qh)?;
-
-    instrumentation::milestone("wayland-bound");
-
+    let output_manager = Rc::new(RefCell::new(OutputManager::new(compositor::detect())));
+    let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
     let render_bridge = RenderBridge::new();
 
-    let shared = Rc::new(AppShared {
-        conn: conn.clone(),
-        qh,
-        compositor,
-        layer_shell,
-        surfaces: RefCell::new(Vec::new()),
-        surface_manager: RefCell::new(SurfaceManager::new()),
-        render_bridge: render_bridge.clone(),
-        output_manager: RefCell::new(OutputManager::new(compositor::detect())),
-        store: RefCell::new(Placements::load()),
-        modifiers: Cell::new(Default::default()),
-        keyboard_focus: Cell::new(None),
-        drag: RefCell::new(None),
-        topology_dirty: Cell::new(true),
-        exit: Cell::new(false),
-        first_frame: Cell::new(false),
-        outputs_ready: Cell::new(false),
-    });
+    let mut platform = WaylandPlatform::connect(
+        output_manager.clone(),
+        surface_manager.clone(),
+        render_bridge.clone(),
+    )?;
 
-    let mut state = AppState {
-        registry: RegistryState::new(&globals),
-        seat_state: SeatState::new(&globals, &shared.qh),
-        output_state: OutputState::new(&globals, &shared.qh),
-        shm,
-        pointer: None,
-        keyboard: None,
-        shared: shared.clone(),
-    };
+    let shared = Rc::new(AppShared {
+        surfaces: RefCell::new(Vec::new()),
+        surface_manager: surface_manager.clone(),
+        render_bridge: render_bridge.clone(),
+        output_manager: output_manager.clone(),
+        store: RefCell::new(Placements::load()),
+        drag: RefCell::new(None),
+        outputs_ready: std::cell::Cell::new(false),
+        exit: std::cell::Cell::new(false),
+        first_frame: std::cell::Cell::new(false),
+    });
 
     slint::platform::set_platform(Box::new(OwlenPlatform::new(render_bridge.clone())))?;
     instrumentation::milestone("platform");
@@ -118,11 +90,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
     let _ = bar.show();
 
-    let mut event_loop: EventLoop<AppState> = EventLoop::try_new()?;
-    WaylandSource::new(conn, event_queue).insert(event_loop.handle())?;
+    let mut event_loop: EventLoop<WaylandPlatform> = EventLoop::try_new()?;
+    let _ = platform.insert_into_event_loop(&event_loop)?;
     event_loop.handle().insert_source(Timer::immediate(), {
         let bar = bar.clone_strong();
-        move |_deadline, _, _state| {
+        move |_deadline, _, _platform| {
             bar.set_clock_text(clock_text());
             slint::platform::update_timers_and_animations();
             TimeoutAction::ToDuration(Duration::from_secs(1))
@@ -130,12 +102,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     })?;
 
     instrumentation::milestone("loop");
-    while !state.shared.exit.get() {
+    while !shared.exit.get() {
         let timeout = slint::platform::duration_until_next_timer_update()
             .unwrap_or(Duration::from_secs(1))
             .min(Duration::from_secs(1));
-        event_loop.dispatch(Some(timeout), &mut state)?;
-        pump(&mut state)?;
+        event_loop.dispatch(Some(timeout), &mut platform)?;
+        pump(&mut platform, &shared)?;
         slint::platform::update_timers_and_animations();
     }
     Ok(())

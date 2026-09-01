@@ -7,63 +7,31 @@ use crate::domain::ids::{HostId, OutputId};
 use crate::instrumentation;
 pub use crate::model::SurfaceKind;
 use crate::model::{
-    Anchor, OutputSnapshot, SavedPlacement, BAR_HEIGHT, BTN_LEFT, CALENDAR_KEY, HANDLE_HEIGHT,
+    Anchor, OutputSnapshot, SavedPlacement, BAR_HEIGHT, CALENDAR_KEY, HANDLE_HEIGHT,
 };
 use crate::persistence::Placements;
 use crate::placement::{
     clamp_offset, margins_from_offset, resolve, PlacementContext, PlacementEngine, MIN_VISIBLE,
 };
 use crate::platform::{
-    dispatch_pointer, OutputManager, OwlenWindowAdapter, RenderBridge, SurfaceManager, SurfaceSpec,
+    OutputManager, OwlenWindowAdapter, PlatformLifecycleEvent, PlatformPointerEvent, RenderBridge,
+    SurfaceManager, SurfaceSpec, WaylandPlatform,
 };
-use slint::platform::{PointerEventButton, WindowAdapter, WindowEvent};
-use slint::{LogicalPosition, LogicalSize};
-use smithay_client_toolkit::compositor::{CompositorHandler, CompositorState};
-use smithay_client_toolkit::delegate_registry;
-use smithay_client_toolkit::output::{OutputHandler, OutputState};
-use smithay_client_toolkit::registry::{ProvidesRegistryState, RegistryState};
-use smithay_client_toolkit::registry_handlers;
-use smithay_client_toolkit::seat::keyboard::{
-    KeyEvent, KeyboardHandler, Keysym, Modifiers, RawModifiers,
-};
-use smithay_client_toolkit::seat::pointer::{PointerEvent, PointerEventKind, PointerHandler};
-use smithay_client_toolkit::seat::{Capability, SeatHandler, SeatState};
-use smithay_client_toolkit::shell::wlr_layer::{
-    LayerShell, LayerShellHandler, LayerSurface, LayerSurfaceConfigure,
-};
-use smithay_client_toolkit::shm::{Shm, ShmHandler};
+use slint::platform::{PointerEventButton, WindowAdapter};
+use slint::LogicalSize;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
-use wayland_client::protocol::{wl_keyboard, wl_output, wl_pointer, wl_seat, wl_surface};
-use wayland_client::{backend::WaylandError, Connection, QueueHandle};
 
 pub struct AppShared {
-    pub conn: Connection,
-    pub qh: QueueHandle<AppState>,
-    pub compositor: CompositorState,
-    pub layer_shell: LayerShell,
     pub surfaces: RefCell<Vec<SurfaceState>>,
-    pub surface_manager: RefCell<SurfaceManager>,
+    pub surface_manager: Rc<RefCell<SurfaceManager>>,
     pub render_bridge: Rc<RenderBridge>,
-    pub output_manager: RefCell<OutputManager>,
+    pub output_manager: Rc<RefCell<OutputManager>>,
     pub store: RefCell<Placements>,
-    pub modifiers: Cell<Modifiers>,
-    pub keyboard_focus: Cell<Option<usize>>,
     pub drag: RefCell<Option<DragState>>,
-    pub topology_dirty: Cell<bool>,
+    pub outputs_ready: Cell<bool>,
     pub exit: Cell<bool>,
     pub first_frame: Cell<bool>,
-    pub outputs_ready: Cell<bool>,
-}
-
-pub struct AppState {
-    pub registry: RegistryState,
-    pub seat_state: SeatState,
-    pub output_state: OutputState,
-    pub shm: Shm,
-    pub pointer: Option<wl_pointer::WlPointer>,
-    pub keyboard: Option<wl_keyboard::WlKeyboard>,
-    pub shared: Rc<AppShared>,
 }
 
 pub struct SurfaceState {
@@ -75,11 +43,11 @@ pub struct SurfaceState {
 }
 
 pub struct DragState {
-    idx: usize,
-    grab: (f64, f64),
-    start_margins: (i32, i32, i32, i32),
-    anchor: Anchor,
-    output_id: OutputId,
+    pub idx: usize,
+    pub grab: (f64, f64),
+    pub start_margins: (i32, i32, i32, i32),
+    pub anchor: Anchor,
+    pub output_id: OutputId,
 }
 
 impl SurfaceState {
@@ -136,10 +104,6 @@ pub fn hide_host(shared: &AppShared, host_id: &HostId) {
     {
         surf.visible = false;
         shared.surface_manager.borrow_mut().retire(host_id);
-        if shared.keyboard_focus.get() == Some(idx) {
-            shared.keyboard_focus.set(None);
-            shared.modifiers.set(Modifiers::default());
-        }
         let dragging_surface = shared.drag.borrow().as_ref().map(|drag| drag.idx) == Some(idx);
         if dragging_surface {
             shared.drag.borrow_mut().take();
@@ -156,10 +120,6 @@ pub fn hide_kind(shared: &AppShared, kind: SurfaceKind) {
     {
         surf.visible = false;
         shared.surface_manager.borrow_mut().retire(&surf.host_id);
-        if shared.keyboard_focus.get() == Some(idx) {
-            shared.keyboard_focus.set(None);
-            shared.modifiers.set(Modifiers::default());
-        }
         let dragging_surface = shared.drag.borrow().as_ref().map(|drag| drag.idx) == Some(idx);
         if dragging_surface {
             shared.drag.borrow_mut().take();
@@ -167,18 +127,135 @@ pub fn hide_kind(shared: &AppShared, kind: SurfaceKind) {
     }
 }
 
-pub fn pump(state: &mut AppState) -> Result<(), WaylandError> {
-    if state.shared.topology_dirty.replace(false) {
-        refresh_outputs(state);
-        reconcile(&state.shared);
+pub fn cancel_drag_if_output_missing(
+    shared: &AppShared,
+    snapshot: &crate::platform::TopologySnapshot,
+) -> bool {
+    let missing = shared
+        .drag
+        .borrow()
+        .as_ref()
+        .is_some_and(|drag| snapshot.get(drag.output_id).is_none());
+    if missing {
+        shared.drag.borrow_mut().take();
+        true
+    } else {
+        false
     }
-    let n = state.shared.surfaces.borrow().len();
+}
+
+pub fn process_lifecycle_event(shared: &AppShared, event: PlatformLifecycleEvent) {
+    match event {
+        PlatformLifecycleEvent::FrameRendered { host_id, .. } => {
+            if let Some(idx) = surface_index_for_host(shared, &host_id) {
+                if shared.surfaces.borrow()[idx].kind == SurfaceKind::Bar
+                    && !shared.first_frame.replace(true)
+                {
+                    instrumentation::milestone("first-frame");
+                    instrumentation::milestone("shell-ready");
+                }
+            }
+        }
+        PlatformLifecycleEvent::Closed { host_id, .. } => {
+            if let Some(idx) = surface_index_for_host(shared, &host_id) {
+                let kind = shared.surfaces.borrow()[idx].kind;
+                // S1: Bar close requests application exit
+                if kind == SurfaceKind::Bar {
+                    shared.exit.set(true);
+                }
+                // S2: Native surface close cancels active drag targeting that surface
+                let dragging_this = shared.drag.borrow().as_ref().map(|drag| drag.idx) == Some(idx);
+                if dragging_this {
+                    shared.drag.borrow_mut().take();
+                }
+            }
+        }
+    }
+}
+
+pub fn pump(
+    platform: &mut WaylandPlatform,
+    shared: &Rc<AppShared>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let _ = platform.dispatch_pending()?;
+
+    if platform.is_topology_dirty() {
+        platform.clear_topology_dirty();
+        platform.refresh_outputs();
+        let has_outputs = !shared.output_manager.borrow().snapshot().is_empty();
+        if has_outputs && !shared.outputs_ready.replace(true) {
+            instrumentation::milestone("outputs-ready");
+        }
+
+        // S2: Invalidate active drag if the target output was removed
+        let output_manager = shared.output_manager.borrow();
+        let snapshot = output_manager.snapshot();
+        cancel_drag_if_output_missing(shared, &snapshot);
+        drop(output_manager);
+
+        reconcile(shared);
+    }
+
+    // Process generic platform lifecycle events (S1 & S2)
+    while let Some(lifecycle_ev) = platform.pop_lifecycle_event() {
+        process_lifecycle_event(shared, lifecycle_ev);
+    }
+
+    // Process typed pointer input events for drag interactions
+    while let Some(ptr_ev) = platform.pop_pointer_event() {
+        match ptr_ev {
+            PlatformPointerEvent::Press {
+                host_id,
+                position,
+                button: PointerEventButton::Left,
+            } => {
+                if let Some(idx) = surface_index_for_host(shared, &host_id) {
+                    let kind = shared.surfaces.borrow()[idx].kind;
+                    if kind == SurfaceKind::Calendar {
+                        let mods = platform.modifiers();
+                        let handle = position.1 < HANDLE_HEIGHT;
+                        if (mods.ctrl && mods.alt) || handle {
+                            if let Some(inst) =
+                                shared.surface_manager.borrow().get_instance(&host_id)
+                            {
+                                *shared.drag.borrow_mut() = Some(DragState {
+                                    idx,
+                                    grab: position,
+                                    start_margins: inst.margins,
+                                    anchor: inst.anchor,
+                                    output_id: inst.output_id,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            PlatformPointerEvent::Release {
+                host_id,
+                position,
+                button: PointerEventButton::Left,
+            } => {
+                if let Some(drag) = shared.drag.borrow_mut().take() {
+                    if let Some(idx) = surface_index_for_host(shared, &host_id) {
+                        if drag.idx == idx {
+                            finish_drag(shared, &drag, position);
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    // Drain typed keyboard events if any
+    while let Some(_kb_ev) = platform.pop_keyboard_event() {}
+
+    let n = shared.surfaces.borrow().len();
     for i in 0..n {
-        let (host_id, adapter, needs_attach, visible) = {
-            let surfaces = state.shared.surfaces.borrow();
+        let (host_id, _adapter, needs_attach, visible) = {
+            let surfaces = shared.surfaces.borrow();
             let s = &surfaces[i];
-            let has_native = state
-                .shared
+            let has_native = shared
                 .surface_manager
                 .borrow()
                 .has_native_instance(&s.host_id);
@@ -190,35 +267,14 @@ pub fn pump(state: &mut AppState) -> Result<(), WaylandError> {
             )
         };
         if needs_attach {
-            try_attach(&state.shared, i);
+            try_attach(platform, shared, i);
         }
         if visible {
-            state
-                .shared
-                .surface_manager
-                .borrow_mut()
-                .sync_size(&host_id, &adapter);
-            state.shared.surface_manager.borrow_mut().draw_surface(
-                &host_id,
-                &adapter,
-                &state.shm,
-                &state.shared.qh,
-            );
+            platform.render_surface(&host_id);
         }
     }
-    state.shared.conn.flush()
-}
-
-fn refresh_outputs(state: &mut AppState) {
-    let _ = state
-        .shared
-        .output_manager
-        .borrow_mut()
-        .refresh_sctk(&state.output_state);
-    let has_outputs = !state.shared.output_manager.borrow().snapshot().is_empty();
-    if has_outputs && !state.shared.outputs_ready.replace(true) {
-        instrumentation::milestone("outputs-ready");
-    }
+    platform.flush()?;
+    Ok(())
 }
 
 fn resolve_ctx(shared: &AppShared) -> PlacementContext {
@@ -368,7 +424,7 @@ pub fn surface_spec_for(kind: SurfaceKind) -> SurfaceSpec {
     }
 }
 
-fn try_attach(shared: &AppShared, idx: usize) {
+fn try_attach(platform: &mut WaylandPlatform, shared: &AppShared, idx: usize) {
     let (host_id, kind, placement, adapter) = {
         let surfaces = shared.surfaces.borrow();
         let s = &surfaces[idx];
@@ -418,13 +474,7 @@ fn try_attach(shared: &AppShared, idx: usize) {
         requested_size: geo.requested_size,
     };
 
-    shared.surface_manager.borrow_mut().attach(
-        params,
-        &output,
-        &shared.compositor,
-        &shared.layer_shell,
-        &shared.qh,
-    );
+    platform.attach_surface(params, &output);
     WindowAdapter::request_redraw(&*adapter.window);
 }
 
@@ -434,452 +484,6 @@ fn surface_index_for_host(shared: &AppShared, host_id: &HostId) -> Option<usize>
         .borrow()
         .iter()
         .position(|s| &s.host_id == host_id)
-}
-
-fn surface_index_for(shared: &AppShared, surface: &wl_surface::WlSurface) -> Option<usize> {
-    let token = shared
-        .surface_manager
-        .borrow()
-        .find_token_by_surface(surface)?;
-    surface_index_for_host(shared, &token.host_id)
-}
-
-impl CompositorHandler for AppState {
-    fn scale_factor_changed(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        surface: &wl_surface::WlSurface,
-        new_factor: i32,
-    ) {
-        if let Some((token, _scale)) = self
-            .shared
-            .surface_manager
-            .borrow_mut()
-            .handle_scale(surface, new_factor)
-        {
-            if let Some(idx) = surface_index_for_host(&self.shared, &token.host_id) {
-                let adapter = self.shared.surfaces.borrow()[idx].adapter.clone();
-                WindowAdapter::request_redraw(&*adapter.window);
-            }
-        }
-    }
-
-    fn transform_changed(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        _surface: &wl_surface::WlSurface,
-        _new_transform: wl_output::Transform,
-    ) {
-    }
-
-    fn frame(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        surface: &wl_surface::WlSurface,
-        _time: u32,
-    ) {
-        if let Some(token) = self
-            .shared
-            .surface_manager
-            .borrow_mut()
-            .handle_frame(surface)
-        {
-            if let Some(idx) = surface_index_for_host(&self.shared, &token.host_id) {
-                if self.shared.surfaces.borrow()[idx].kind == SurfaceKind::Bar
-                    && !self.shared.first_frame.replace(true)
-                {
-                    instrumentation::milestone("first-frame");
-                    instrumentation::milestone("shell-ready");
-                }
-            }
-        }
-    }
-
-    fn surface_enter(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        _surface: &wl_surface::WlSurface,
-        _output: &wl_output::WlOutput,
-    ) {
-    }
-
-    fn surface_leave(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        _surface: &wl_surface::WlSurface,
-        _output: &wl_output::WlOutput,
-    ) {
-    }
-}
-
-impl OutputHandler for AppState {
-    fn output_state(&mut self) -> &mut OutputState {
-        &mut self.output_state
-    }
-
-    fn new_output(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        _output: wl_output::WlOutput,
-    ) {
-        self.shared.topology_dirty.set(true);
-    }
-
-    fn update_output(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        _output: wl_output::WlOutput,
-    ) {
-        self.shared.topology_dirty.set(true);
-    }
-
-    fn output_destroyed(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        output: wl_output::WlOutput,
-    ) {
-        let removed = self
-            .shared
-            .output_manager
-            .borrow_mut()
-            .remove_wl_output(&output);
-        let removed_id = removed.as_ref().map(|(id, _, _)| *id);
-
-        let drag_targets_removed_output = self
-            .shared
-            .drag
-            .borrow()
-            .as_ref()
-            .is_some_and(|drag| Some(drag.output_id) == removed_id);
-        if drag_targets_removed_output {
-            self.shared.drag.borrow_mut().take();
-        }
-
-        reconcile(&self.shared);
-        let surface_count = self.shared.surfaces.borrow().len();
-        for idx in 0..surface_count {
-            let (host_id, visible) = {
-                let surfaces = self.shared.surfaces.borrow();
-                (surfaces[idx].host_id.clone(), surfaces[idx].visible)
-            };
-            let needs_attach = visible
-                && !self
-                    .shared
-                    .surface_manager
-                    .borrow()
-                    .has_native_instance(&host_id);
-            if needs_attach {
-                try_attach(&self.shared, idx);
-            }
-        }
-        self.shared.topology_dirty.set(true);
-    }
-}
-
-impl LayerShellHandler for AppState {
-    fn closed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, layer: &LayerSurface) {
-        if let Some(token) = self
-            .shared
-            .surface_manager
-            .borrow()
-            .find_token_by_layer(layer)
-        {
-            let host_id = token.host_id.clone();
-            self.shared.surface_manager.borrow_mut().retire(&host_id);
-            if let Some(idx) = surface_index_for_host(&self.shared, &host_id) {
-                let (kind, adapter) = {
-                    let surfaces = self.shared.surfaces.borrow();
-                    (surfaces[idx].kind, surfaces[idx].adapter.clone())
-                };
-                if kind == SurfaceKind::Bar {
-                    self.shared.exit.set(true);
-                }
-                WindowAdapter::request_redraw(&*adapter.window);
-                if self.shared.keyboard_focus.get() == Some(idx) {
-                    self.shared.keyboard_focus.set(None);
-                    self.shared.modifiers.set(Modifiers::default());
-                }
-                if self.shared.drag.borrow().as_ref().map(|drag| drag.idx) == Some(idx) {
-                    self.shared.drag.borrow_mut().take();
-                }
-                self.shared.topology_dirty.set(true);
-            }
-        }
-    }
-
-    fn configure(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        layer: &LayerSurface,
-        configure: LayerSurfaceConfigure,
-        _serial: u32,
-    ) {
-        if let Some(token) = self
-            .shared
-            .surface_manager
-            .borrow_mut()
-            .handle_configure(layer, configure.new_size)
-        {
-            if let Some(idx) = surface_index_for_host(&self.shared, &token.host_id) {
-                let adapter = self.shared.surfaces.borrow()[idx].adapter.clone();
-                WindowAdapter::request_redraw(&*adapter.window);
-            }
-        }
-    }
-}
-
-impl SeatHandler for AppState {
-    fn seat_state(&mut self) -> &mut SeatState {
-        &mut self.seat_state
-    }
-
-    fn new_seat(&mut self, _: &Connection, _: &QueueHandle<Self>, _: wl_seat::WlSeat) {}
-
-    fn new_capability(
-        &mut self,
-        _conn: &Connection,
-        qh: &QueueHandle<Self>,
-        seat: wl_seat::WlSeat,
-        capability: Capability,
-    ) {
-        if capability == Capability::Keyboard && self.keyboard.is_none() {
-            if let Ok(kb) = self.seat_state.get_keyboard(qh, &seat, None) {
-                self.keyboard = Some(kb);
-            }
-        }
-        if capability == Capability::Pointer && self.pointer.is_none() {
-            if let Ok(ptr) = self.seat_state.get_pointer(qh, &seat) {
-                self.pointer = Some(ptr);
-            }
-        }
-    }
-
-    fn remove_capability(
-        &mut self,
-        _conn: &Connection,
-        _: &QueueHandle<Self>,
-        _: wl_seat::WlSeat,
-        capability: Capability,
-    ) {
-        if capability == Capability::Keyboard {
-            self.shared.modifiers.set(Modifiers::default());
-            self.shared.keyboard_focus.set(None);
-            if let Some(kb) = self.keyboard.take() {
-                kb.release();
-            }
-        }
-        if capability == Capability::Pointer {
-            if let Some(ptr) = self.pointer.take() {
-                ptr.release();
-            }
-        }
-    }
-
-    fn remove_seat(&mut self, _: &Connection, _: &QueueHandle<Self>, _: wl_seat::WlSeat) {
-        self.shared.modifiers.set(Modifiers::default());
-        self.shared.keyboard_focus.set(None);
-        if let Some(kb) = self.keyboard.take() {
-            kb.release();
-        }
-        if let Some(ptr) = self.pointer.take() {
-            ptr.release();
-        }
-    }
-}
-
-impl KeyboardHandler for AppState {
-    fn enter(
-        &mut self,
-        _: &Connection,
-        _: &QueueHandle<Self>,
-        _: &wl_keyboard::WlKeyboard,
-        surface: &wl_surface::WlSurface,
-        _: u32,
-        _: &[u32],
-        _keysyms: &[Keysym],
-    ) {
-        self.shared
-            .keyboard_focus
-            .set(surface_index_for(&self.shared, surface));
-    }
-
-    fn leave(
-        &mut self,
-        _: &Connection,
-        _: &QueueHandle<Self>,
-        _: &wl_keyboard::WlKeyboard,
-        surface: &wl_surface::WlSurface,
-        _: u32,
-    ) {
-        let leaving = surface_index_for(&self.shared, surface);
-        if self.shared.keyboard_focus.get() == leaving {
-            self.shared.keyboard_focus.set(None);
-            self.shared.modifiers.set(Modifiers::default());
-        }
-    }
-
-    fn press_key(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        _: &wl_keyboard::WlKeyboard,
-        _: u32,
-        event: KeyEvent,
-    ) {
-        if let Some(text) = event.utf8 {
-            if let Some(idx) = self.shared.keyboard_focus.get() {
-                let adapter = self.shared.surfaces.borrow()[idx].adapter.clone();
-                dispatch_pointer(
-                    &adapter,
-                    WindowEvent::KeyPressed {
-                        text: text.as_str().into(),
-                    },
-                );
-            }
-        }
-    }
-
-    fn repeat_key(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        _keyboard: &wl_keyboard::WlKeyboard,
-        _serial: u32,
-        _event: KeyEvent,
-    ) {
-    }
-
-    fn release_key(
-        &mut self,
-        _: &Connection,
-        _: &QueueHandle<Self>,
-        _: &wl_keyboard::WlKeyboard,
-        _: u32,
-        event: KeyEvent,
-    ) {
-        if let Some(text) = event.utf8 {
-            if let Some(idx) = self.shared.keyboard_focus.get() {
-                let adapter = self.shared.surfaces.borrow()[idx].adapter.clone();
-                dispatch_pointer(
-                    &adapter,
-                    WindowEvent::KeyReleased {
-                        text: text.as_str().into(),
-                    },
-                );
-            }
-        }
-    }
-
-    fn update_modifiers(
-        &mut self,
-        _: &Connection,
-        _: &QueueHandle<Self>,
-        _: &wl_keyboard::WlKeyboard,
-        _serial: u32,
-        modifiers: Modifiers,
-        _raw_modifiers: RawModifiers,
-        _layout: u32,
-    ) {
-        self.shared.modifiers.set(modifiers);
-    }
-}
-
-impl PointerHandler for AppState {
-    fn pointer_frame(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        _pointer: &wl_pointer::WlPointer,
-        events: &[PointerEvent],
-    ) {
-        for event in events {
-            let Some(idx) = surface_index_for(&self.shared, &event.surface) else {
-                continue;
-            };
-            let (host_id, adapter, kind) = {
-                let surfaces = self.shared.surfaces.borrow();
-                (
-                    surfaces[idx].host_id.clone(),
-                    surfaces[idx].adapter.clone(),
-                    surfaces[idx].kind,
-                )
-            };
-            let pos = LogicalPosition::new(event.position.0 as f32, event.position.1 as f32);
-            match event.kind {
-                PointerEventKind::Enter { .. } | PointerEventKind::Motion { .. } => {
-                    dispatch_pointer(&adapter, WindowEvent::PointerMoved { position: pos });
-                }
-                PointerEventKind::Leave { .. } => {
-                    dispatch_pointer(&adapter, WindowEvent::PointerExited);
-                }
-                PointerEventKind::Press { button, .. } => {
-                    if button == BTN_LEFT && kind == SurfaceKind::Calendar {
-                        let mods = self.shared.modifiers.get();
-                        let handle = event.position.1 < HANDLE_HEIGHT;
-                        if (mods.ctrl && mods.alt) || handle {
-                            if let Some(inst) =
-                                self.shared.surface_manager.borrow().get_instance(&host_id)
-                            {
-                                *self.shared.drag.borrow_mut() = Some(DragState {
-                                    idx,
-                                    grab: event.position,
-                                    start_margins: inst.margins,
-                                    anchor: inst.anchor,
-                                    output_id: inst.output_id,
-                                });
-                            }
-                        }
-                    }
-                    dispatch_pointer(
-                        &adapter,
-                        WindowEvent::PointerPressed {
-                            position: pos,
-                            button: PointerEventButton::Left,
-                        },
-                    );
-                }
-                PointerEventKind::Release { button, .. } => {
-                    if button == BTN_LEFT {
-                        if let Some(drag) = self.shared.drag.borrow_mut().take() {
-                            if drag.idx == idx {
-                                finish_drag(&self.shared, &drag, event.position);
-                            }
-                        }
-                    }
-                    dispatch_pointer(
-                        &adapter,
-                        WindowEvent::PointerReleased {
-                            position: pos,
-                            button: PointerEventButton::Left,
-                        },
-                    );
-                }
-                PointerEventKind::Axis {
-                    horizontal,
-                    vertical,
-                    ..
-                } => {
-                    dispatch_pointer(
-                        &adapter,
-                        WindowEvent::PointerScrolled {
-                            position: pos,
-                            delta_x: horizontal.absolute as f32,
-                            delta_y: vertical.absolute as f32,
-                        },
-                    );
-                }
-            }
-        }
-    }
 }
 
 fn finish_drag(shared: &AppShared, drag: &DragState, pointer: (f64, f64)) {
@@ -953,20 +557,3 @@ fn finish_drag(shared: &AppShared, drag: &DragState, pointer: (f64, f64)) {
         "calendar placed"
     );
 }
-
-impl ShmHandler for AppState {
-    fn shm_state(&mut self) -> &mut Shm {
-        &mut self.shm
-    }
-}
-
-delegate_registry!(AppState);
-
-impl ProvidesRegistryState for AppState {
-    fn registry(&mut self) -> &mut RegistryState {
-        &mut self.registry
-    }
-    registry_handlers![OutputState, SeatState];
-}
-
-smithay_client_toolkit::delegate_dispatch2!(AppState);

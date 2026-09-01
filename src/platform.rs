@@ -2,6 +2,7 @@ pub mod compositor;
 pub mod output_manager;
 pub mod render_bridge;
 pub mod surface_manager;
+pub mod wayland;
 
 pub use compositor::{
     detect as detect_compositor, CompositorAdapter, CompositorOutputFacts, GenericAdapter,
@@ -19,6 +20,10 @@ pub use surface_manager::{
     anchor_to_layer_anchor, LiveSurfaceInstance, NativeSurfaceParams, SurfaceCommand,
     SurfaceGeneration, SurfaceGenerationRegistry, SurfaceLifecycleEvent, SurfaceManager,
     SurfaceSlot, SurfaceSpec, SurfaceToken,
+};
+pub use wayland::{
+    PlatformKeyboardEvent, PlatformLifecycleEvent, PlatformPointerEvent, WaylandPlatform,
+    WaylandState,
 };
 
 use crate::domain::ids::{HostId, OutputId};
