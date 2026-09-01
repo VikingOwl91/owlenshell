@@ -1,6 +1,7 @@
 use crate::domain::host::HostSpec;
 use crate::domain::ids::{HostId, WidgetId};
 use crate::domain::widget::WidgetSpec;
+use crate::model::DEFAULT_BAR_HEIGHT;
 
 /// Canonical host and widget identifiers for the default shell.
 pub const DEFAULT_BAR_HOST_ID: &str = "bar";
@@ -37,7 +38,7 @@ impl ShellSpec {
         let clock_widget_id = WidgetId::new(DEFAULT_CLOCK_WIDGET_ID);
         let cal_widget_id = WidgetId::new(DEFAULT_CALENDAR_WIDGET_ID);
 
-        let bar_spec = HostSpec::top_bar(bar_host_id.clone(), 32);
+        let bar_spec = HostSpec::top_bar(bar_host_id.clone(), DEFAULT_BAR_HEIGHT);
 
         let mut cal_spec = HostSpec::floating(cal_host_id.clone());
         cal_spec.namespace = "owlenshell-calendar".into();

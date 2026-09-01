@@ -537,3 +537,72 @@ impl From<&crate::domain::host::HostSpec> for HostPlacementConstraints {
         }
     }
 }
+
+/// Computes the native surface attachment geometry for a host specification and placement.
+pub fn compute_attach_geometry(
+    spec: &crate::domain::host::HostSpec,
+    saved: Option<&crate::domain::placement::SavedPlacement>,
+    preferred: slint::LogicalSize,
+    output_logical_size: Option<(i32, i32)>,
+) -> crate::domain::placement::AttachGeometry {
+    match spec.size {
+        crate::domain::host::HostSize::OutputWidth { height } => {
+            crate::domain::placement::AttachGeometry {
+                anchor: spec.default_anchor,
+                margins: (0, 0, 0, 0),
+                requested_size: (0, height),
+                effective_widget_size: (0, height as i32),
+                offset: (0, 0),
+            }
+        }
+        crate::domain::host::HostSize::OutputHeight { width } => {
+            crate::domain::placement::AttachGeometry {
+                anchor: spec.default_anchor,
+                margins: (0, 0, 0, 0),
+                requested_size: (width, 0),
+                effective_widget_size: (width as i32, 0),
+                offset: (0, 0),
+            }
+        }
+        crate::domain::host::HostSize::Exact { width, height } => {
+            crate::domain::placement::AttachGeometry {
+                anchor: spec.default_anchor,
+                margins: (0, 0, 0, 0),
+                requested_size: (width, height),
+                effective_widget_size: (width as i32, height as i32),
+                offset: (0, 0),
+            }
+        }
+        crate::domain::host::HostSize::FillOutput => crate::domain::placement::AttachGeometry {
+            anchor: spec.default_anchor,
+            margins: (0, 0, 0, 0),
+            requested_size: (0, 0),
+            effective_widget_size: (0, 0),
+            offset: (0, 0),
+        },
+        crate::domain::host::HostSize::ContentPreferred => {
+            let anchor = saved.map(|p| p.anchor).unwrap_or(spec.default_anchor);
+            let raw_offset = saved.map(|p| p.offset).unwrap_or(spec.default_offset);
+            let widget_w = preferred.width.max(1.0) as i32;
+            let widget_h = preferred.height.max(1.0) as i32;
+            let offset = clamp_offset(
+                anchor,
+                raw_offset,
+                (widget_w, widget_h),
+                output_logical_size,
+                None,
+                MIN_VISIBLE,
+            );
+            let margins = margins_from_offset(anchor, offset);
+            let w = widget_w as u32;
+            let h = widget_h as u32;
+            crate::domain::placement::AttachGeometry {
+                anchor,
+                margins,
+                requested_size: (w, h),
+                effective_widget_size: (widget_w, widget_h),
+                offset,
+            }
+        }
+    }
+}

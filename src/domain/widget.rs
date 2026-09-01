@@ -14,10 +14,6 @@ pub enum HostCommand {
 /// Generic logical action emitted by an interactive widget.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WidgetAction {
-    /// Toggles the logical visibility of a target host.
-    ToggleHost(HostId),
-    /// Hides a target host.
-    HideHost(HostId),
     /// Direct execution of a generic host command.
     Command(HostCommand),
 }

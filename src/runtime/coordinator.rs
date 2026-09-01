@@ -4,23 +4,20 @@ use crate::domain::ids::{HostId, OutputId, WidgetId};
 use crate::domain::placement::{Anchor, SavedPlacement};
 use crate::domain::widget::{HostCommand, WidgetAction};
 use crate::instrumentation;
-use crate::model::SurfaceKind;
+use crate::model::HANDLE_HEIGHT;
 use crate::persistence::Placements;
 use crate::placement::{
-    margins_from_offset, HostPlacementConstraints, PlacementContext, PlacementEngine, MIN_VISIBLE,
+    compute_attach_geometry, margins_from_offset, HostPlacementConstraints, PlacementContext,
+    PlacementEngine, MIN_VISIBLE,
 };
 use crate::platform::{
     OutputManager, PlatformLifecycleEvent, PlatformPointerEvent, RenderBridge, SurfaceManager,
     TopologySnapshot, WaylandPlatform,
 };
-use crate::runtime::poc_compat::{compute_attach_geometry, HANDLE_HEIGHT};
 use slint::platform::{PointerEventButton, WindowAdapter};
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
 use std::rc::Rc;
-
-/// Compatibility alias preserving the previous type name for existing tests/callers.
-pub type LogicalHostState = HostState;
 
 /// Active user drag interaction state, keyed by logical `HostId`.
 #[derive(Debug, Clone, PartialEq)]
@@ -111,25 +108,6 @@ impl Coordinator {
         self.register_host_spec(spec, true, saved_placement);
     }
 
-    /// Compatibility API: Attaches or updates a logical host using legacy `SurfaceKind`.
-    /// Preserves exact historical namespace ("owlenshell-calendar" for Calendar).
-    pub fn attach_host(
-        &self,
-        host_id: HostId,
-        kind: SurfaceKind,
-        saved_placement: Option<SavedPlacement>,
-    ) {
-        let spec = match kind {
-            SurfaceKind::Bar => HostSpec::top_bar(host_id, crate::model::BAR_HEIGHT),
-            SurfaceKind::Calendar => {
-                let mut s = HostSpec::floating(host_id);
-                s.namespace = "owlenshell-calendar".into();
-                s
-            }
-        };
-        self.attach_host_spec(spec, saved_placement);
-    }
-
     /// Attaches a widget to a host in canonical `HostState.attached_widgets`.
     pub fn attach_widget(&self, host_id: &HostId, widget_id: WidgetId) -> bool {
         let mut hosts = self.hosts.borrow_mut();
@@ -217,33 +195,9 @@ impl Coordinator {
     /// Primary production API: Dispatches a generic `WidgetAction`.
     pub fn dispatch_action(&self, action: WidgetAction) {
         match action {
-            WidgetAction::ToggleHost(host_id) => {
-                let _ = self.toggle_host(&host_id);
-            }
-            WidgetAction::HideHost(host_id) => {
-                self.hide_host(&host_id);
-            }
             WidgetAction::Command(cmd) => {
                 self.execute_command(cmd);
             }
-        }
-    }
-
-    /// Compatibility API: Hides all hosts matching a given SurfaceKind.
-    pub fn hide_kind(&self, kind: SurfaceKind) {
-        let host_ids: Vec<HostId> = {
-            let hosts = self.hosts.borrow();
-            hosts
-                .iter()
-                .filter(|(_, h)| match kind {
-                    SurfaceKind::Bar => h.spec.primary_milestone,
-                    SurfaceKind::Calendar => !h.spec.primary_milestone,
-                })
-                .map(|(id, _)| id.clone())
-                .collect()
-        };
-        for host_id in host_ids {
-            self.hide_host(&host_id);
         }
     }
 
@@ -497,12 +451,7 @@ impl Coordinator {
 
         let preferred = adapter.preferred.get();
         let surface_spec = crate::platform::SurfaceSpec::from(&spec);
-        let kind = if spec.primary_milestone {
-            SurfaceKind::Bar
-        } else {
-            SurfaceKind::Calendar
-        };
-        let geo = compute_attach_geometry(kind, saved.as_ref(), preferred, snap.logical_size);
+        let geo = compute_attach_geometry(&spec, saved.as_ref(), preferred, snap.logical_size);
 
         let params = crate::platform::NativeSurfaceParams {
             host_id: host_id.clone(),

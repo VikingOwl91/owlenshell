@@ -1008,7 +1008,9 @@ fn same_output_drop_preserves_exact_geometry() {
 
 #[test]
 fn runtime_try_attach_geometry_computation_uses_dynamic_preferred_size() {
-    use owlenshell::runtime::{compute_attach_geometry, SurfaceKind};
+    use owlenshell::domain::host::HostSpec;
+    use owlenshell::domain::ids::HostId;
+    use owlenshell::runtime::compute_attach_geometry;
     use slint::LogicalSize;
 
     // Preferred size below 320: 240x180
@@ -1027,12 +1029,8 @@ fn runtime_try_attach_geometry_computation_uses_dynamic_preferred_size() {
         offset: (150, 50),
     };
 
-    let geo = compute_attach_geometry(
-        SurfaceKind::Calendar,
-        Some(&placement),
-        preferred,
-        Some((400, 300)),
-    );
+    let spec = HostSpec::floating(HostId::new("calendar"));
+    let geo = compute_attach_geometry(&spec, Some(&placement), preferred, Some((400, 300)));
 
     assert_eq!(
         geo.effective_widget_size,

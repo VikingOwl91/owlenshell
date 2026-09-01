@@ -444,3 +444,31 @@ fn default_shell_spec_composition_invariants() {
     assert!(shell.is_initially_visible(&bar_id));
     assert!(!shell.is_initially_visible(&cal_id));
 }
+
+#[test]
+fn default_namespaces_and_persisted_keys_are_canonical() {
+    use owlenshell::domain::default_shell::{
+        ShellSpec, DEFAULT_BAR_HOST_ID, DEFAULT_CALENDAR_HOST_ID,
+    };
+    use owlenshell::domain::ids::HostId;
+
+    let shell = ShellSpec::default_shell();
+
+    let bar_id = HostId::new(DEFAULT_BAR_HOST_ID);
+    let cal_id = HostId::new(DEFAULT_CALENDAR_HOST_ID);
+
+    assert_eq!(bar_id.as_str(), "bar");
+    assert_eq!(cal_id.as_str(), "calendar");
+
+    let bar_host = shell.get_host(&bar_id).expect("bar host must exist");
+    assert_eq!(
+        bar_host.namespace, "owlenshell-bar",
+        "Bar host namespace must remain 'owlenshell-bar'"
+    );
+
+    let cal_host = shell.get_host(&cal_id).expect("calendar host must exist");
+    assert_eq!(
+        cal_host.namespace, "owlenshell-calendar",
+        "Calendar host namespace must remain 'owlenshell-calendar'"
+    );
+}

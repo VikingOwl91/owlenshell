@@ -130,3 +130,13 @@ impl PlacementDecision {
         matches!(self, Self::Deferred(_))
     }
 }
+
+/// Resolved attachment geometry for a native surface on a Wayland output.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AttachGeometry {
+    pub anchor: Anchor,
+    pub margins: (i32, i32, i32, i32),
+    pub requested_size: (u32, u32),
+    pub effective_widget_size: (i32, i32),
+    pub offset: (i32, i32),
+}

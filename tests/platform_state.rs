@@ -835,8 +835,9 @@ fn platform_typed_pointer_and_keyboard_events_isolate_protocol_details() {
 
 #[test]
 fn platform_lifecycle_event_and_drag_cancellation_invariants() {
+    use owlenshell::domain::host::HostSpec;
     use owlenshell::domain::output::OutputSnapshot;
-    use owlenshell::model::{Anchor, SurfaceKind};
+    use owlenshell::domain::placement::Anchor;
     use owlenshell::persistence::Placements;
     use owlenshell::platform::{
         detect_compositor, OutputManager, PlatformLifecycleEvent, RenderBridge, SurfaceManager,
@@ -859,8 +860,8 @@ fn platform_lifecycle_event_and_drag_cancellation_invariants() {
     let bar_id = HostId::new("bar");
     let cal_id = HostId::new("calendar");
 
-    coordinator.attach_host(bar_id.clone(), SurfaceKind::Bar, None);
-    coordinator.attach_host(cal_id.clone(), SurfaceKind::Calendar, None);
+    coordinator.attach_host_spec(HostSpec::top_bar(bar_id.clone(), 32), None);
+    coordinator.attach_host_spec(HostSpec::floating(cal_id.clone()), None);
 
     // 1. FrameRendered for bar triggers first-frame milestone via Coordinator
     let bar_token = surface_manager
@@ -927,8 +928,8 @@ fn platform_lifecycle_event_and_drag_cancellation_invariants() {
         render_bridge.clone(),
         Placements::default(),
     );
-    coordinator.attach_host(bar_id.clone(), SurfaceKind::Bar, None);
-    coordinator.attach_host(cal_id.clone(), SurfaceKind::Calendar, None);
+    coordinator.attach_host_spec(HostSpec::top_bar(bar_id.clone(), 32), None);
+    coordinator.attach_host_spec(HostSpec::floating(cal_id.clone()), None);
     coordinator.set_drag_state(Some(DragState {
         host_id: cal_id.clone(),
         grab: (100.0, 100.0),

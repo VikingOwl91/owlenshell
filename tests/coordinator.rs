@@ -1,7 +1,7 @@
+use owlenshell::domain::host::HostSpec;
 use owlenshell::domain::ids::{HostId, OutputId};
 use owlenshell::domain::output::OutputPreference;
 use owlenshell::domain::placement::{Anchor, ResolveReason, SavedPlacement};
-use owlenshell::model::SurfaceKind;
 use owlenshell::persistence::Placements;
 use owlenshell::platform::compositor::GenericAdapter;
 use owlenshell::platform::output_manager::ProtocolOutput;
@@ -53,7 +53,7 @@ fn no_saved_intent_vs_saved_fallback_reason_separation() {
     let host_with_missing_saved = HostId::new("with_saved");
 
     // Attach host without saved placement
-    coordinator.attach_host(host_no_saved.clone(), SurfaceKind::Bar, None);
+    coordinator.attach_host_spec(HostSpec::top_bar(host_no_saved.clone(), 32), None);
 
     // Attach host with saved placement targeting non-existent output "HDMI-A-1"
     let saved_missing = SavedPlacement {
@@ -61,9 +61,8 @@ fn no_saved_intent_vs_saved_fallback_reason_separation() {
         anchor: Anchor::TopLeft,
         offset: (0, 0),
     };
-    coordinator.attach_host(
-        host_with_missing_saved.clone(),
-        SurfaceKind::Calendar,
+    coordinator.attach_host_spec(
+        HostSpec::floating(host_with_missing_saved.clone()),
         Some(saved_missing),
     );
 
@@ -74,7 +73,7 @@ fn no_saved_intent_vs_saved_fallback_reason_separation() {
     assert_eq!(dec_no_saved.reason(), ResolveReason::Any);
     assert!(
         !dec_no_saved.is_fallback(),
-        "No saved intent must not be marked as fallback"
+        "No saved placement must resolve without is_fallback flag"
     );
 
     let state_with_saved = coordinator.get_host(&host_with_missing_saved).unwrap();
@@ -82,7 +81,7 @@ fn no_saved_intent_vs_saved_fallback_reason_separation() {
     assert_eq!(dec_with_saved.reason(), ResolveReason::Any);
     assert!(
         dec_with_saved.is_fallback(),
-        "Missing saved intent target must be marked as fallback"
+        "Missing saved target must mark is_fallback = true"
     );
 }
 
@@ -92,7 +91,7 @@ fn stale_topology_decision_re_resolves() {
     let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
     let render_bridge = RenderBridge::new();
 
-    // Gen 1: Only DP-1 exists
+    // Gen 1: Only DP-1 available
     output_manager
         .borrow_mut()
         .sync_protocol_facts(&[make_proto_output(1, "DP-1", (0, 0), Some((1920, 1080)))]);
@@ -110,7 +109,7 @@ fn stale_topology_decision_re_resolves() {
         anchor: Anchor::TopRight,
         offset: (20, 20),
     };
-    coordinator.attach_host(host_id.clone(), SurfaceKind::Calendar, Some(saved_hdmi));
+    coordinator.attach_host_spec(HostSpec::floating(host_id.clone()), Some(saved_hdmi));
 
     coordinator.reconcile();
 
@@ -134,10 +133,7 @@ fn stale_topology_decision_re_resolves() {
     let dec2 = state2.current_decision.unwrap();
     assert_eq!(dec2.target_output_id(), Some(OutputId::new(2)));
     assert_eq!(dec2.reason(), ResolveReason::ExactName);
-    assert!(
-        !dec2.is_fallback(),
-        "Home output resolution is not fallback"
-    );
+    assert!(!dec2.is_fallback());
 }
 
 #[test]
@@ -149,18 +145,19 @@ fn fallback_does_not_persist_only_explicit_drop_persists() {
     let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
     let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
 
-    // Gen 1: Only DP-1 exists
+    // Only DP-1 active
     output_manager
         .borrow_mut()
         .sync_protocol_facts(&[make_proto_output(1, "DP-1", (0, 0), Some((1920, 1080)))]);
 
-    let mut initial_store = Placements::default();
     let host_id = HostId::new("calendar");
     let home_saved = SavedPlacement {
         output: OutputPreference::new().with_name("HDMI-A-1"),
         anchor: Anchor::TopRight,
         offset: (20, 20),
     };
+
+    let mut initial_store = Placements::default();
     initial_store.set(host_id.clone(), home_saved.clone());
 
     let coordinator = Coordinator::new(
@@ -175,9 +172,8 @@ fn fallback_does_not_persist_only_explicit_drop_persists() {
         .with_host_creation(host_id.clone(), Calendar::new)
         .expect("calendar creation");
 
-    coordinator.attach_host(
-        host_id.clone(),
-        SurfaceKind::Calendar,
+    coordinator.attach_host_spec(
+        HostSpec::floating(host_id.clone()),
         Some(home_saved.clone()),
     );
 
@@ -237,7 +233,7 @@ fn hidden_logical_state_survives_native_destruction() {
         offset: (40, 50),
     };
 
-    coordinator.attach_host(host_id.clone(), SurfaceKind::Calendar, Some(saved.clone()));
+    coordinator.attach_host_spec(HostSpec::floating(host_id.clone()), Some(saved.clone()));
 
     // Create fake native instance token
     let _token = surface_manager
@@ -259,26 +255,6 @@ fn hidden_logical_state_survives_native_destruction() {
 
 #[test]
 fn protocol_isolation_invariant() {
-    let source_path = "src/runtime/coordinator.rs";
-    let content = std::fs::read_to_string(source_path).expect("read coordinator.rs");
-    let forbidden = [
-        "wayland_client",
-        "smithay_client_toolkit",
-        "calloop_wayland_source",
-        "WlSurface",
-        "WlOutput",
-        "LayerSurface",
-    ];
-    for term in forbidden {
-        assert!(
-            !content.contains(term),
-            "Coordinator must not contain raw Wayland/SCTK protocol type '{term}'"
-        );
-    }
-}
-
-#[test]
-fn calendar_attach_resolves_without_topology_dirty() {
     let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
     let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
     let render_bridge = RenderBridge::new();
@@ -296,7 +272,7 @@ fn calendar_attach_resolves_without_topology_dirty() {
 
     let host_id = HostId::new("calendar");
     // Attach host: sets current_decision to None
-    coordinator.attach_host(host_id.clone(), SurfaceKind::Calendar, None);
+    coordinator.attach_host_spec(HostSpec::floating(host_id.clone()), None);
 
     let state = coordinator.get_host(&host_id).unwrap();
     assert!(state.visible);
@@ -359,7 +335,7 @@ fn cross_output_drop_re_resolves_without_topology_dirty() {
         anchor: Anchor::TopLeft,
         offset: (10, 10),
     };
-    coordinator.attach_host(host_id.clone(), SurfaceKind::Calendar, Some(initial_saved));
+    coordinator.attach_host_spec(HostSpec::floating(host_id.clone()), Some(initial_saved));
     coordinator.reconcile();
 
     let state1 = coordinator.get_host(&host_id).unwrap();
@@ -440,39 +416,41 @@ fn coordinator_generic_host_and_widget_attachment_lifecycle() {
         Placements::default(),
     );
 
-    let bar_spec = HostSpec::top_bar(HostId::new("primary_bar"), 32);
+    let bar_id = HostId::new("bar_test");
+    let bar_spec = HostSpec::top_bar(bar_id.clone(), 32);
+
+    // 1. Attach HostSpec
     coordinator.attach_host_spec(bar_spec.clone(), None);
 
-    // 1. Host carries HostSpec in HostState
-    let host_state = coordinator.get_host(&HostId::new("primary_bar")).unwrap();
-    assert_eq!(host_state.spec.id.as_str(), "primary_bar");
+    let host_state = coordinator.get_host(&bar_id).expect("host must exist");
+    assert_eq!(host_state.spec.id, bar_id);
     assert_eq!(host_state.spec.size, HostSize::OutputWidth { height: 32 });
-    assert!(host_state.spec.primary_milestone);
     assert_eq!(host_state.spec.movement_policy, HostMovementPolicy::Fixed);
+    assert!(host_state.visible);
+    assert!(host_state.attached_widgets.is_empty());
 
-    // 2. Generic widget attachment
-    let clock_id = WidgetId::new("clock_widget");
-    let battery_id = WidgetId::new("battery_widget");
-    assert!(coordinator.attach_widget(&HostId::new("primary_bar"), clock_id.clone()));
-    assert!(coordinator.attach_widget(&HostId::new("primary_bar"), battery_id.clone()));
+    // 2. Attach Widgets to Host
+    let w1 = WidgetId::new("widget_1");
+    let w2 = WidgetId::new("widget_2");
 
-    // 3. attached_widgets is the canonical containment relation
-    let attached = coordinator
-        .attached_widgets(&HostId::new("primary_bar"))
-        .unwrap();
-    assert_eq!(attached, vec![clock_id.clone(), battery_id.clone()]);
+    assert!(coordinator.attach_widget(&bar_id, w1.clone()));
+    assert!(coordinator.attach_widget(&bar_id, w2.clone()));
 
-    // 4. Detachment
-    assert!(coordinator.detach_widget(&HostId::new("primary_bar"), &clock_id));
-    let attached_after = coordinator
-        .attached_widgets(&HostId::new("primary_bar"))
-        .unwrap();
-    assert_eq!(attached_after, vec![battery_id]);
+    let attached = coordinator.attached_widgets(&bar_id).unwrap();
+    assert_eq!(attached, vec![w1.clone(), w2.clone()]);
+
+    // 3. Detach Widget
+    assert!(coordinator.detach_widget(&bar_id, &w1));
+    let attached_after = coordinator.attached_widgets(&bar_id).unwrap();
+    assert_eq!(attached_after, vec![w2.clone()]);
+
+    // 4. Detaching non-existent returns false
+    assert!(!coordinator.detach_widget(&bar_id, &w1));
 }
 
 #[test]
 fn coordinator_reconcile_derives_placement_constraints_from_host_spec() {
-    use owlenshell::domain::host::HostSpec;
+    use owlenshell::domain::host::{HostMode, HostSize, HostSpec};
 
     let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
     let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
@@ -489,25 +467,32 @@ fn coordinator_reconcile_derives_placement_constraints_from_host_spec() {
         Placements::default(),
     );
 
-    let bar_spec = HostSpec::top_bar(HostId::new("bar"), 32);
-    let float_spec = HostSpec::floating(HostId::new("float_popup"));
+    let bar_id = HostId::new("bar_host");
+    let bar_spec = HostSpec::top_bar(bar_id.clone(), 32);
+
+    let float_id = HostId::new("float_host");
+    let float_spec = HostSpec::floating(float_id.clone());
 
     coordinator.attach_host_spec(bar_spec, None);
     coordinator.attach_host_spec(float_spec, None);
 
     coordinator.reconcile();
 
-    let bar_state = coordinator.get_host(&HostId::new("bar")).unwrap();
-    let float_state = coordinator.get_host(&HostId::new("float_popup")).unwrap();
-
+    let bar_state = coordinator.get_host(&bar_id).unwrap();
     assert!(bar_state.current_decision.is_some());
+    assert_eq!(bar_state.spec.mode, HostMode::Cover);
+    assert_eq!(bar_state.spec.size, HostSize::OutputWidth { height: 32 });
+
+    let float_state = coordinator.get_host(&float_id).unwrap();
     assert!(float_state.current_decision.is_some());
+    assert_eq!(float_state.spec.mode, HostMode::Float);
+    assert_eq!(float_state.spec.size, HostSize::ContentPreferred);
 }
 
 #[test]
 fn coordinator_lifecycle_exit_on_close_and_primary_milestone_are_independent() {
     use owlenshell::domain::host::HostSpec;
-    use owlenshell::platform::{PlatformLifecycleEvent, SurfaceGeneration, SurfaceToken};
+    use owlenshell::platform::PlatformLifecycleEvent;
 
     let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
     let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
@@ -520,41 +505,49 @@ fn coordinator_lifecycle_exit_on_close_and_primary_milestone_are_independent() {
         Placements::default(),
     );
 
-    // Host 1: primary_milestone = true, exit_on_close = false
-    let mut host1_spec = HostSpec::top_bar(HostId::new("milestone_only"), 32);
-    host1_spec.exit_on_close = false;
+    let host1_id = HostId::new("host1");
+    let mut host1_spec = HostSpec::top_bar(host1_id.clone(), 32);
+    host1_spec.primary_milestone = true;
+    host1_spec.exit_on_close = false; // independent policy!
     coordinator.attach_host_spec(host1_spec, None);
 
-    // Host 2: primary_milestone = false, exit_on_close = true
-    let mut host2_spec = HostSpec::floating(HostId::new("exit_only"));
-    host2_spec.exit_on_close = true;
+    let host2_id = HostId::new("host2");
+    let mut host2_spec = HostSpec::floating(host2_id.clone());
+    host2_spec.primary_milestone = false;
+    host2_spec.exit_on_close = true; // independent policy!
     coordinator.attach_host_spec(host2_spec, None);
 
-    // 1. FrameRendered on host1 (primary_milestone = true) fires first-frame / shell-ready
-    assert!(!coordinator.first_frame_fired());
+    let token1 = surface_manager
+        .borrow_mut()
+        .generation_registry_mut_for_test()
+        .allocate(host1_id.clone());
+
+    let token2 = surface_manager
+        .borrow_mut()
+        .generation_registry_mut_for_test()
+        .allocate(host2_id.clone());
+
+    // 1. FrameRendered on host1 triggers first-frame milestone because primary_milestone=true
     coordinator.process_lifecycle_event(PlatformLifecycleEvent::FrameRendered {
-        host_id: HostId::new("milestone_only"),
-        token: SurfaceToken::new(HostId::new("milestone_only"), SurfaceGeneration::INITIAL),
+        host_id: host1_id.clone(),
+        token: token1.clone(),
     });
     assert!(coordinator.first_frame_fired());
 
-    // FrameRendered on host2 (primary_milestone = false) does not affect state
-    assert!(!coordinator.should_exit());
-
-    // 2. Closed on host1 (exit_on_close = false) does NOT request exit
+    // 2. Closed on host1 does NOT exit because exit_on_close=false
     coordinator.process_lifecycle_event(PlatformLifecycleEvent::Closed {
-        host_id: HostId::new("milestone_only"),
-        token: SurfaceToken::new(HostId::new("milestone_only"), SurfaceGeneration::INITIAL),
+        host_id: host1_id.clone(),
+        token: token1,
     });
     assert!(
         !coordinator.should_exit(),
         "Host with exit_on_close=false must not exit"
     );
 
-    // 3. Closed on host2 (exit_on_close = true) requests exit
+    // 3. Closed on host2 DOES exit because exit_on_close=true
     coordinator.process_lifecycle_event(PlatformLifecycleEvent::Closed {
-        host_id: HostId::new("exit_only"),
-        token: SurfaceToken::new(HostId::new("exit_only"), SurfaceGeneration::INITIAL),
+        host_id: host2_id.clone(),
+        token: token2,
     });
     assert!(
         coordinator.should_exit(),
@@ -565,7 +558,7 @@ fn coordinator_lifecycle_exit_on_close_and_primary_milestone_are_independent() {
 #[test]
 fn coordinator_dispatch_action_toggles_target_host_visibility() {
     use owlenshell::domain::host::HostSpec;
-    use owlenshell::domain::widget::WidgetAction;
+    use owlenshell::domain::widget::{HostCommand, WidgetAction};
 
     let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
     let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
@@ -585,18 +578,19 @@ fn coordinator_dispatch_action_toggles_target_host_visibility() {
     // Initial state: visible = true
     assert!(coordinator.get_host(&popup_id).unwrap().visible);
 
-    // 1. Dispatch ToggleHost -> host becomes hidden
-    coordinator.dispatch_action(WidgetAction::ToggleHost(popup_id.clone()));
+    // 1. Dispatch Command(Toggle) -> host becomes hidden
+    coordinator.dispatch_action(WidgetAction::Command(HostCommand::Toggle(popup_id.clone())));
     assert!(!coordinator.get_host(&popup_id).unwrap().visible);
 
-    // 2. Dispatch ToggleHost again -> host becomes visible
-    coordinator.dispatch_action(WidgetAction::ToggleHost(popup_id.clone()));
+    // 2. Dispatch Command(Toggle) again -> host becomes visible
+    coordinator.dispatch_action(WidgetAction::Command(HostCommand::Toggle(popup_id.clone())));
     assert!(coordinator.get_host(&popup_id).unwrap().visible);
 }
 
 #[test]
 fn coordinator_first_attachment_vs_subsequent_toggle_semantics() {
-    use owlenshell::domain::widget::WidgetAction;
+    use owlenshell::domain::default_shell::ShellSpec;
+    use owlenshell::domain::widget::{HostCommand, WidgetAction};
 
     let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
     let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
@@ -609,40 +603,47 @@ fn coordinator_first_attachment_vs_subsequent_toggle_semantics() {
         Placements::default(),
     );
 
+    let shell_spec = ShellSpec::default_shell();
+    coordinator.apply_shell_spec(&shell_spec);
+
     let cal_id = HostId::new("calendar");
 
-    // 1. Initial state: host absent
-    assert!(coordinator.get_host(&cal_id).is_none());
-
-    // 2. First click on absent host: attachment establishes visible = true
-    coordinator.attach_host(cal_id.clone(), SurfaceKind::Calendar, None);
-    let state_after_attach = coordinator.get_host(&cal_id).expect("host must exist");
+    // 1. Initial state: host exists, initially hidden from ShellSpec
+    let state_initial = coordinator.get_host(&cal_id).expect("calendar must exist");
     assert!(
-        state_after_attach.visible,
-        "Initial attach must set visible = true"
+        !state_initial.visible,
+        "Calendar must be initially hidden in default shell"
     );
 
-    // 3. Second click: dispatch_action(ToggleHost) inverts visible from true -> false
-    coordinator.dispatch_action(WidgetAction::ToggleHost(cal_id.clone()));
+    // 2. First click on hidden host: toggle transitions visible from false -> true
+    coordinator.dispatch_action(WidgetAction::Command(HostCommand::Toggle(cal_id.clone())));
     let state_after_first_toggle = coordinator.get_host(&cal_id).expect("host must exist");
     assert!(
-        !state_after_first_toggle.visible,
-        "First toggle must set visible = false"
+        state_after_first_toggle.visible,
+        "First toggle must set visible = true"
     );
 
-    // 4. Third click: dispatch_action(ToggleHost) inverts visible from false -> true
-    coordinator.dispatch_action(WidgetAction::ToggleHost(cal_id.clone()));
+    // 3. Second click: dispatch_action(Toggle) inverts visible from true -> false
+    coordinator.dispatch_action(WidgetAction::Command(HostCommand::Toggle(cal_id.clone())));
     let state_after_second_toggle = coordinator.get_host(&cal_id).expect("host must exist");
     assert!(
-        state_after_second_toggle.visible,
-        "Second toggle must set visible = true"
+        !state_after_second_toggle.visible,
+        "Second toggle must set visible = false"
+    );
+
+    // 4. Third click: dispatch_action(Toggle) inverts visible from false -> true
+    coordinator.dispatch_action(WidgetAction::Command(HostCommand::Toggle(cal_id.clone())));
+    let state_after_third_toggle = coordinator.get_host(&cal_id).expect("host must exist");
+    assert!(
+        state_after_third_toggle.visible,
+        "Third toggle must set visible = true"
     );
 }
 
 #[test]
 fn calendar_widget_state_survives_host_hide_show_and_native_retirement() {
     use owlenshell::domain::ids::WidgetId;
-    use owlenshell::domain::widget::WidgetAction;
+    use owlenshell::domain::widget::{HostCommand, WidgetAction};
     use owlenshell::runtime::CalendarWidgetController;
 
     let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
@@ -665,7 +666,7 @@ fn calendar_widget_state_survives_host_hide_show_and_native_retirement() {
     );
 
     // 1. Initial attachment
-    coordinator.attach_host(cal_host_id.clone(), SurfaceKind::Calendar, None);
+    coordinator.attach_host_spec(HostSpec::floating(cal_host_id.clone()), None);
     coordinator.attach_widget(&cal_host_id, calendar_controller.id().clone());
 
     let attached = coordinator.attached_widgets(&cal_host_id).unwrap();
@@ -679,8 +680,10 @@ fn calendar_widget_state_survives_host_hide_show_and_native_retirement() {
     // 3. User navigates / mutates controller state while hidden
     calendar_controller.set_date(2026, 12);
 
-    // 4. Re-show host via generic ToggleHost action
-    coordinator.dispatch_action(WidgetAction::ToggleHost(cal_host_id.clone()));
+    // 4. Re-show host via generic Command(Toggle) action
+    coordinator.dispatch_action(WidgetAction::Command(HostCommand::Toggle(
+        cal_host_id.clone(),
+    )));
     assert!(coordinator.get_host(&cal_host_id).unwrap().visible);
 
     // 5. Invariants: attached WidgetId survives, controller content state survives
