@@ -1,6 +1,7 @@
 pub mod compositor;
 pub mod output_manager;
 pub mod render_bridge;
+pub mod session;
 pub mod surface_manager;
 pub mod wayland;
 
@@ -15,6 +16,11 @@ pub use output_manager::{
 pub use render_bridge::{
     dispatch_keyboard, dispatch_pointer, CreationNonce, OwlenPlatform, OwlenWindowAdapter,
     PendingWindowCreation, RenderBridge, RenderBridgeError,
+};
+pub use session::{
+    detect_session, detect_session_with, ApplicationLaunch, ChildHandle, SessionCapabilities,
+    SessionDetector, SessionError, SessionIntegration, SessionManagerKind, SessionMode,
+    StandaloneSession, SystemSessionDetector, UwsmSession,
 };
 pub use surface_manager::{
     anchor_to_layer_anchor, LiveSurfaceInstance, NativeSurfaceParams, SurfaceCommand,

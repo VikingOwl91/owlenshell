@@ -6,7 +6,8 @@ use owlenshell::instrumentation;
 use owlenshell::model::{SurfaceKind, CALENDAR_KEY};
 use owlenshell::persistence::Placements;
 use owlenshell::platform::{
-    compositor, OutputManager, OwlenPlatform, RenderBridge, SurfaceManager, WaylandPlatform,
+    compositor, detect_session, OutputManager, OwlenPlatform, RenderBridge, SurfaceManager,
+    WaylandPlatform,
 };
 use owlenshell::runtime::Coordinator;
 use slint::{ComponentHandle, ModelRc, VecModel};
@@ -19,6 +20,9 @@ slint::include_modules!();
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     instrumentation::init();
     instrumentation::milestone("start");
+
+    let mut session = detect_session();
+    tracing::info!(mode = ?session.mode(), "session backend selected");
 
     let output_manager = Rc::new(RefCell::new(OutputManager::new(compositor::detect())));
     let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
@@ -96,6 +100,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     })?;
 
+    let mut notified_ready = false;
     instrumentation::milestone("loop");
     while !coordinator.should_exit() {
         let timeout = slint::platform::duration_until_next_timer_update()
@@ -103,8 +108,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .min(Duration::from_secs(1));
         event_loop.dispatch(Some(timeout), &mut platform)?;
         coordinator.pump(&mut platform)?;
+
+        if coordinator.first_frame_fired() && !notified_ready {
+            if let Err(err) = session.notify_ready() {
+                tracing::warn!(%err, "failed to notify session readiness");
+            }
+            notified_ready = true;
+        }
+
         slint::platform::update_timers_and_animations();
     }
+
+    if let Err(err) = session.begin_shutdown() {
+        tracing::warn!(%err, "failed to notify session shutdown");
+    }
+
     Ok(())
 }
 
