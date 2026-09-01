@@ -42,6 +42,28 @@ The long-term goal is to provide a complete daily-driver desktop shell that can 
 └─────────────────────────────────────────────┘
 ```
 
+## Product Identity: Modern-Native
+
+Owlenshell defines its design and engineering character as **modern-native**:
+
+- **Rust-First Runtime**: Native systems programming in Rust owns runtime orchestration, memory safety, system integration, and core state.
+- **Wayland-Native Semantics**: The shell is designed from the ground up for modern Wayland protocols and layer-shell semantics, not adapted from legacy X11 abstractions.
+- **Slint Presentation**: Declarative, GPU/CPU-accelerated UI rendering via Slint without dragging in heavy web engines.
+- **No Web Runtime Dependency**: Avoids Electron, WebView, or Chromium-style architectures where native systems approaches provide lower latency, tighter integration, and predictable resource usage.
+- **Low Resource Overhead**: Near-zero idle CPU wakeups, bounded memory usage, and event-driven operation are active architectural constraints, not post-hoc optimizations.
+- **Batteries-Included with Deep Customizability**: Ships a cohesive, fully functioning daily-driver desktop shell out of the box, without restricting deep configuration, custom styling, or user scripting.
+- **Direct Manipulation**: Everyday layout and customization operations can be performed directly on the desktop rather than requiring translation into configuration syntax.
+
+Owlenshell is designed for contemporary Linux desktop environments, rather than attempting to recreate historical desktop conventions. The goal is architectural rigor, responsiveness, compositor portability, and product quality.
+
+### Competitive Positioning
+
+Owlenshell does not rely on fragile novelty claims (such as being the "first" or "only" shell with a particular feature). Individual features exist across different projects.
+
+The differentiation lies in the unified architectural and product model:
+
+> **A batteries-included native Wayland shell built in Rust, where widgets are independent from surfaces and placement, designed for direct manipulation, topology-aware multi-monitor environments, typed configuration, and modern human and agent DX.**
+
 ## Core Principle: Atomic UI
 
 Atomic UI is the defining architectural principle of Owlenshell.
@@ -70,6 +92,22 @@ If a widget is visually 300×400 pixels, Owlenshell should not create an invisib
 Invisible widgets should not leave invisible input geometry behind.
 
 Atomic widgets should behave like independent desktop objects.
+
+## Direct Manipulation as First-Class UX
+
+If something can reasonably be manipulated directly on the desktop, users should not be forced to translate that action into configuration syntax.
+
+Direct manipulation operations are first-class workflows on Owlenshell's long-term roadmap:
+
+- **Intra-Host Reordering**: Moving a widget's order within a bar or host container.
+- **Inter-Host Migration**: Moving a widget from one host to another.
+- **Detachment & Floating**: Detaching a widget from a bar host directly into a free-floating host surface.
+- **Attachment & Docking**: Attaching a floating widget into an existing dock or bar host.
+- **Cross-Monitor Dragging**: Dragging a widget across output boundaries with seamless native surface recreation.
+- **State Preservation**: Maintaining interactive widget state across detachment, dockings, and multi-monitor migrations.
+- **Topology Intelligence**: Seamless fallback when outputs disconnect, with automatic return to the preferred home output when restored.
+
+These capabilities land incrementally; the initial live-movement stage proves the movement foundation rather than implementing the entire interaction model. This principle builds directly upon the fundamental `Widget != Surface` and generic `Host` decoupled architecture.
 
 ## Movable by Design
 
@@ -812,20 +850,21 @@ The design philosophy is opinionated without being restrictive:
 When architectural decisions are ambiguous, prefer the option that preserves these properties:
 
 1. **Atomic** — UI surfaces are independent desktop objects.
-2. **Native** — Wayland and system integration are owned directly by Owlenshell.
+2. **Native & Modern** — Wayland and system integration are owned directly by Owlenshell in Rust + Slint, avoiding heavy web runtimes.
 3. **Self-contained** — No GTK, Qt, GJS, QML or browser runtime as the shell foundation.
 4. **Compositor-agnostic** — Generic Wayland provides the baseline; compositor adapters enhance it.
-5. **Movable** — The user owns widget placement and can manipulate it directly.
+5. **Direct Manipulation** — The user owns widget placement and can manipulate it directly without translating intent into configuration syntax.
 6. **Persistent** — User intent survives restarts and temporary topology changes.
 7. **Topology-aware** — Multi-output behavior is part of the core architecture.
 8. **Event-driven** — Idle systems should remain idle.
 9. **Batteries-included** — A useful shell exists before customization begins.
 10. **Programmable** — Advanced users can extend behavior without replacing the runtime.
-11. **Fault-tolerant** — Optional components fail locally whenever possible.
-12. **Secure by boundary** — Authentication and lock functionality are isolated from ordinary extensibility.
-13. **Observable** — Runtime decisions can be inspected and diagnosed.
-14. **Evolvable** — Configuration, state and APIs can migrate without repeatedly breaking user environments.
-15. **Dogfooded** — The default shell must use the same public primitives available to users.
+11. **Human & Agent Operable** — Core configuration, introspection, and actions are exposed through unified typed schemas accessible to humans, GUI tools, and external agents alike.
+12. **Fault-tolerant** — Optional components fail locally whenever possible.
+13. **Secure by boundary** — Authentication and lock functionality are isolated from ordinary extensibility.
+14. **Observable** — Runtime decisions can be inspected and diagnosed.
+15. **Evolvable** — Configuration, state and APIs can migrate without repeatedly breaking user environments.
+16. **Dogfooded** — The default shell and ecosystem tools must use the same public primitives available to users.
 
 ## The Question Owlenshell Should Keep Answering
 

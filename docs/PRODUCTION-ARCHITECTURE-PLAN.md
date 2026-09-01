@@ -402,37 +402,60 @@ Do not begin by designing a complete TOML language. First represent defaults as
 typed `AppSpec` data. Once the generic calendar slice works, add:
 
 ```text
-Built-in defaults
-        \
-File configuration
-         > Typed Configuration Model
-Settings UI
-        /
-         -> validation / transactional configuration update
-         -> runtime reconciliation
-         -> HostSpec / WidgetSpec composition
+Declarative Config Files
+          \
+Settings GUI (Native Slint)
+           \
+CLI / IPC (owlenshellctl)  ───►  Shared Typed Configuration & Control Model
+           /
+MCP / External Agents
+          /
+           │
+           ▼
+  Validation & Transactional Update
+           │
+           ▼
+  Live Runtime Reconciliation
+           │
+           ▼
+  HostSpec / WidgetSpec Active Composition
 ```
+
+### Human- and Agent-Operable by Design
+
+Owlenshell is designed from the beginning to be operable by both humans and automated tools/agents without compromising performance or security:
+
+- **Unified Typed Model**: Declarative file configuration, the native Settings GUI, IPC (`owlenshellctl`), and future agent/MCP integrations all target the exact same canonical typed schemas and validation gates.
+- **Zero AI Runtime Burden**: There is NO embedded AI runtime or LLM inside Owlenshell. Users who never use agents incur effectively no AI-specific runtime burden.
+- **No Backdoors**: External agents interact solely through structured, validated public interfaces. There is no unauthenticated mutation path or special AI-only configuration channel.
+- **Predictable Mutation Pipeline**:
+  ```text
+  Agent / User Request
+    ↓
+  Structured Introspection (read effective state / schemas)
+    ↓
+  Typed Operation Proposal
+    ↓
+  Schema & Policy Validation
+    ↓
+  User Approval (where configured / appropriate)
+    ↓
+  Transactional Application & Live Reconciliation
+  ```
+
+### Native Graphical Settings UI as Equal Client
 
 Owlenshell ships a batteries-included native graphical settings UI for common
 shell customization (e.g. bar position, bar size, output preferences, widget
 enable/disable, widget ordering, common widget options, and later theme/styling).
 
 Key architectural invariants:
-- **Unified Public Model**: The settings UI is NOT a separate configuration
-  system. Both GUI and file configuration consume and produce the exact same
-  typed public configuration model. There is zero GUI-only runtime mutation or
-  divergent configuration path.
-- **Transactional Safety**: Invalid changes (from file edits or UI actions) are
-  rejected during validation and never destroy the currently valid running
-  composition.
-- **Live Reconciliation**: Settings updates reconcile live without process restart
-  where practical.
-- **Non-Mandatory GUI**: The graphical settings UI must never become required for
-  declarative, headless, or manual file-based configuration.
-- **Revert to Defaults**: The system natively supports resetting or reverting to
-  useful built-in defaults.
-- **Rune Separation**: Rune remains an isolated behavioral/scripting extension
-  mechanism, distinct from core configuration.
+- **Equal Public Client**: The settings UI is NOT a separate configuration system. Both GUI and file configuration consume and produce the exact same typed public configuration model. There is zero GUI-only runtime mutation or divergent configuration path.
+- **Transactional Safety**: Invalid changes (from file edits or UI actions) are rejected during validation and never destroy the currently valid running composition.
+- **Live Reconciliation**: Settings updates reconcile live without process restart where practical.
+- **Non-Mandatory GUI**: The graphical settings UI must never become required for declarative, headless, or manual file-based configuration.
+- **Revert to Defaults**: The system natively supports resetting or reverting to useful built-in defaults.
+- **Rune Separation**: Rune remains an isolated behavioral/scripting extension mechanism, distinct from core configuration.
 
 An invalid reload keeps the previous valid runtime.
 
@@ -442,10 +465,58 @@ Persistence stores machine-local runtime intent, not desired configuration.
 The initial schema needs host placements and small widget state only. It must
 be versioned from the first production write.
 
-### IPC
+### IPC and Structured Introspection
 
-Add IPC after `HostCommand` and state queries are stable. IPC should translate
-external requests into the same commands used internally.
+Add IPC after `HostCommand` and state queries are stable. IPC (`owlenshellctl`) translates external requests into the same commands used internally.
+
+In addition to standard control commands, the runtime exposes structured introspection:
+- effective configuration and active schema
+- registered hosts, widgets, and attachment relationships
+- output inventory and topology generation
+- compositor capabilities and diagnostics
+
+Future Model Context Protocol (MCP) integration reuses the same validated configuration, state, and control application interfaces; IPC may later be one transport or client.
+
+### Machine-Readable Documentation & Developer Experience
+
+To ensure humans and automated tools can reason about Owlenshell configurations accurately:
+- Canonical Markdown documentation with stable reference URLs.
+- Published machine-readable schemas (e.g. JSON Schema) for configuration files, widget manifests, and provider capabilities.
+- Machine-readable index endpoints (e.g. `llms.txt`, schema catalogs).
+- Authoritative examples derived directly from schema validation tests.
+
+### Public API Dogfooding
+
+Ecosystem tooling and first-party features must adhere to a strict dogfooding discipline:
+- Built-in widgets use the same public widget primitives/interfaces and lifecycle primitives as custom extensions.
+- The default shell composition uses public `HostSpec` and `WidgetSpec` attachment APIs.
+- The native Settings UI interacts exclusively with the public typed configuration model.
+- The native Widget Browser consumes the same registry model published externally.
+- Command-line tools (`owlenshellctl`) and agent interfaces (including future MCP integration) use the same supported validated configuration/state/control interfaces.
+
+If a first-party component requires a private bypass or internal shortcut, that is treated as evidence of an incomplete public abstraction.
+
+### Widget Registry and Ecosystem Browser Architecture
+
+To enable a healthy ecosystem of community-contributed and first-party widgets without turning Owlenshell into an unvetted package manager:
+
+- **Scoped to Shell Extensions**: The registry strictly distributes Owlenshell widgets, themes, and Rune scripts. It is not a general Linux system package manager.
+- **Canonical Schema**: Extensions may provide structured manifest metadata, such as:
+  - `id`, `name`, `version`, `description`, `maintainer`
+  - `supported_owlenshell_versions`, `supported_hosts`
+  - `required_services`, `optional_services`, `capabilities` / `permissions`
+  - `configuration_schema`, `documentation_url`, `source_url`, `verification_status`
+- **Lifecycle Pipeline**: `Create -> Publish -> Discover -> Install -> Configure -> Place`
+- **Dual-Client Principle**:
+  - The public project website and the native Owlenshell UI are independent client consumers of the exact same public registry API.
+  - The native Slint UI directly renders registry models using native components and must **never** embed a WebView or web engine for widget discovery.
+
+### Public Project Website
+
+Once Owlenshell reaches a genuinely shippable public milestone, a dedicated project website will serve as the external hub:
+- **Responsibilities**: Project overview, installation guides, architecture documentation, configuration references, visual demos, and the public web view of the Widget Registry.
+- **Visual Demos**: Interactive and video demonstrations highlighting key native features, such as direct intra-host/inter-host manipulation, multi-monitor dragging, topology-aware fallback, and automatic return-home.
+- **Implementation Independence**: No web framework is pre-selected; the website remains a purely external consumer of published schemas and registry endpoints.
 
 ### Rune
 
@@ -630,11 +701,18 @@ Acceptance gates:
 Only after the vertical-slice gates pass:
 
 1. Shared services beyond the clock
-2. Inspect and control IPC
-3. Rune behavior runtime
-4. Broader compositor adapters
+2. Inspect and control IPC & Diagnostics CLI (`owlenshellctl`)
+3. Rune behavior runtime & sandboxed scripting
+4. Broader compositor adapters (Sway, niri, etc.)
 5. Protected lock and PAM subsystem
-6. Possible crate extraction based on proven boundaries
+6. Machine-readable documentation (`llms.txt`, JSON schemas, API docs)
+7. Model Context Protocol (MCP) server for structured agent introspection and control
+8. Widget Registry & Browser architecture:
+   - Canonical metadata schema for discovering and distributing third-party widgets.
+   - Dual-client architecture: The public website and the native Slint Widget Browser are independent clients of the same registry API.
+   - The native UI must NEVER embed a web browser or WebView for discovery.
+9. Public Project Website (documentation, tutorials, configuration reference, visual demos, registry browser).
+10. Possible crate extraction based on proven boundaries.
 
 ## Principal Risks
 

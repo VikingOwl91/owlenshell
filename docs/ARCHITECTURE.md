@@ -14,13 +14,16 @@ The architecture must preserve:
 
 - atomic Wayland surfaces
 - compositor independence
-- self-contained Rust + Slint runtime
+- modern-native, self-contained Rust + Slint runtime
+- direct manipulation as first-class desktop UX
 - event-driven system integration
 - persistent topology-aware placement
 - strict separation of content, placement and system state
+- unified typed configuration shared identically by file configs, Settings GUI, and IPC/agents
+- human and agent operability without internal AI burdens or mutation backdoors
 - failure isolation
 - extensibility without making scripting part of the critical path
-- observability and testability
+- observability, machine-readable schemas, and testability
 
 ## High-Level Model
 
