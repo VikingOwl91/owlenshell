@@ -1,4 +1,11 @@
-use crate::domain::ids::WidgetId;
+use crate::domain::ids::{HostId, WidgetId};
+
+/// Generic logical action emitted by an interactive widget.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum WidgetAction {
+    /// Toggles the logical visibility of a target host.
+    ToggleHost(HostId),
+}
 
 /// Classification of first-party widget content kinds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

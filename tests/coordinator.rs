@@ -561,3 +561,80 @@ fn coordinator_lifecycle_exit_on_close_and_primary_milestone_are_independent() {
         "Host with exit_on_close=true must exit"
     );
 }
+
+#[test]
+fn coordinator_dispatch_action_toggles_target_host_visibility() {
+    use owlenshell::domain::host::HostSpec;
+    use owlenshell::domain::widget::WidgetAction;
+
+    let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
+    let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
+    let render_bridge = RenderBridge::new();
+
+    let coordinator = Coordinator::new(
+        output_manager.clone(),
+        surface_manager.clone(),
+        render_bridge.clone(),
+        Placements::default(),
+    );
+
+    let popup_id = HostId::new("test_popup");
+    let popup_spec = HostSpec::floating(popup_id.clone());
+    coordinator.attach_host_spec(popup_spec, None);
+
+    // Initial state: visible = true
+    assert!(coordinator.get_host(&popup_id).unwrap().visible);
+
+    // 1. Dispatch ToggleHost -> host becomes hidden
+    coordinator.dispatch_action(WidgetAction::ToggleHost(popup_id.clone()));
+    assert!(!coordinator.get_host(&popup_id).unwrap().visible);
+
+    // 2. Dispatch ToggleHost again -> host becomes visible
+    coordinator.dispatch_action(WidgetAction::ToggleHost(popup_id.clone()));
+    assert!(coordinator.get_host(&popup_id).unwrap().visible);
+}
+
+#[test]
+fn coordinator_first_attachment_vs_subsequent_toggle_semantics() {
+    use owlenshell::domain::widget::WidgetAction;
+
+    let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
+    let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
+    let render_bridge = RenderBridge::new();
+
+    let coordinator = Coordinator::new(
+        output_manager.clone(),
+        surface_manager.clone(),
+        render_bridge.clone(),
+        Placements::default(),
+    );
+
+    let cal_id = HostId::new("calendar");
+
+    // 1. Initial state: host absent
+    assert!(coordinator.get_host(&cal_id).is_none());
+
+    // 2. First click on absent host: attachment establishes visible = true
+    coordinator.attach_host(cal_id.clone(), SurfaceKind::Calendar, None);
+    let state_after_attach = coordinator.get_host(&cal_id).expect("host must exist");
+    assert!(
+        state_after_attach.visible,
+        "Initial attach must set visible = true"
+    );
+
+    // 3. Second click: dispatch_action(ToggleHost) inverts visible from true -> false
+    coordinator.dispatch_action(WidgetAction::ToggleHost(cal_id.clone()));
+    let state_after_first_toggle = coordinator.get_host(&cal_id).expect("host must exist");
+    assert!(
+        !state_after_first_toggle.visible,
+        "First toggle must set visible = false"
+    );
+
+    // 4. Third click: dispatch_action(ToggleHost) inverts visible from false -> true
+    coordinator.dispatch_action(WidgetAction::ToggleHost(cal_id.clone()));
+    let state_after_second_toggle = coordinator.get_host(&cal_id).expect("host must exist");
+    assert!(
+        state_after_second_toggle.visible,
+        "Second toggle must set visible = true"
+    );
+}

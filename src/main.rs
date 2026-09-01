@@ -1,7 +1,8 @@
 use calloop::timer::{TimeoutAction, Timer};
 use calloop::EventLoop;
 use chrono::Datelike;
-use owlenshell::domain::ids::HostId;
+use owlenshell::domain::ids::{HostId, WidgetId};
+use owlenshell::domain::widget::WidgetAction;
 use owlenshell::instrumentation;
 use owlenshell::model::{SurfaceKind, CALENDAR_KEY};
 use owlenshell::persistence::Placements;
@@ -9,7 +10,7 @@ use owlenshell::platform::{
     compositor, detect_session, OutputManager, OwlenPlatform, RenderBridge, SurfaceManager,
     WaylandPlatform,
 };
-use owlenshell::runtime::Coordinator;
+use owlenshell::runtime::{ClockWidgetController, Coordinator};
 use slint::{ComponentHandle, ModelRc, VecModel};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -44,47 +45,83 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     slint::platform::set_platform(Box::new(OwlenPlatform::new(render_bridge.clone())))?;
     instrumentation::milestone("platform");
 
+    // 1. Initialize BarHost
     let bar_id = HostId::new("bar");
     let bar = render_bridge.with_host_creation(bar_id.clone(), Bar::new)?;
-    coordinator.attach_host(bar_id, SurfaceKind::Bar, None);
-    bar.set_clock_text(clock_text());
+    coordinator.attach_host(bar_id.clone(), SurfaceKind::Bar, None);
+
+    // 2. Initialize ClockWidget controller and attach to BarHost
+    let cal_id = HostId::new(CALENDAR_KEY);
+    let clock_controller = Rc::new(ClockWidgetController::new(
+        WidgetId::new("bar_clock"),
+        Some(cal_id.clone()),
+    ));
+    coordinator.attach_widget(&bar_id, clock_controller.id().clone());
+    bar.set_clock_text(clock_controller.current_text());
     instrumentation::milestone("bar");
 
-    let cal_id = HostId::new(CALENDAR_KEY);
+    // 3. Calendar UI container (Step 4 will fully decouple CalendarWidget)
     let calendar_ui: Rc<RefCell<Option<Calendar>>> = Rc::new(RefCell::new(None));
+
+    // Connect clock action to generic Coordinator action dispatch
     bar.on_open_calendar({
         let coordinator = coordinator.clone();
+        let clock_controller = clock_controller.clone();
         let calendar_ui = calendar_ui.clone();
         let render_bridge = render_bridge.clone();
-        let cal_id = cal_id.clone();
         move || {
-            if calendar_ui.borrow().is_some() {
-                coordinator.hide_host(&cal_id);
-                *calendar_ui.borrow_mut() = None;
-                render_bridge.remove_adapter(&cal_id);
-                return;
-            }
-            let cal = render_bridge
-                .with_host_creation(cal_id.clone(), Calendar::new)
-                .expect("calendar");
-            let (title, weeks) = calendar_weeks();
-            cal.set_month_title(title.into());
-            cal.set_weeks(weeks);
-            cal.on_dismiss({
-                let coordinator = coordinator.clone();
-                let calendar_ui = calendar_ui.clone();
-                let render_bridge = render_bridge.clone();
-                let cal_id = cal_id.clone();
-                move || {
-                    coordinator.hide_host(&cal_id);
-                    *calendar_ui.borrow_mut() = None;
-                    render_bridge.remove_adapter(&cal_id);
+            if let Some(action) = clock_controller.handle_click() {
+                let WidgetAction::ToggleHost(target_id) = action.clone();
+                let host_exists = coordinator.get_host(&target_id).is_some();
+                let was_visible = coordinator
+                    .get_host(&target_id)
+                    .map(|h| h.visible)
+                    .unwrap_or(false);
+
+                if !host_exists {
+                    // Initial registration sets visible = true
+                    let placement = coordinator.placements_store().get(&target_id).cloned();
+                    coordinator.attach_host(target_id.clone(), SurfaceKind::Calendar, placement);
+                } else {
+                    // Existing host toggles through Coordinator dispatch
+                    coordinator.dispatch_action(action);
                 }
-            });
-            let _ = cal.show();
-            let placement = coordinator.placements_store().get(&cal_id).cloned();
-            coordinator.attach_host(cal_id.clone(), SurfaceKind::Calendar, placement);
-            *calendar_ui.borrow_mut() = Some(cal);
+
+                let is_visible = coordinator
+                    .get_host(&target_id)
+                    .map(|h| h.visible)
+                    .unwrap_or(false);
+
+                // Temporary Step 4 compatibility: materialize / tear down Calendar UI
+                match (was_visible, is_visible) {
+                    (true, false) => {
+                        *calendar_ui.borrow_mut() = None;
+                        render_bridge.remove_adapter(&target_id);
+                    }
+                    (false, true) => {
+                        let cal = render_bridge
+                            .with_host_creation(target_id.clone(), Calendar::new)
+                            .expect("calendar");
+                        let (title, weeks) = calendar_weeks();
+                        cal.set_month_title(title.into());
+                        cal.set_weeks(weeks);
+                        cal.on_dismiss({
+                            let coordinator = coordinator.clone();
+                            let calendar_ui = calendar_ui.clone();
+                            let render_bridge = render_bridge.clone();
+                            let target_id = target_id.clone();
+                            move || {
+                                coordinator.hide_host(&target_id);
+                                *calendar_ui.borrow_mut() = None;
+                                render_bridge.remove_adapter(&target_id);
+                            }
+                        });
+                        let _ = cal.show();
+                        *calendar_ui.borrow_mut() = Some(cal);
+                    }
+                    _ => {}
+                }
+            }
         }
     });
     let _ = bar.show();
@@ -93,10 +130,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _ = platform.insert_into_event_loop(&event_loop)?;
     event_loop.handle().insert_source(Timer::immediate(), {
         let bar = bar.clone_strong();
+        let clock_controller = clock_controller.clone();
         move |_deadline, _, _platform| {
-            bar.set_clock_text(clock_text());
+            bar.set_clock_text(clock_controller.current_text());
             slint::platform::update_timers_and_animations();
-            TimeoutAction::ToDuration(Duration::from_secs(1))
+            TimeoutAction::ToDuration(clock_controller.update_interval())
         }
     })?;
 
@@ -124,10 +162,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
-}
-
-fn clock_text() -> slint::SharedString {
-    chrono::Local::now().format("%H:%M:%S").to_string().into()
 }
 
 fn calendar_weeks() -> (String, ModelRc<DayRow>) {

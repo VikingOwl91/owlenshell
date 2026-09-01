@@ -1,6 +1,7 @@
 use crate::domain::host::{HostMovementPolicy, HostSpec, HostState};
 use crate::domain::ids::{HostId, OutputId, WidgetId};
 use crate::domain::placement::{Anchor, SavedPlacement};
+use crate::domain::widget::WidgetAction;
 use crate::instrumentation;
 use crate::model::SurfaceKind;
 use crate::persistence::Placements;
@@ -147,6 +148,42 @@ impl Coordinator {
                 .is_some_and(|d| &d.host_id == host_id);
             if dragging_this {
                 self.drag.borrow_mut().take();
+            }
+        }
+    }
+
+    /// Primary production API: Shows an existing logical host, invalidating placement to force fresh resolution.
+    pub fn show_host(&self, host_id: &HostId) {
+        let mut hosts = self.hosts.borrow_mut();
+        if let Some(host) = hosts.get_mut(host_id) {
+            host.visible = true;
+            host.current_decision = None;
+            host.decision_generation = None;
+        }
+    }
+
+    /// Primary production API: Toggles the logical visibility of a host.
+    /// Returns the new visibility state, or None if host does not exist.
+    pub fn toggle_host(&self, host_id: &HostId) -> Option<bool> {
+        let is_visible = self.hosts.borrow().get(host_id).map(|h| h.visible);
+        match is_visible {
+            Some(true) => {
+                self.hide_host(host_id);
+                Some(false)
+            }
+            Some(false) => {
+                self.show_host(host_id);
+                Some(true)
+            }
+            None => None,
+        }
+    }
+
+    /// Primary production API: Dispatches a generic `WidgetAction`.
+    pub fn dispatch_action(&self, action: WidgetAction) {
+        match action {
+            WidgetAction::ToggleHost(host_id) => {
+                let _ = self.toggle_host(&host_id);
             }
         }
     }

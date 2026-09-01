@@ -275,3 +275,39 @@ fn host_spec_output_height_to_placement_constraints_conversion() {
     assert_eq!(constraints.min_visible, 32);
     assert!(constraints.work_area.is_none());
 }
+
+#[test]
+fn clock_widget_controller_instantiation_and_action_dispatch() {
+    use owlenshell::domain::ids::WidgetId;
+    use owlenshell::domain::widget::WidgetAction;
+    use owlenshell::runtime::ClockWidgetController;
+
+    let cal_host_id = HostId::new("calendar_popup");
+    let controller =
+        ClockWidgetController::new(WidgetId::new("clock_main"), Some(cal_host_id.clone()));
+
+    assert_eq!(controller.id().as_str(), "clock_main");
+    assert_eq!(controller.spec().title, "Clock");
+    assert_eq!(controller.spec().kind, WidgetKind::Clock);
+    assert_eq!(
+        controller.update_interval(),
+        std::time::Duration::from_secs(1)
+    );
+
+    // current_text returns a valid time string
+    let text = controller.current_text();
+    assert!(!text.is_empty());
+
+    // handle_click emits generic WidgetAction::ToggleHost
+    let action = controller.handle_click().expect("action must be emitted");
+    assert_eq!(action, WidgetAction::ToggleHost(cal_host_id));
+}
+
+#[test]
+fn clock_widget_controller_without_target_emits_no_action() {
+    use owlenshell::domain::ids::WidgetId;
+    use owlenshell::runtime::ClockWidgetController;
+
+    let controller = ClockWidgetController::new(WidgetId::new("standalone_clock"), None);
+    assert_eq!(controller.handle_click(), None);
+}
