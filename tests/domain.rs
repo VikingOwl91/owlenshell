@@ -311,3 +311,62 @@ fn clock_widget_controller_without_target_emits_no_action() {
     let controller = ClockWidgetController::new(WidgetId::new("standalone_clock"), None);
     assert_eq!(controller.handle_click(), None);
 }
+
+#[test]
+fn calendar_widget_controller_state_and_content_generation() {
+    use owlenshell::domain::ids::WidgetId;
+    use owlenshell::domain::widget::WidgetAction;
+    use owlenshell::runtime::CalendarWidgetController;
+
+    let host_id = HostId::new("calendar_host");
+    let controller = CalendarWidgetController::with_date(
+        WidgetId::new("cal_widget"),
+        host_id.clone(),
+        2026,
+        9, // September 2026 (Starts on Tuesday, 30 days)
+    );
+
+    assert_eq!(controller.id().as_str(), "cal_widget");
+    assert_eq!(controller.spec().title, "Calendar");
+    assert_eq!(controller.spec().kind, WidgetKind::Calendar);
+    assert_eq!(controller.selected_year(), 2026);
+    assert_eq!(controller.selected_month(), 9);
+    assert_eq!(controller.month_title(), "September 2026");
+
+    let rows = controller.week_rows();
+    assert_eq!(rows.len(), 6);
+    // Row 0: Monday=0, Tuesday=1, Wednesday=2, Thursday=3, Friday=4, Saturday=5, Sunday=6
+    assert_eq!(rows[0].d0, 0);
+    assert_eq!(rows[0].d1, 1);
+    assert_eq!(rows[0].d2, 2);
+    assert_eq!(rows[0].d6, 6);
+
+    // Row 4: 28, 29, 30, 0, 0, 0, 0
+    assert_eq!(rows[4].d0, 28);
+    assert_eq!(rows[4].d1, 29);
+    assert_eq!(rows[4].d2, 30);
+    assert_eq!(rows[4].d3, 0);
+
+    // Dismiss action emits generic HideHost
+    let action = controller.handle_dismiss();
+    assert_eq!(action, WidgetAction::HideHost(host_id));
+}
+
+#[test]
+fn calendar_widget_controller_state_mutation_survives_independently() {
+    use owlenshell::domain::ids::WidgetId;
+    use owlenshell::runtime::CalendarWidgetController;
+
+    let mut controller = CalendarWidgetController::with_date(
+        WidgetId::new("cal_widget"),
+        HostId::new("calendar_host"),
+        2026,
+        8,
+    );
+    assert_eq!(controller.month_title(), "August 2026");
+
+    controller.set_date(2026, 12);
+    assert_eq!(controller.selected_year(), 2026);
+    assert_eq!(controller.selected_month(), 12);
+    assert_eq!(controller.month_title(), "December 2026");
+}

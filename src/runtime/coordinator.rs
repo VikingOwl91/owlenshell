@@ -185,6 +185,9 @@ impl Coordinator {
             WidgetAction::ToggleHost(host_id) => {
                 let _ = self.toggle_host(&host_id);
             }
+            WidgetAction::HideHost(host_id) => {
+                self.hide_host(&host_id);
+            }
         }
     }
 

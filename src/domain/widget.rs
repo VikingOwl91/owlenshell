@@ -5,6 +5,8 @@ use crate::domain::ids::{HostId, WidgetId};
 pub enum WidgetAction {
     /// Toggles the logical visibility of a target host.
     ToggleHost(HostId),
+    /// Hides a target host.
+    HideHost(HostId),
 }
 
 /// Classification of first-party widget content kinds.

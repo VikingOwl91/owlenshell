@@ -1,6 +1,5 @@
 use calloop::timer::{TimeoutAction, Timer};
 use calloop::EventLoop;
-use chrono::Datelike;
 use owlenshell::domain::ids::{HostId, WidgetId};
 use owlenshell::domain::widget::WidgetAction;
 use owlenshell::instrumentation;
@@ -10,13 +9,32 @@ use owlenshell::platform::{
     compositor, detect_session, OutputManager, OwlenPlatform, RenderBridge, SurfaceManager,
     WaylandPlatform,
 };
-use owlenshell::runtime::{ClockWidgetController, Coordinator};
+use owlenshell::runtime::{
+    CalendarDayRow, CalendarWidgetController, ClockWidgetController, Coordinator,
+};
 use slint::{ComponentHandle, ModelRc, VecModel};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::Duration;
 
 slint::include_modules!();
+
+/// Converts domain `CalendarDayRow` slices into the Slint `ModelRc<DayRow>` presentation model.
+fn bind_calendar_weeks(rows: &[CalendarDayRow]) -> ModelRc<DayRow> {
+    let slint_rows: Vec<DayRow> = rows
+        .iter()
+        .map(|c| DayRow {
+            d0: c.d0,
+            d1: c.d1,
+            d2: c.d2,
+            d3: c.d3,
+            d4: c.d4,
+            d5: c.d5,
+            d6: c.d6,
+        })
+        .collect();
+    Rc::new(VecModel::from(slint_rows)).into()
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     instrumentation::init();
@@ -60,66 +78,86 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     bar.set_clock_text(clock_controller.current_text());
     instrumentation::milestone("bar");
 
-    // 3. Calendar UI container (Step 4 will fully decouple CalendarWidget)
+    // 3. Initialize CalendarWidget controller (logical lifetime independent of native surface)
+    let calendar_controller = Rc::new(RefCell::new(CalendarWidgetController::new(
+        WidgetId::new("popup_calendar"),
+        cal_id.clone(),
+    )));
+
+    // 4. Temporary Slint Calendar UI handle container
     let calendar_ui: Rc<RefCell<Option<Calendar>>> = Rc::new(RefCell::new(None));
 
     // Connect clock action to generic Coordinator action dispatch
     bar.on_open_calendar({
         let coordinator = coordinator.clone();
         let clock_controller = clock_controller.clone();
+        let calendar_controller = calendar_controller.clone();
         let calendar_ui = calendar_ui.clone();
         let render_bridge = render_bridge.clone();
         move || {
             if let Some(action) = clock_controller.handle_click() {
-                let WidgetAction::ToggleHost(target_id) = action.clone();
-                let host_exists = coordinator.get_host(&target_id).is_some();
-                let was_visible = coordinator
-                    .get_host(&target_id)
-                    .map(|h| h.visible)
-                    .unwrap_or(false);
+                if let WidgetAction::ToggleHost(target_id) = action.clone() {
+                    let host_exists = coordinator.get_host(&target_id).is_some();
+                    let was_visible = coordinator
+                        .get_host(&target_id)
+                        .map(|h| h.visible)
+                        .unwrap_or(false);
 
-                if !host_exists {
-                    // Initial registration sets visible = true
-                    let placement = coordinator.placements_store().get(&target_id).cloned();
-                    coordinator.attach_host(target_id.clone(), SurfaceKind::Calendar, placement);
-                } else {
-                    // Existing host toggles through Coordinator dispatch
-                    coordinator.dispatch_action(action);
-                }
-
-                let is_visible = coordinator
-                    .get_host(&target_id)
-                    .map(|h| h.visible)
-                    .unwrap_or(false);
-
-                // Temporary Step 4 compatibility: materialize / tear down Calendar UI
-                match (was_visible, is_visible) {
-                    (true, false) => {
-                        *calendar_ui.borrow_mut() = None;
-                        render_bridge.remove_adapter(&target_id);
+                    if !host_exists {
+                        // Initial registration sets visible = true and attaches calendar widget
+                        let placement = coordinator.placements_store().get(&target_id).cloned();
+                        coordinator.attach_host(
+                            target_id.clone(),
+                            SurfaceKind::Calendar,
+                            placement,
+                        );
+                        coordinator
+                            .attach_widget(&target_id, calendar_controller.borrow().id().clone());
+                    } else {
+                        // Existing host toggles through Coordinator dispatch
+                        coordinator.dispatch_action(action);
                     }
-                    (false, true) => {
-                        let cal = render_bridge
-                            .with_host_creation(target_id.clone(), Calendar::new)
-                            .expect("calendar");
-                        let (title, weeks) = calendar_weeks();
-                        cal.set_month_title(title.into());
-                        cal.set_weeks(weeks);
-                        cal.on_dismiss({
-                            let coordinator = coordinator.clone();
-                            let calendar_ui = calendar_ui.clone();
-                            let render_bridge = render_bridge.clone();
-                            let target_id = target_id.clone();
-                            move || {
-                                coordinator.hide_host(&target_id);
-                                *calendar_ui.borrow_mut() = None;
-                                render_bridge.remove_adapter(&target_id);
-                            }
-                        });
-                        let _ = cal.show();
-                        *calendar_ui.borrow_mut() = Some(cal);
+
+                    let is_visible = coordinator
+                        .get_host(&target_id)
+                        .map(|h| h.visible)
+                        .unwrap_or(false);
+
+                    // Materialize / tear down Calendar UI bound to controller state
+                    match (was_visible, is_visible) {
+                        (true, false) => {
+                            *calendar_ui.borrow_mut() = None;
+                            render_bridge.remove_adapter(&target_id);
+                        }
+                        (false, true) => {
+                            let cal = render_bridge
+                                .with_host_creation(target_id.clone(), Calendar::new)
+                                .expect("calendar");
+                            let controller = calendar_controller.borrow();
+                            cal.set_month_title(controller.month_title().into());
+                            cal.set_weeks(bind_calendar_weeks(&controller.week_rows()));
+                            cal.on_dismiss({
+                                let coordinator = coordinator.clone();
+                                let calendar_controller = calendar_controller.clone();
+                                let calendar_ui = calendar_ui.clone();
+                                let render_bridge = render_bridge.clone();
+                                move || {
+                                    let dismiss_action =
+                                        calendar_controller.borrow().handle_dismiss();
+                                    if let WidgetAction::HideHost(dismiss_target_id) =
+                                        dismiss_action.clone()
+                                    {
+                                        coordinator.dispatch_action(dismiss_action);
+                                        *calendar_ui.borrow_mut() = None;
+                                        render_bridge.remove_adapter(&dismiss_target_id);
+                                    }
+                                }
+                            });
+                            let _ = cal.show();
+                            *calendar_ui.borrow_mut() = Some(cal);
+                        }
+                        _ => {}
                     }
-                    _ => {}
                 }
             }
         }
@@ -162,44 +200,4 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
-}
-
-fn calendar_weeks() -> (String, ModelRc<DayRow>) {
-    let now = chrono::Local::now().date_naive();
-    let title = now.format("%B %Y").to_string();
-    let first = chrono::NaiveDate::from_ymd_opt(now.year(), now.month(), 1).unwrap();
-    let start = first.weekday().num_days_from_monday() as usize;
-    let dim = days_in_month(now.year(), now.month());
-    let mut cells = [0i32; 42];
-    for d in 1..=dim {
-        cells[start + d as usize - 1] = d as i32;
-    }
-    let rows: Vec<DayRow> = cells
-        .chunks(7)
-        .map(|c| DayRow {
-            d0: c[0],
-            d1: c[1],
-            d2: c[2],
-            d3: c[3],
-            d4: c[4],
-            d5: c[5],
-            d6: c[6],
-        })
-        .collect();
-    (title, Rc::new(VecModel::from(rows)).into())
-}
-
-fn days_in_month(year: i32, month: u32) -> u32 {
-    match month {
-        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
-        4 | 6 | 9 | 11 => 30,
-        2 => {
-            if year % 4 == 0 && (year % 100 != 0 || year % 400 == 0) {
-                29
-            } else {
-                28
-            }
-        }
-        _ => 30,
-    }
 }

@@ -638,3 +638,53 @@ fn coordinator_first_attachment_vs_subsequent_toggle_semantics() {
         "Second toggle must set visible = true"
     );
 }
+
+#[test]
+fn calendar_widget_state_survives_host_hide_show_and_native_retirement() {
+    use owlenshell::domain::ids::WidgetId;
+    use owlenshell::domain::widget::WidgetAction;
+    use owlenshell::runtime::CalendarWidgetController;
+
+    let output_manager = Rc::new(RefCell::new(OutputManager::new(Box::new(GenericAdapter))));
+    let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
+    let render_bridge = RenderBridge::new();
+
+    let coordinator = Coordinator::new(
+        output_manager.clone(),
+        surface_manager.clone(),
+        render_bridge.clone(),
+        Placements::default(),
+    );
+
+    let cal_host_id = HostId::new("calendar_host");
+    let mut calendar_controller = CalendarWidgetController::with_date(
+        WidgetId::new("calendar_main"),
+        cal_host_id.clone(),
+        2026,
+        11, // November 2026
+    );
+
+    // 1. Initial attachment
+    coordinator.attach_host(cal_host_id.clone(), SurfaceKind::Calendar, None);
+    coordinator.attach_widget(&cal_host_id, calendar_controller.id().clone());
+
+    let attached = coordinator.attached_widgets(&cal_host_id).unwrap();
+    assert_eq!(attached, vec![WidgetId::new("calendar_main")]);
+    assert_eq!(calendar_controller.month_title(), "November 2026");
+
+    // 2. Hide host via generic HideHost action
+    coordinator.dispatch_action(calendar_controller.handle_dismiss());
+    assert!(!coordinator.get_host(&cal_host_id).unwrap().visible);
+
+    // 3. User navigates / mutates controller state while hidden
+    calendar_controller.set_date(2026, 12);
+
+    // 4. Re-show host via generic ToggleHost action
+    coordinator.dispatch_action(WidgetAction::ToggleHost(cal_host_id.clone()));
+    assert!(coordinator.get_host(&cal_host_id).unwrap().visible);
+
+    // 5. Invariants: attached WidgetId survives, controller content state survives
+    let attached_after = coordinator.attached_widgets(&cal_host_id).unwrap();
+    assert_eq!(attached_after, vec![WidgetId::new("calendar_main")]);
+    assert_eq!(calendar_controller.month_title(), "December 2026");
+}

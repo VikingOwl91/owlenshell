@@ -317,3 +317,48 @@ fn native_recreation_transition_preserves_adapter_and_triggers_no_new_registrati
     // - Component remains live and usable
     cal.set_month_title("November 2026".into());
 }
+
+#[test]
+fn calendar_controller_and_widget_identity_survives_native_retirement_cycle() {
+    use owlenshell::domain::ids::WidgetId;
+    use owlenshell::runtime::CalendarWidgetController;
+
+    let (_lock, bridge) = setup_test_bridge();
+    let host_id = HostId::new("calendar_host");
+
+    // 1. Controller instantiated independently
+    let mut calendar_controller =
+        CalendarWidgetController::with_date(WidgetId::new("popup_cal"), host_id.clone(), 2026, 10);
+    assert_eq!(calendar_controller.month_title(), "October 2026");
+
+    // 2. Slint component created and bound to controller
+    let cal = bridge
+        .with_host_creation(host_id.clone(), Calendar::new)
+        .expect("calendar creation");
+    cal.set_month_title(calendar_controller.month_title().into());
+
+    let mut float_spec = owlenshell::domain::host::HostSpec::floating(host_id.clone());
+    float_spec.namespace = "owlenshell-calendar".into();
+    let mut host_state = owlenshell::domain::host::HostState::new(float_spec);
+    host_state.attach_widget(calendar_controller.id().clone());
+
+    // 3. Native surface retired (e.g. cross-output move or disconnect)
+    let mut surface_manager = owlenshell::platform::SurfaceManager::new();
+    let token = surface_manager
+        .generation_registry_mut_for_test()
+        .allocate(host_id.clone());
+    surface_manager.retire(&host_id);
+
+    // Invariant: Native surface retired, but controller state and attached widget survive
+    assert!(!surface_manager.has_native_instance(&host_id));
+    assert_eq!(host_state.attached_widgets(), &[WidgetId::new("popup_cal")]);
+
+    // 4. Controller state mutated during retirement
+    calendar_controller.set_date(2026, 11);
+
+    // 5. Rebound to Slint component
+    cal.set_month_title(calendar_controller.month_title().into());
+    assert_eq!(calendar_controller.month_title(), "November 2026");
+    assert_eq!(host_state.attached_widgets()[0].as_str(), "popup_cal");
+    let _ = token;
+}
