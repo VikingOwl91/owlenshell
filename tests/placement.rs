@@ -3,8 +3,7 @@ use owlenshell::domain::output::{OutputIdentity, OutputPreference, OutputSnapsho
 use owlenshell::domain::placement::{Anchor, ResolveReason, SavedPlacement};
 use owlenshell::placement::{
     clamp_offset, containing_output, dragged_origin, margins_from_offset, nearest_corner,
-    origin_from_margins, resolve, HostPlacementConstraints, PlacementContext, PlacementEngine,
-    MIN_VISIBLE,
+    origin_from_margins, HostPlacementConstraints, PlacementContext, PlacementEngine, MIN_VISIBLE,
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -46,6 +45,23 @@ fn snap(
 fn pref_name(name: &str) -> OutputPreference {
     OutputPreference::new().with_name(name)
 }
+fn test_resolve(
+    pref: &OutputPreference,
+    outputs: &[OutputSnapshot],
+    ctx: &PlacementContext,
+) -> owlenshell::domain::placement::PlacementDecision {
+    let saved = SavedPlacement {
+        output: pref.clone(),
+        anchor: Anchor::TopRight,
+        offset: (0, 0),
+    };
+    PlacementEngine::resolve(
+        Some(&saved),
+        outputs,
+        ctx,
+        &HostPlacementConstraints::default(),
+    )
+}
 
 #[test]
 fn single_monitor_exact_name() {
@@ -59,7 +75,7 @@ fn single_monitor_exact_name() {
         None,
         true,
     )];
-    let r = resolve(&pref_name("DP-1"), &outs, &PlacementContext::default());
+    let r = test_resolve(&pref_name("DP-1"), &outs, &PlacementContext::default());
     assert_eq!(r.reason(), ResolveReason::ExactName);
     assert_eq!(r.target_output_id(), Some(OutputId::new(1)));
     assert!(!r.is_fallback());
@@ -79,7 +95,7 @@ fn output_absent_falls_back() {
         None,
         false,
     )];
-    let r = resolve(&pref_name("DP-1"), &outs, &PlacementContext::default());
+    let r = test_resolve(&pref_name("DP-1"), &outs, &PlacementContext::default());
     assert_eq!(r.reason(), ResolveReason::Any);
     assert_eq!(r.target_output_id(), Some(OutputId::new(2)));
     assert!(r.is_fallback(), "absent output must be marked as fallback");
@@ -103,7 +119,7 @@ fn serial_survives_connector_rename() {
         .with_make("GB")
         .with_model("MO27Q28G")
         .with_physical_size_mm((600, 340));
-    let r = resolve(&pref, &outs, &PlacementContext::default());
+    let r = test_resolve(&pref, &outs, &PlacementContext::default());
     assert_eq!(r.reason(), ResolveReason::Serial);
     assert_eq!(r.target_output_id(), Some(OutputId::new(9)));
     assert!(!r.is_fallback());
@@ -138,7 +154,7 @@ fn unique_fingerprint_when_name_missing() {
         .with_make("Acer")
         .with_model("VG270")
         .with_physical_size_mm((600, 340));
-    let r = resolve(&pref, &outs, &PlacementContext::default());
+    let r = test_resolve(&pref, &outs, &PlacementContext::default());
     assert_eq!(r.reason(), ResolveReason::Fingerprint);
     assert_eq!(r.target_output_id(), Some(OutputId::new(1)));
     assert!(!r.is_fallback());
@@ -173,7 +189,7 @@ fn ambiguous_fingerprint_skips() {
         .with_make("Dell")
         .with_model("U2720Q")
         .with_physical_size_mm((600, 340));
-    let r = resolve(
+    let r = test_resolve(
         &pref,
         &outs,
         &PlacementContext {
@@ -206,7 +222,7 @@ fn ambiguous_serial_skips() {
     let pref = OutputPreference::new()
         .with_name("OLD")
         .with_serial("placeholder");
-    let r = resolve(&pref, &[first, second], &PlacementContext::default());
+    let r = test_resolve(&pref, &[first, second], &PlacementContext::default());
     assert_eq!(r.reason(), ResolveReason::Any);
     assert_eq!(r.target_output_id(), Some(OutputId::new(1)));
     assert!(r.is_fallback());
@@ -238,7 +254,7 @@ fn logical_role_matching_is_honest() {
     out1.logical_role = Some("main-workspace".into());
 
     let pref = OutputPreference::new().with_logical_role("status-panel");
-    let r = resolve(&pref, &[out1, out2], &PlacementContext::default());
+    let r = test_resolve(&pref, &[out1, out2], &PlacementContext::default());
 
     assert_eq!(r.reason(), ResolveReason::LogicalRole);
     assert_eq!(r.target_output_id(), Some(OutputId::new(2)));
@@ -246,7 +262,7 @@ fn logical_role_matching_is_honest() {
 
     // If role does not match, does NOT match connector name accidentally
     let pref_missing_role = OutputPreference::new().with_logical_role("non-existent-role");
-    let r_missing = resolve(
+    let r_missing = test_resolve(
         &pref_missing_role,
         &[snap(
             1,
@@ -288,7 +304,7 @@ fn preferred_then_any() {
             true,
         ),
     ];
-    let r = resolve(
+    let r = test_resolve(
         &OutputPreference::default(),
         &outs,
         &PlacementContext::default(),
@@ -303,7 +319,7 @@ fn deterministic_fallback_orders_by_stable_properties_ahead_of_runtime_id() {
         snap(1, "HDMI-1", "B", "B", (1, 1), Some((800, 600)), None, false),
         snap(99, "DP-1", "A", "A", (1, 1), Some((800, 600)), None, false),
     ];
-    let r = resolve(
+    let r = test_resolve(
         &OutputPreference::default(),
         &outs,
         &PlacementContext::default(),
@@ -318,7 +334,7 @@ fn deterministic_fallback_orders_by_stable_properties_ahead_of_runtime_id() {
 
 #[test]
 fn no_outputs_defers() {
-    let r = resolve(&pref_name("DP-1"), &[], &PlacementContext::default());
+    let r = test_resolve(&pref_name("DP-1"), &[], &PlacementContext::default());
     assert_eq!(r.reason(), ResolveReason::Deferred);
     assert_eq!(r.target_output_id(), None);
     assert!(r.is_deferred());
@@ -351,7 +367,7 @@ fn fallback_does_not_change_home_resolution() {
         .with_name("DP-1")
         .with_serial("home-serial");
 
-    let r_fallback = resolve(
+    let r_fallback = test_resolve(
         &pref,
         std::slice::from_ref(&fallback),
         &PlacementContext::default(),
@@ -359,7 +375,7 @@ fn fallback_does_not_change_home_resolution() {
     assert_eq!(r_fallback.target_output_id(), Some(OutputId::new(2)));
     assert!(r_fallback.is_fallback());
 
-    let r_home = resolve(&pref, &[fallback, home], &PlacementContext::default());
+    let r_home = test_resolve(&pref, &[fallback, home], &PlacementContext::default());
     assert_eq!(r_home.target_output_id(), Some(OutputId::new(1)));
     assert_eq!(r_home.reason(), ResolveReason::ExactName);
     assert!(!r_home.is_fallback());
@@ -384,7 +400,7 @@ fn repeated_empty_and_restore_topologies_are_stable() {
         Vec::new(),
         vec![output.clone()],
     ] {
-        let result = resolve(&pref, &outputs, &PlacementContext::default());
+        let result = test_resolve(&pref, &outputs, &PlacementContext::default());
         assert_eq!(result.target_output_id(), outputs.first().map(|o| o.id));
     }
 }
@@ -420,7 +436,7 @@ fn removed_output_cannot_win_post_removal_resolution() {
         focused_output_id: None,
     };
 
-    let result = resolve(&pref, std::slice::from_ref(&remaining), &context);
+    let result = test_resolve(&pref, std::slice::from_ref(&remaining), &context);
 
     assert_eq!(result.target_output_id(), Some(remaining.id));
     assert_eq!(result.reason(), ResolveReason::Any);

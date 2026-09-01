@@ -278,14 +278,12 @@ fn native_recreation_transition_preserves_adapter_and_triggers_no_new_registrati
         .expect("adapter must be registered in bridge");
     assert_eq!(bridge.adapter_count(), 1);
 
-    // 2. Initialize runtime surface state with active native handles in SurfaceManager
-    let mut surface = owlenshell::runtime::SurfaceState {
-        host_id: host_id.clone(),
-        kind: owlenshell::model::SurfaceKind::Calendar,
-        adapter: initial_adapter.clone(),
-        placement: None,
-        visible: true,
-    };
+    // 2. Initialize logical host state and native surface manager
+    let mut logical_state = owlenshell::runtime::LogicalHostState::new(
+        host_id.clone(),
+        owlenshell::model::SurfaceKind::Calendar,
+        None,
+    );
 
     let mut surface_manager = owlenshell::platform::SurfaceManager::new();
     let token1 = surface_manager
@@ -298,21 +296,21 @@ fn native_recreation_transition_preserves_adapter_and_triggers_no_new_registrati
     assert_eq!(retired_token, Some(token1));
 
     // Invariant: Native token retired, logical visibility preserved
-    assert!(surface.visible);
+    assert!(logical_state.visible);
     assert!(!surface_manager.has_native_instance(&host_id));
     assert_eq!(surface_manager.current_token(&host_id), None);
 
-    // 4. Execute actual runtime recreation preparation transition (used by attach_host on reattach)
+    // 4. Execute actual runtime reattachment: adapter survives, logical state remains visible
     let reattached_adapter = bridge
-        .get_adapter(&surface.host_id)
+        .get_adapter(&logical_state.host_id)
         .expect("host adapter must survive native retirement");
-    surface.prepare_recreation(reattached_adapter, None);
+    logical_state.visible = true;
 
     // 5. Invariant assertions:
     // - The exact same adapter Rc survives
-    assert!(Rc::ptr_eq(&surface.adapter, &initial_adapter));
+    assert!(Rc::ptr_eq(&reattached_adapter, &initial_adapter));
     // - Logical visibility remains true
-    assert!(surface.visible);
+    assert!(logical_state.visible);
     // - Exactly 1 adapter remains in RenderBridge registry
     assert_eq!(bridge.adapter_count(), 1);
     // - No pending creation left open

@@ -8,7 +8,7 @@ use owlenshell::persistence::Placements;
 use owlenshell::platform::{
     compositor, OutputManager, OwlenPlatform, RenderBridge, SurfaceManager, WaylandPlatform,
 };
-use owlenshell::runtime::{attach_host, hide_host, pump, AppShared};
+use owlenshell::runtime::Coordinator;
 use slint::{ComponentHandle, ModelRc, VecModel};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -30,37 +30,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         render_bridge.clone(),
     )?;
 
-    let shared = Rc::new(AppShared {
-        surfaces: RefCell::new(Vec::new()),
-        surface_manager: surface_manager.clone(),
-        render_bridge: render_bridge.clone(),
-        output_manager: output_manager.clone(),
-        store: RefCell::new(Placements::load()),
-        drag: RefCell::new(None),
-        outputs_ready: std::cell::Cell::new(false),
-        exit: std::cell::Cell::new(false),
-        first_frame: std::cell::Cell::new(false),
-    });
+    let coordinator = Rc::new(Coordinator::new(
+        output_manager.clone(),
+        surface_manager.clone(),
+        render_bridge.clone(),
+        Placements::load(),
+    ));
 
     slint::platform::set_platform(Box::new(OwlenPlatform::new(render_bridge.clone())))?;
     instrumentation::milestone("platform");
 
     let bar_id = HostId::new("bar");
     let bar = render_bridge.with_host_creation(bar_id.clone(), Bar::new)?;
-    attach_host(&shared, bar_id, SurfaceKind::Bar, None);
+    coordinator.attach_host(bar_id, SurfaceKind::Bar, None);
     bar.set_clock_text(clock_text());
     instrumentation::milestone("bar");
 
     let cal_id = HostId::new(CALENDAR_KEY);
     let calendar_ui: Rc<RefCell<Option<Calendar>>> = Rc::new(RefCell::new(None));
     bar.on_open_calendar({
-        let shared = shared.clone();
+        let coordinator = coordinator.clone();
         let calendar_ui = calendar_ui.clone();
         let render_bridge = render_bridge.clone();
         let cal_id = cal_id.clone();
         move || {
             if calendar_ui.borrow().is_some() {
-                hide_host(&shared, &cal_id);
+                coordinator.hide_host(&cal_id);
                 *calendar_ui.borrow_mut() = None;
                 render_bridge.remove_adapter(&cal_id);
                 return;
@@ -72,19 +67,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             cal.set_month_title(title.into());
             cal.set_weeks(weeks);
             cal.on_dismiss({
-                let shared = shared.clone();
+                let coordinator = coordinator.clone();
                 let calendar_ui = calendar_ui.clone();
                 let render_bridge = render_bridge.clone();
                 let cal_id = cal_id.clone();
                 move || {
-                    hide_host(&shared, &cal_id);
+                    coordinator.hide_host(&cal_id);
                     *calendar_ui.borrow_mut() = None;
                     render_bridge.remove_adapter(&cal_id);
                 }
             });
             let _ = cal.show();
-            let placement = shared.store.borrow().get(&cal_id).cloned();
-            attach_host(&shared, cal_id.clone(), SurfaceKind::Calendar, placement);
+            let placement = coordinator.placements_store().get(&cal_id).cloned();
+            coordinator.attach_host(cal_id.clone(), SurfaceKind::Calendar, placement);
             *calendar_ui.borrow_mut() = Some(cal);
         }
     });
@@ -102,12 +97,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     })?;
 
     instrumentation::milestone("loop");
-    while !shared.exit.get() {
+    while !coordinator.should_exit() {
         let timeout = slint::platform::duration_until_next_timer_update()
             .unwrap_or(Duration::from_secs(1))
             .min(Duration::from_secs(1));
         event_loop.dispatch(Some(timeout), &mut platform)?;
-        pump(&mut platform, &shared)?;
+        coordinator.pump(&mut platform)?;
         slint::platform::update_timers_and_animations();
     }
     Ok(())

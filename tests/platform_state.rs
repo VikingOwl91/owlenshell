@@ -3,8 +3,9 @@ use owlenshell::domain::host::{
 };
 use owlenshell::domain::ids::{HostId, OutputId};
 use owlenshell::domain::output::{OutputIdentity, OutputPreference, OutputSnapshot};
+use owlenshell::domain::placement::SavedPlacement;
 use owlenshell::domain::placement::{Anchor, PlacedSurface, ResolveReason};
-use owlenshell::placement::{resolve, PlacementContext};
+use owlenshell::placement::{HostPlacementConstraints, PlacementContext, PlacementEngine};
 use owlenshell::platform::compositor::{CompositorAdapter, CompositorOutputFacts, GenericAdapter};
 use owlenshell::platform::output_manager::{
     NewOutput, OutputManager, OutputRegistry, ProtocolOutput, TopologyEvent, TopologyGeneration,
@@ -124,10 +125,16 @@ fn all_invalid_geometry_defers_placement_resolution() {
         snapshot.placement_capable_outputs().cloned().collect();
     assert!(placement_capable.is_empty());
 
-    let decision = resolve(
-        &OutputPreference::new().with_name("DP-1"),
+    let saved = SavedPlacement {
+        output: OutputPreference::new().with_name("DP-1"),
+        anchor: Anchor::TopRight,
+        offset: (0, 0),
+    };
+    let decision = PlacementEngine::resolve(
+        Some(&saved),
         &placement_capable,
         &PlacementContext::default(),
+        &HostPlacementConstraints::default(),
     );
     assert_eq!(decision.reason(), ResolveReason::Deferred);
     assert!(decision.is_deferred());
@@ -832,53 +839,30 @@ fn platform_lifecycle_event_and_drag_cancellation_invariants() {
     use owlenshell::model::{Anchor, SurfaceKind};
     use owlenshell::persistence::Placements;
     use owlenshell::platform::{
-        detect_compositor, OutputManager, OwlenWindowAdapter, PlatformLifecycleEvent, RenderBridge,
-        SurfaceManager,
+        detect_compositor, OutputManager, PlatformLifecycleEvent, RenderBridge, SurfaceManager,
     };
-    use owlenshell::runtime::{
-        cancel_drag_if_output_missing, process_lifecycle_event, AppShared, DragState, SurfaceState,
-    };
-    use std::cell::{Cell, RefCell};
+    use owlenshell::runtime::{Coordinator, DragState};
+    use std::cell::RefCell;
     use std::rc::Rc;
 
     let output_manager = Rc::new(RefCell::new(OutputManager::new(detect_compositor())));
     let surface_manager = Rc::new(RefCell::new(SurfaceManager::new()));
     let render_bridge = RenderBridge::new();
 
-    let shared = Rc::new(AppShared {
-        surfaces: RefCell::new(Vec::new()),
-        surface_manager: surface_manager.clone(),
-        render_bridge: render_bridge.clone(),
-        output_manager: output_manager.clone(),
-        store: RefCell::new(Placements::load()),
-        drag: RefCell::new(None),
-        outputs_ready: Cell::new(false),
-        exit: Cell::new(false),
-        first_frame: Cell::new(false),
-    });
+    let coordinator = Coordinator::new(
+        output_manager.clone(),
+        surface_manager.clone(),
+        render_bridge.clone(),
+        Placements::default(),
+    );
 
     let bar_id = HostId::new("bar");
     let cal_id = HostId::new("calendar");
 
-    let bar_adapter = OwlenWindowAdapter::new(bar_id.clone());
-    let cal_adapter = OwlenWindowAdapter::new(cal_id.clone());
+    coordinator.attach_host(bar_id.clone(), SurfaceKind::Bar, None);
+    coordinator.attach_host(cal_id.clone(), SurfaceKind::Calendar, None);
 
-    shared.surfaces.borrow_mut().push(SurfaceState {
-        host_id: bar_id.clone(),
-        kind: SurfaceKind::Bar,
-        adapter: bar_adapter,
-        placement: None,
-        visible: true,
-    });
-    shared.surfaces.borrow_mut().push(SurfaceState {
-        host_id: cal_id.clone(),
-        kind: SurfaceKind::Calendar,
-        adapter: cal_adapter,
-        placement: None,
-        visible: true,
-    });
-
-    // 1. FrameRendered for bar triggers first-frame milestone via production helper
+    // 1. FrameRendered for bar triggers first-frame milestone via Coordinator
     let bar_token = surface_manager
         .borrow_mut()
         .generation_registry_mut_for_test()
@@ -888,14 +872,14 @@ fn platform_lifecycle_event_and_drag_cancellation_invariants() {
         host_id: bar_id.clone(),
         token: bar_token.clone(),
     };
-    process_lifecycle_event(&shared, frame_bar);
+    coordinator.process_lifecycle_event(frame_bar);
     assert!(
-        shared.first_frame.get(),
+        coordinator.first_frame_fired(),
         "FrameRendered for Bar must set first_frame milestone"
     );
 
     // 2. FrameRendered for non-Bar (calendar) does not reset or duplicate milestone
-    shared.first_frame.set(false);
+    coordinator.set_first_frame_fired(false);
     let cal_token = surface_manager
         .borrow_mut()
         .generation_registry_mut_for_test()
@@ -905,50 +889,67 @@ fn platform_lifecycle_event_and_drag_cancellation_invariants() {
         host_id: cal_id.clone(),
         token: cal_token.clone(),
     };
-    process_lifecycle_event(&shared, frame_cal);
+    coordinator.process_lifecycle_event(frame_cal);
     assert!(
-        !shared.first_frame.get(),
+        !coordinator.first_frame_fired(),
         "FrameRendered for non-Bar must not trigger Bar milestone"
     );
 
-    // 3. Set active drag on calendar (index 1) on output 42
-    *shared.drag.borrow_mut() = Some(DragState {
-        idx: 1,
+    // 3. Set active drag on calendar (HostId) on output 42
+    coordinator.set_drag_state(Some(DragState {
+        host_id: cal_id.clone(),
         grab: (100.0, 100.0),
         start_margins: (0, 0, 0, 0),
         anchor: Anchor::TopLeft,
         output_id: OutputId::new(42),
-    });
-    assert!(shared.drag.borrow().is_some());
+    }));
+    assert!(coordinator.drag_state().is_some());
 
     // 4. Closed for unrelated host (bar) preserves calendar drag
     let close_bar_when_dragging_cal = PlatformLifecycleEvent::Closed {
         host_id: bar_id.clone(),
         token: bar_token.clone(),
     };
-    process_lifecycle_event(&shared, close_bar_when_dragging_cal);
-    assert!(shared.exit.get(), "Bar close must request application exit");
+    coordinator.process_lifecycle_event(close_bar_when_dragging_cal);
     assert!(
-        shared.drag.borrow().is_some(),
+        coordinator.should_exit(),
+        "Bar close must request application exit"
+    );
+    assert!(
+        coordinator.drag_state().is_some(),
         "unrelated host close must preserve active drag on calendar"
     );
 
     // Reset exit flag for next assertion
-    shared.exit.set(false);
+    let coordinator = Coordinator::new(
+        output_manager.clone(),
+        surface_manager.clone(),
+        render_bridge.clone(),
+        Placements::default(),
+    );
+    coordinator.attach_host(bar_id.clone(), SurfaceKind::Bar, None);
+    coordinator.attach_host(cal_id.clone(), SurfaceKind::Calendar, None);
+    coordinator.set_drag_state(Some(DragState {
+        host_id: cal_id.clone(),
+        grab: (100.0, 100.0),
+        start_margins: (0, 0, 0, 0),
+        anchor: Anchor::TopLeft,
+        output_id: OutputId::new(42),
+    }));
 
-    // 5. Closed for actively dragged host (calendar) cancels drag via production helper without setting exit
+    // 5. Closed for actively dragged host (calendar) cancels drag via Coordinator without setting exit
     let close_cal = PlatformLifecycleEvent::Closed {
         host_id: cal_id.clone(),
         token: cal_token,
     };
-    process_lifecycle_event(&shared, close_cal);
+    coordinator.process_lifecycle_event(close_cal);
     assert!(
-        !shared.exit.get(),
+        !coordinator.should_exit(),
         "non-bar close must not request application exit"
     );
     assert!(
-        shared.drag.borrow().is_none(),
-        "closing dragged surface must cancel active drag via production helper"
+        coordinator.drag_state().is_none(),
+        "closing dragged surface must cancel active drag via Coordinator"
     );
 
     // 6. Test topology drag cancellation helper when output is removed vs present
@@ -970,31 +971,31 @@ fn platform_lifecycle_event_and_drag_cancellation_invariants() {
     );
 
     // Set drag targeting out2 (which is absent in snap_with_out1)
-    *shared.drag.borrow_mut() = Some(DragState {
-        idx: 1,
+    coordinator.set_drag_state(Some(DragState {
+        host_id: cal_id.clone(),
         grab: (50.0, 50.0),
         start_margins: (0, 0, 0, 0),
         anchor: Anchor::TopLeft,
         output_id: out2,
-    });
+    }));
 
-    let cancelled = cancel_drag_if_output_missing(&shared, &snap_with_out1);
+    let cancelled = coordinator.cancel_drag_if_output_missing(&snap_with_out1);
     assert!(cancelled, "drag targeting absent output must be cancelled");
-    assert!(shared.drag.borrow().is_none());
+    assert!(coordinator.drag_state().is_none());
 
     // Set drag targeting out1 (which is present in snap_with_out1)
-    *shared.drag.borrow_mut() = Some(DragState {
-        idx: 1,
+    coordinator.set_drag_state(Some(DragState {
+        host_id: cal_id.clone(),
         grab: (50.0, 50.0),
         start_margins: (0, 0, 0, 0),
         anchor: Anchor::TopLeft,
         output_id: out1,
-    });
+    }));
 
-    let cancelled = cancel_drag_if_output_missing(&shared, &snap_with_out1);
+    let cancelled = coordinator.cancel_drag_if_output_missing(&snap_with_out1);
     assert!(
         !cancelled,
         "drag targeting present output must remain active"
     );
-    assert!(shared.drag.borrow().is_some());
+    assert!(coordinator.drag_state().is_some());
 }
