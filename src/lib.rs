@@ -5,4 +5,6 @@ pub mod persistence;
 pub mod placement;
 pub mod platform;
 pub mod runtime;
-pub mod window;
+pub mod ui {
+    slint::include_modules!();
+}

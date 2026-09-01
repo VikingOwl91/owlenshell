@@ -6,8 +6,8 @@ use owlenshell::domain::ids::HostId;
 use owlenshell::instrumentation;
 use owlenshell::model::{SurfaceKind, CALENDAR_KEY};
 use owlenshell::persistence::Placements;
-use owlenshell::platform::{compositor, OutputManager};
-use owlenshell::runtime::{drain_and_attach, hide_kind, pump, AppShared, AppState, OwlenPlatform};
+use owlenshell::platform::{compositor, OutputManager, OwlenPlatform, RenderBridge};
+use owlenshell::runtime::{attach_host, hide_host, pump, AppShared, AppState};
 use slint::{ComponentHandle, ModelRc, VecModel};
 use smithay_client_toolkit::compositor::CompositorState;
 use smithay_client_toolkit::output::OutputState;
@@ -37,13 +37,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     instrumentation::milestone("wayland-bound");
 
+    let render_bridge = RenderBridge::new();
+
     let shared = Rc::new(AppShared {
         conn: conn.clone(),
         qh,
         compositor,
         layer_shell,
         surfaces: RefCell::new(Vec::new()),
-        new_adapters: RefCell::new(Vec::new()),
+        render_bridge: render_bridge.clone(),
         output_manager: RefCell::new(OutputManager::new(compositor::detect())),
         store: RefCell::new(Placements::load()),
         modifiers: Cell::new(Default::default()),
@@ -65,45 +67,49 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         shared: shared.clone(),
     };
 
-    slint::platform::set_platform(Box::new(OwlenPlatform {
-        shared: shared.clone(),
-    }))?;
+    slint::platform::set_platform(Box::new(OwlenPlatform::new(render_bridge.clone())))?;
     instrumentation::milestone("platform");
 
-    let bar = Bar::new()?;
-    drain_and_attach(&shared, SurfaceKind::Bar, None);
+    let bar_id = HostId::new("bar");
+    let bar = render_bridge.with_host_creation(bar_id.clone(), Bar::new)?;
+    attach_host(&shared, bar_id, SurfaceKind::Bar, None);
     bar.set_clock_text(clock_text());
     instrumentation::milestone("bar");
 
+    let cal_id = HostId::new(CALENDAR_KEY);
     let calendar_ui: Rc<RefCell<Option<Calendar>>> = Rc::new(RefCell::new(None));
     bar.on_open_calendar({
         let shared = shared.clone();
         let calendar_ui = calendar_ui.clone();
+        let render_bridge = render_bridge.clone();
+        let cal_id = cal_id.clone();
         move || {
             if calendar_ui.borrow().is_some() {
-                hide_kind(&shared, SurfaceKind::Calendar);
+                hide_host(&shared, &cal_id);
                 *calendar_ui.borrow_mut() = None;
+                render_bridge.remove_adapter(&cal_id);
                 return;
             }
-            let cal = Calendar::new().expect("calendar");
+            let cal = render_bridge
+                .with_host_creation(cal_id.clone(), Calendar::new)
+                .expect("calendar");
             let (title, weeks) = calendar_weeks();
             cal.set_month_title(title.into());
             cal.set_weeks(weeks);
             cal.on_dismiss({
                 let shared = shared.clone();
                 let calendar_ui = calendar_ui.clone();
+                let render_bridge = render_bridge.clone();
+                let cal_id = cal_id.clone();
                 move || {
-                    hide_kind(&shared, SurfaceKind::Calendar);
+                    hide_host(&shared, &cal_id);
                     *calendar_ui.borrow_mut() = None;
+                    render_bridge.remove_adapter(&cal_id);
                 }
             });
             let _ = cal.show();
-            let placement = shared
-                .store
-                .borrow()
-                .get(&HostId::new(CALENDAR_KEY))
-                .cloned();
-            drain_and_attach(&shared, SurfaceKind::Calendar, placement);
+            let placement = shared.store.borrow().get(&cal_id).cloned();
+            attach_host(&shared, cal_id.clone(), SurfaceKind::Calendar, placement);
             *calendar_ui.borrow_mut() = Some(cal);
         }
     });

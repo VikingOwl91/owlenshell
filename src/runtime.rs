@@ -1,6 +1,6 @@
 pub mod placement_engine;
 
-use crate::domain::ids::OutputId;
+use crate::domain::ids::{HostId, OutputId};
 use crate::instrumentation;
 pub use crate::model::SurfaceKind;
 use crate::model::{
@@ -10,11 +10,10 @@ use crate::persistence::Placements;
 use crate::placement::{
     clamp_offset, margins_from_offset, resolve, PlacementContext, PlacementEngine, MIN_VISIBLE,
 };
-use crate::platform::OutputManager;
-use crate::window::OwlenWindowAdapter;
+use crate::platform::{dispatch_pointer, OutputManager, OwlenWindowAdapter, RenderBridge};
 use slint::platform::software_renderer::{PremultipliedRgbaColor, TargetPixel};
-use slint::platform::{Platform, PointerEventButton, WindowAdapter, WindowEvent};
-use slint::{LogicalPosition, LogicalSize, PhysicalSize, PlatformError};
+use slint::platform::{PointerEventButton, WindowAdapter, WindowEvent};
+use slint::{LogicalPosition, LogicalSize, PhysicalSize};
 use smithay_client_toolkit::compositor::{CompositorHandler, CompositorState, FrameCallbackData};
 use smithay_client_toolkit::delegate_registry;
 use smithay_client_toolkit::output::{OutputHandler, OutputState};
@@ -43,7 +42,7 @@ pub struct AppShared {
     pub compositor: CompositorState,
     pub layer_shell: LayerShell,
     pub surfaces: RefCell<Vec<SurfaceState>>,
-    pub new_adapters: RefCell<Vec<Rc<OwlenWindowAdapter>>>,
+    pub render_bridge: Rc<RenderBridge>,
     pub output_manager: RefCell<OutputManager>,
     pub store: RefCell<Placements>,
     pub modifiers: Cell<Modifiers>,
@@ -66,6 +65,7 @@ pub struct AppState {
 }
 
 pub struct SurfaceState {
+    pub host_id: HostId,
     pub kind: SurfaceKind,
     pub adapter: Rc<OwlenWindowAdapter>,
     pub placement: Option<SavedPlacement>,
@@ -97,53 +97,53 @@ pub struct DragState {
     output_id: OutputId,
 }
 
-pub struct OwlenPlatform {
-    pub shared: Rc<AppShared>,
-}
+impl SurfaceState {
+    /// Retires active native surface resources while preserving logical host identity and visibility.
+    pub fn retire_native_surface(&mut self) {
+        self.wl = None;
+        self.configured = None;
+        self.render_size = None;
+        self.frame_pending = false;
+        WindowAdapter::request_redraw(&*self.adapter.window);
+    }
 
-impl Platform for OwlenPlatform {
-    fn create_window_adapter(&self) -> Result<Rc<dyn WindowAdapter>, PlatformError> {
-        let adapter = OwlenWindowAdapter::new();
-        self.shared.new_adapters.borrow_mut().push(adapter.clone());
-        Ok(adapter)
+    /// Prepares an existing surface state for reattachment or recreation with updated placement.
+    pub fn prepare_recreation(
+        &mut self,
+        adapter: Rc<OwlenWindowAdapter>,
+        placement: Option<SavedPlacement>,
+    ) {
+        self.adapter = adapter;
+        self.placement = placement;
+        self.visible = true;
+        self.retire_native_surface();
     }
 }
 
-pub fn drain_and_attach(
+pub fn attach_host(
     shared: &Rc<AppShared>,
+    host_id: HostId,
     kind: SurfaceKind,
     placement: Option<SavedPlacement>,
 ) -> usize {
     let adapter = shared
-        .new_adapters
-        .borrow_mut()
-        .pop()
-        .expect("slint window adapter");
+        .render_bridge
+        .get_adapter(&host_id)
+        .expect("adapter must exist for host_id");
+
     let mut surfaces = shared.surfaces.borrow_mut();
     if let Some((idx, surface)) = surfaces
         .iter_mut()
         .enumerate()
-        .find(|(_, surface)| surface.kind == kind && !surface.visible)
+        .find(|(_, s)| s.host_id == host_id)
     {
-        surface.adapter.surface.set(None);
-        adapter.surface.set(Some(idx));
-        *surface = SurfaceState {
-            kind,
-            adapter,
-            placement,
-            visible: true,
-            scale: 1,
-            configured: None,
-            frame_pending: false,
-            render_size: None,
-            dispatched_scale: 0,
-            wl: None,
-        };
+        surface.prepare_recreation(adapter, placement);
         return idx;
     }
+
     let idx = surfaces.len();
-    adapter.surface.set(Some(idx));
     surfaces.push(SurfaceState {
+        host_id,
         kind,
         adapter,
         placement,
@@ -158,6 +158,29 @@ pub fn drain_and_attach(
     idx
 }
 
+pub fn hide_host(shared: &AppShared, host_id: &HostId) {
+    let mut surfaces = shared.surfaces.borrow_mut();
+    for (idx, surf) in surfaces
+        .iter_mut()
+        .enumerate()
+        .filter(|(_, s)| &s.host_id == host_id)
+    {
+        surf.visible = false;
+        surf.wl = None;
+        surf.configured = None;
+        surf.render_size = None;
+        surf.frame_pending = false;
+        if shared.keyboard_focus.get() == Some(idx) {
+            shared.keyboard_focus.set(None);
+            shared.modifiers.set(Modifiers::default());
+        }
+        let dragging_surface = shared.drag.borrow().as_ref().map(|drag| drag.idx) == Some(idx);
+        if dragging_surface {
+            shared.drag.borrow_mut().take();
+        }
+    }
+}
+
 pub fn hide_kind(shared: &AppShared, kind: SurfaceKind) {
     let mut surfaces = shared.surfaces.borrow_mut();
     for (idx, surf) in surfaces
@@ -166,7 +189,6 @@ pub fn hide_kind(shared: &AppShared, kind: SurfaceKind) {
         .filter(|(_, s)| s.kind == kind)
     {
         surf.visible = false;
-        surf.adapter.surface.set(None);
         surf.wl = None;
         surf.configured = None;
         surf.render_size = None;
@@ -279,19 +301,12 @@ fn reconcile(shared: &AppShared) {
         );
         if target.is_none() {
             let mut surfaces = shared.surfaces.borrow_mut();
-            surfaces[i].wl = None;
-            surfaces[i].configured = None;
-            surfaces[i].render_size = None;
-            surfaces[i].frame_pending = false;
+            surfaces[i].retire_native_surface();
             continue;
         }
         if current != target {
             let mut surfaces = shared.surfaces.borrow_mut();
-            surfaces[i].wl = None;
-            surfaces[i].configured = None;
-            surfaces[i].render_size = None;
-            surfaces[i].frame_pending = false;
-            WindowAdapter::request_redraw(&*surfaces[i].adapter.window);
+            surfaces[i].retire_native_surface();
         }
     }
 }
@@ -573,10 +588,6 @@ fn layer_index_for(shared: &AppShared, layer: &LayerSurface) -> Option<usize> {
         .position(|s| s.wl.as_ref().map(|l| &l.layer == layer).unwrap_or(false))
 }
 
-fn dispatch_pointer(adapter: &OwlenWindowAdapter, event: WindowEvent) {
-    let _ = adapter.window.try_dispatch_event(event);
-}
-
 impl CompositorHandler for AppState {
     fn scale_factor_changed(
         &mut self,
@@ -708,11 +719,7 @@ impl LayerShellHandler for AppState {
             if surfaces[idx].kind == SurfaceKind::Bar {
                 self.shared.exit.set(true);
             }
-            surfaces[idx].wl = None;
-            surfaces[idx].configured = None;
-            surfaces[idx].render_size = None;
-            surfaces[idx].frame_pending = false;
-            WindowAdapter::request_redraw(&*surfaces[idx].adapter.window);
+            surfaces[idx].retire_native_surface();
             if self.shared.keyboard_focus.get() == Some(idx) {
                 self.shared.keyboard_focus.set(None);
                 self.shared.modifiers.set(Modifiers::default());
@@ -1030,11 +1037,7 @@ fn finish_drag(shared: &AppShared, drag: &DragState, pointer: (f64, f64)) {
         let mut surfaces = shared.surfaces.borrow_mut();
         surfaces[drag.idx].placement = Some(placement.clone());
         if recreate {
-            surfaces[drag.idx].wl = None;
-            surfaces[drag.idx].configured = None;
-            surfaces[drag.idx].render_size = None;
-            surfaces[drag.idx].frame_pending = false;
-            WindowAdapter::request_redraw(&*surfaces[drag.idx].adapter.window);
+            surfaces[drag.idx].retire_native_surface();
         } else if let Some(live) = surfaces[drag.idx].wl.as_mut() {
             live.anchor = placement.anchor;
             live.margins = margins_from_offset(placement.anchor, placement.offset);

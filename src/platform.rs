@@ -1,5 +1,6 @@
 pub mod compositor;
 pub mod output_manager;
+pub mod render_bridge;
 pub mod surface_manager;
 
 pub use compositor::{
@@ -9,6 +10,10 @@ pub use compositor::{
 pub use output_manager::{
     canonical_output_cmp, NewOutput, OutputManager, OutputRegistry, ProtocolOutput, TopologyEvent,
     TopologyGeneration, TopologySnapshot,
+};
+pub use render_bridge::{
+    dispatch_keyboard, dispatch_pointer, CreationNonce, OwlenPlatform, OwlenWindowAdapter,
+    PendingWindowCreation, RenderBridge, RenderBridgeError,
 };
 pub use surface_manager::{
     SurfaceCommand, SurfaceGeneration, SurfaceGenerationRegistry, SurfaceLifecycleEvent,
