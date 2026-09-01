@@ -682,3 +682,16 @@ impl SurfaceManager {
         inst.frame_pending = true;
     }
 }
+
+impl From<&crate::domain::host::HostSpec> for SurfaceSpec {
+    fn from(spec: &crate::domain::host::HostSpec) -> Self {
+        Self {
+            namespace: spec.namespace.clone(),
+            layer: spec.layer,
+            mode: spec.mode.clone(),
+            size: spec.size,
+            exclusive_zone: spec.exclusive_zone,
+            keyboard_interactivity: spec.keyboard_interactivity,
+        }
+    }
+}

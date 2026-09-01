@@ -519,3 +519,21 @@ pub fn containing_output(
     let found = matches.next()?;
     matches.next().is_none().then_some(found)
 }
+
+impl From<&crate::domain::host::HostSpec> for HostPlacementConstraints {
+    fn from(spec: &crate::domain::host::HostSpec) -> Self {
+        let widget_size = match spec.size {
+            crate::domain::host::HostSize::Exact { width, height } => (width as i32, height as i32),
+            crate::domain::host::HostSize::OutputWidth { height } => (0, height as i32),
+            crate::domain::host::HostSize::OutputHeight { width } => (width as i32, 0),
+            crate::domain::host::HostSize::FillOutput => (0, 0),
+            crate::domain::host::HostSize::ContentPreferred => (MIN_VISIBLE, MIN_VISIBLE),
+        };
+
+        Self {
+            min_visible: MIN_VISIBLE,
+            widget_size,
+            work_area: None,
+        }
+    }
+}

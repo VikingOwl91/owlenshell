@@ -8,7 +8,8 @@ use owlenshell::domain::output::{OutputIdentity, OutputPreference, OutputSnapsho
 use owlenshell::domain::placement::{
     Anchor, DeferredSurface, PlacedSurface, PlacementDecision, ResolveReason, SavedPlacement,
 };
-use owlenshell::domain::widget::{WidgetSpec, WidgetState};
+use owlenshell::domain::widget::{WidgetKind, WidgetSpec, WidgetState};
+use owlenshell::platform::SurfaceSpec;
 
 #[test]
 fn typed_ids_are_distinct_and_well_formed() {
@@ -63,6 +64,7 @@ fn host_spec_is_generic_without_widget_variants() {
         exclusive_zone: ExclusiveZonePolicy::None,
         keyboard_interactivity: KeyboardInteractivityPolicy::OnDemand,
         movement_policy: HostMovementPolicy::Movable,
+        primary_milestone: false,
     };
 
     assert_eq!(spec.mode, HostMode::Float);
@@ -80,13 +82,80 @@ fn host_spec_is_generic_without_widget_variants() {
 }
 
 #[test]
+fn bar_host_policy_without_clock_knowledge() {
+    let bar_spec = HostSpec::top_bar(HostId::new("bar_container"), 32);
+    assert_eq!(bar_spec.id.as_str(), "bar_container");
+    assert_eq!(bar_spec.mode, HostMode::Cover);
+    assert_eq!(bar_spec.layer, HostLayer::Top);
+    assert_eq!(bar_spec.exclusive_zone, ExclusiveZonePolicy::Fixed(32));
+    assert_eq!(bar_spec.movement_policy, HostMovementPolicy::Fixed);
+    assert!(bar_spec.primary_milestone);
+
+    // Converts to platform SurfaceSpec accurately
+    let surface_spec = SurfaceSpec::from(&bar_spec);
+    assert_eq!(surface_spec.namespace, "owlenshell-bar");
+    assert_eq!(surface_spec.mode, HostMode::Cover);
+    assert_eq!(surface_spec.exclusive_zone, ExclusiveZonePolicy::Fixed(32));
+
+    // Can host an arbitrary non-clock widget
+    let mut state = HostState::with_spec(bar_spec);
+    state.attach_widget(WidgetId::new("system_monitor"));
+    assert_eq!(state.attached_widgets()[0].as_str(), "system_monitor");
+}
+
+#[test]
+fn floating_host_policy_without_calendar_knowledge() {
+    let float_spec = HostSpec::floating(HostId::new("popup_container"));
+    assert_eq!(float_spec.id.as_str(), "popup_container");
+    assert_eq!(float_spec.mode, HostMode::Float);
+    assert_eq!(float_spec.layer, HostLayer::Top);
+    assert_eq!(float_spec.exclusive_zone, ExclusiveZonePolicy::None);
+    assert_eq!(float_spec.movement_policy, HostMovementPolicy::Movable);
+    assert!(!float_spec.primary_milestone);
+
+    // Converts to platform SurfaceSpec accurately
+    let surface_spec = SurfaceSpec::from(&float_spec);
+    assert_eq!(surface_spec.namespace, "owlenshell-floating");
+    assert_eq!(surface_spec.mode, HostMode::Float);
+    assert_eq!(surface_spec.exclusive_zone, ExclusiveZonePolicy::None);
+
+    // Can host an arbitrary non-calendar widget
+    let mut state = HostState::with_spec(float_spec);
+    state.attach_widget(WidgetId::new("quick_notes"));
+    assert_eq!(state.attached_widgets()[0].as_str(), "quick_notes");
+}
+
+#[test]
+fn clock_and_calendar_widgets_contain_no_host_or_native_policy() {
+    let clock = WidgetSpec::clock(WidgetId::new("clock_widget"));
+    assert_eq!(clock.kind, WidgetKind::Clock);
+    assert_eq!(clock.title, "Clock");
+    assert!(clock.enabled_by_default);
+
+    let calendar = WidgetSpec::calendar(WidgetId::new("calendar_widget"));
+    assert_eq!(calendar.kind, WidgetKind::Calendar);
+    assert_eq!(calendar.title, "Calendar");
+    assert!(calendar.enabled_by_default);
+
+    // Widget state exists independently of any Host or native surface
+    let mut clock_state = WidgetState::new(clock.id);
+    assert!(clock_state.enabled);
+    clock_state.enabled = false;
+    assert!(!clock_state.enabled);
+
+    let cal_state = WidgetState::new(calendar.id);
+    assert!(cal_state.enabled);
+}
+
+#[test]
 fn widget_spec_and_state_are_decoupled_from_host_policy() {
-    let widget_spec = WidgetSpec {
-        id: WidgetId::new("weather-widget"),
-        title: "Weather".into(),
-        enabled_by_default: true,
-    };
+    let widget_spec = WidgetSpec::new(
+        WidgetId::new("weather-widget"),
+        WidgetKind::Custom,
+        "Weather",
+    );
     assert_eq!(widget_spec.id.as_str(), "weather-widget");
+    assert_eq!(widget_spec.kind, WidgetKind::Custom);
 
     let widget_state = WidgetState::new(widget_spec.id.clone());
     assert!(widget_state.enabled);
@@ -156,4 +225,39 @@ fn output_identity_and_role_matching_evidence() {
     assert_eq!(pref.model(), Some("U2720Q"));
     assert_eq!(pref.physical_size_mm(), Some((600, 340)));
     assert_eq!(pref.logical_role.as_deref(), Some("primary"));
+}
+
+#[test]
+fn host_spec_to_placement_constraints_conversion() {
+    use owlenshell::domain::host::HostSize;
+    use owlenshell::placement::HostPlacementConstraints;
+
+    // 1. top_bar HostSpec preserves configured height and does not invent static width
+    let bar_spec = HostSpec::top_bar(HostId::new("bar"), 32);
+    let bar_constraints = HostPlacementConstraints::from(&bar_spec);
+    assert_eq!(bar_constraints.widget_size, (0, 32));
+    assert_eq!(bar_constraints.min_visible, 32);
+    assert!(bar_constraints.work_area.is_none());
+
+    // 2. floating HostSpec uses ContentPreferred (default min size) without manufacturing a fake static size
+    let float_spec = HostSpec::floating(HostId::new("calendar_host"));
+    let float_constraints = HostPlacementConstraints::from(&float_spec);
+    assert_eq!(float_constraints.widget_size, (32, 32));
+    assert_eq!(float_constraints.min_visible, 32);
+    assert!(float_constraints.work_area.is_none());
+
+    // 3. Exact size HostSpec preserves explicit width and height
+    let mut exact_spec = HostSpec::floating(HostId::new("exact_host"));
+    exact_spec.size = HostSize::Exact {
+        width: 320,
+        height: 240,
+    };
+    let exact_constraints = HostPlacementConstraints::from(&exact_spec);
+    assert_eq!(exact_constraints.widget_size, (320, 240));
+
+    // 4. FillOutput HostSpec preserves (0, 0)
+    let mut fill_spec = HostSpec::floating(HostId::new("fill_host"));
+    fill_spec.size = HostSize::FillOutput;
+    let fill_constraints = HostPlacementConstraints::from(&fill_spec);
+    assert_eq!(fill_constraints.widget_size, (0, 0));
 }

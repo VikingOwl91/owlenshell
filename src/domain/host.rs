@@ -58,9 +58,10 @@ pub enum HostMovementPolicy {
     Fixed,
 }
 
-/// Generic specification of a shell surface host.
+/// Generic specification of a shell surface host container.
 ///
-/// Contains NO widget-specific fields or calendar/clock variants.
+/// Contains spatial and layer-shell policies, but NO widget-specific fields
+/// or calendar/clock variants.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct HostSpec {
     pub id: HostId,
@@ -73,6 +74,43 @@ pub struct HostSpec {
     pub exclusive_zone: ExclusiveZonePolicy,
     pub keyboard_interactivity: KeyboardInteractivityPolicy,
     pub movement_policy: HostMovementPolicy,
+    pub primary_milestone: bool,
+}
+
+impl HostSpec {
+    /// Constructs a standard top bar host specification.
+    pub fn top_bar(id: HostId, height: u32) -> Self {
+        Self {
+            id,
+            namespace: "owlenshell-bar".into(),
+            mode: HostMode::Cover,
+            layer: HostLayer::Top,
+            size: HostSize::OutputWidth { height },
+            default_anchor: Anchor::TopLeft,
+            default_offset: (0, 0),
+            exclusive_zone: ExclusiveZonePolicy::Fixed(height),
+            keyboard_interactivity: KeyboardInteractivityPolicy::None,
+            movement_policy: HostMovementPolicy::Fixed,
+            primary_milestone: true,
+        }
+    }
+
+    /// Constructs a standard floating/movable popup host specification.
+    pub fn floating(id: HostId) -> Self {
+        Self {
+            id,
+            namespace: "owlenshell-floating".into(),
+            mode: HostMode::Float,
+            layer: HostLayer::Top,
+            size: HostSize::ContentPreferred,
+            default_anchor: Anchor::TopRight,
+            default_offset: (24, 40),
+            exclusive_zone: ExclusiveZonePolicy::None,
+            keyboard_interactivity: KeyboardInteractivityPolicy::OnDemand,
+            movement_policy: HostMovementPolicy::Movable,
+            primary_milestone: false,
+        }
+    }
 }
 
 /// Runtime logical state of a surface host.
@@ -81,6 +119,7 @@ pub struct HostSpec {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct HostState {
     pub id: HostId,
+    pub spec: Option<HostSpec>,
     pub visible: bool,
     pub attached_widgets: Vec<WidgetId>,
     pub saved_placement: Option<SavedPlacement>,
@@ -91,6 +130,18 @@ impl HostState {
     pub fn new(id: HostId) -> Self {
         Self {
             id,
+            spec: None,
+            visible: false,
+            attached_widgets: Vec::new(),
+            saved_placement: None,
+            current_decision: None,
+        }
+    }
+
+    pub fn with_spec(spec: HostSpec) -> Self {
+        Self {
+            id: spec.id.clone(),
+            spec: Some(spec),
             visible: false,
             attached_widgets: Vec::new(),
             saved_placement: None,
