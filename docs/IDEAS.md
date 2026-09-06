@@ -269,6 +269,127 @@ A useful long-term principle:
 
 > **Make Linux desktop state visible, understandable and directly manipulable instead of leaving it fragmented across CLI tools and subsystem-specific interfaces.**
 
+## v-infinity: Family IT Support Without the Phone Debugging
+
+This section is intentionally **v-infinity**: capture the idea, preserve the architecture implications, and absolutely do not let it become a prerequisite for turning AGS off.
+
+The problem is familiar: a less technical Linux user sees only the GUI symptom, while the person helping them needs service state, configuration health, logs and environment details. Remote diagnosis then degenerates into reading terminal commands over the phone and receiving incomplete screenshots.
+
+Potential direction:
+
+### Progressive Diagnosis
+
+Present the useful answer before subsystem detail:
+
+```text
+Printing unavailable
+CUPS configuration appears damaged.
+
+[ Try safe repair ]  [ Details ]
+```
+
+Advanced details can correlate provider state such as service status, device detection, configuration health and relevant recent logs. The normal user should not need to understand systemd or CUPS merely to act on a known safe fix.
+
+Principle:
+
+> **Show the answer first. Explain the system on demand.**
+
+### Trusted Support Contact
+
+Optionally allow a user to configure one or more trusted support contacts -- including, inevitably, the dedicated family IT person.
+
+A support request should not merely send "it doesn't work". Owlenshell can generate a structured diagnostic bundle containing only relevant information, with an explicit preview before sharing.
+
+Potential bundle contents:
+
+- Owlenshell version
+- distribution/session/compositor information
+- relevant provider and service states
+- narrowly scoped recent logs
+- configuration health signals
+- relevant hardware/device state
+- attempted or suggested remediation
+
+Sensitive and unrelated data such as passwords, clipboard history, arbitrary home-directory contents and unrelated logs must not be silently included. Users should be able to inspect and redact the exact payload before sharing.
+
+A configured support contact must not turn Owlenshell into an automatic escalation pipeline. Self-diagnosis and safe local remediation should remain the first path.
+
+### Support Request UX
+
+A support-capable Owlenshell instance could recognize a structured Owlenshell support bundle and present it as an actionable diagnostic view rather than a blob of text:
+
+```text
+Support request from Cousin-PC
+
+Printing
+Configuration appears damaged
+CUPS: active
+Printer: detected
+
+[ Reply ] [ Request more diagnostics ] [ Connect remotely... ]
+```
+
+### Consensual Remote Assistance
+
+As a much later extension, a support request could transition into an explicitly consented remote-assistance session.
+
+Owlenshell should own the understandable workflow, consent UX, capability grants, diagnostics and revocation semantics rather than unnecessarily inventing a new remote-desktop protocol. Existing Linux primitives such as desktop portals and PipeWire, plus an appropriate transport/backend, should be reused where possible.
+
+Remote access must be capability-scoped and visible to the assisted user. Example initial grant:
+
+```text
+Chris wants to help remotely
+
+Requested access:
+✓ View screen
+✓ Control mouse & keyboard
+✗ Read files
+✗ Clipboard
+✗ Terminal
+✗ Administrator access
+
+[ Decline ] [ Allow ]
+```
+
+Additional capabilities must require an explicit new grant. A helper who later needs terminal access, file access or privileged action should request that capability with a human-readable reason rather than silently escalating the session.
+
+Potential grant properties:
+
+- allow once / session-scoped access
+- automatic expiry
+- explicit capability list
+- prominent active-session indicator
+- immediate local termination control
+- no hidden persistence
+- automatic revocation when the session ends
+- optional local session record showing what capabilities were granted and for how long
+
+Privileged/root operations remain separate from ordinary remote-control permission and should use the normal constrained privileged-action/Polkit model rather than inheriting remote-session authority.
+
+### Why This Fits Owlenshell
+
+This is not a reason for Owlenshell to become a remote administration suite. It is a possible long-term consequence of foundations already useful elsewhere:
+
+- typed diagnostics/providers can produce the support context
+- capability policy can express temporary remote permissions
+- portal visibility can expose screen/control sessions
+- system-service/configuration diagnostics can explain failures
+- the native shell can provide clear consent and session state
+
+The end-to-end idea is:
+
+```text
+Diagnose
+  -> offer safe self-fix
+  -> create inspectable/redactable support bundle
+  -> send to trusted support contact
+  -> optionally request consensual remote assistance
+  -> grant only required capabilities
+  -> automatically revoke everything at session end
+```
+
+If this ever ships, its success criterion is fewer telephone conversations beginning with: **"Open a terminal. No, the other black window."**
+
 ## Scope Discipline
 
 None of the ideas in this document should block the v1 acceptance contract.
