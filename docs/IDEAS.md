@@ -298,7 +298,29 @@ Principle:
 
 Optionally allow a user to configure one or more trusted support contacts -- including, inevitably, the dedicated family IT person.
 
-A support request should not merely send "it doesn't work". Owlenshell can generate a structured diagnostic bundle containing only relevant information, with an explicit preview before sharing.
+A support contact should be a cryptographic identity, not merely an email address or account name. Email, Matrix or another channel may transport a request, but transport identity must not be the security boundary.
+
+A possible model is a small modern public-key identity built around Ed25519/X25519-style primitives, or another well-reviewed equivalent. Existing OpenPGP or SSH identities may be useful as import/verification mechanisms, but the protocol should not inherit their complexity merely for familiarity.
+
+Conceptually:
+
+```text
+Supporter identity
+├── human-readable name: Chris
+├── public signing key
+├── encryption key/material
+├── fingerprint
+├── enrollment timestamp
+└── verification method
+```
+
+Enrollment should be a deliberate operation. In-person QR-code exchange, fingerprint comparison or another out-of-band verification path is preferable for high-trust support relationships.
+
+**Do not use first-contact TOFU as sufficient authorization for remote control.** A scammer who is already talking a user through a support flow must not be able to turn "accept this new key" into the remote-access installation step.
+
+The relationship should ideally be bidirectional: the assisted device can verify the supporter, and the supporter can verify that a request came from an enrolled device rather than merely trusting the sender address.
+
+A support request should not merely send "it doesn't work". Owlenshell can generate a structured diagnostic bundle containing only relevant information, with an explicit preview before sharing. Bundles can be signed by the device and, where appropriate, encrypted to the intended support contact.
 
 Potential bundle contents:
 
@@ -316,10 +338,11 @@ A configured support contact must not turn Owlenshell into an automatic escalati
 
 ### Support Request UX
 
-A support-capable Owlenshell instance could recognize a structured Owlenshell support bundle and present it as an actionable diagnostic view rather than a blob of text:
+A support-capable Owlenshell instance could recognize a signed structured Owlenshell support bundle and present it as an actionable diagnostic view rather than a blob of text:
 
 ```text
 Support request from Cousin-PC
+Identity: verified enrolled device
 
 Printing
 Configuration appears damaged
@@ -329,29 +352,37 @@ Printer: detected
 [ Reply ] [ Request more diagnostics ] [ Connect remotely... ]
 ```
 
+The assisted side should likewise distinguish an enrolled, cryptographically verified supporter from a new or unknown identity. A display name alone is never evidence of identity.
+
 ### Consensual Remote Assistance
 
 As a much later extension, a support request could transition into an explicitly consented remote-assistance session.
 
 Owlenshell should own the understandable workflow, consent UX, capability grants, diagnostics and revocation semantics rather than unnecessarily inventing a new remote-desktop protocol. Existing Linux primitives such as desktop portals and PipeWire, plus an appropriate transport/backend, should be reused where possible.
 
-Remote access must be capability-scoped and visible to the assisted user. Example initial grant:
+Remote access must be capability-scoped and visible to the assisted user. Prefer the least powerful useful support mode. Screen viewing plus pointer/annotation may solve many problems without granting input control at all.
+
+Example initial grant:
 
 ```text
 Chris wants to help remotely
 
+Identity: VERIFIED
+Trusted supporter since: 2027-03-14
+
 Requested access:
 ✓ View screen
-✓ Control mouse & keyboard
+✓ Point/annotate
+✗ Control mouse & keyboard
 ✗ Read files
 ✗ Clipboard
 ✗ Terminal
 ✗ Administrator access
 
-[ Decline ] [ Allow ]
+[ Decline ] [ Allow once ]
 ```
 
-Additional capabilities must require an explicit new grant. A helper who later needs terminal access, file access or privileged action should request that capability with a human-readable reason rather than silently escalating the session.
+Additional capabilities must require an explicit new grant. A helper who later needs input control, terminal access, file access or privileged action should request that capability with a human-readable reason rather than silently escalating the session.
 
 Potential grant properties:
 
@@ -363,8 +394,94 @@ Potential grant properties:
 - no hidden persistence
 - automatic revocation when the session ends
 - optional local session record showing what capabilities were granted and for how long
+- clear separation between viewing, annotation, input control, clipboard, files, terminal and privileged operations
 
 Privileged/root operations remain separate from ordinary remote-control permission and should use the normal constrained privileged-action/Polkit model rather than inheriting remote-session authority.
+
+### Scam and Social-Engineering Threat Model
+
+Cryptography can answer **"Is this request signed by the enrolled key?"** It cannot answer **"Is somebody manipulating the user into enrolling the attacker?"** Both problems must be treated independently.
+
+Remote support is therefore one of the rare Owlenshell features where deliberate friction may be a security property rather than a UX defect.
+
+Potential safeguards to investigate:
+
+- never allow a newly introduced identity to silently gain the same trust presentation as a long-established supporter
+- prevent or heavily constrain supporter enrollment from inside an unsolicited incoming remote-support flow
+- clearly distinguish `new/unknown`, `enrolled`, and `verified` identities
+- display how and when a supporter was enrolled
+- require separate consent for meaningful capability escalation
+- avoid repeated low-information prompts that train users to press Allow
+- include contextual anti-scam language for dangerous grants rather than generic permission text
+- never claim that Owlenshell, a bank, Microsoft, package updates, refunds or malware removal inherently require remote support
+- provide a single obvious local kill switch for every active session
+- ensure support sessions cannot create hidden persistence or silently enroll new supporters
+
+The design goal is stronger than preventing technically unauthorized access:
+
+> **A legitimate user should have a realistic chance of recognizing when they are being manipulated into authorizing malicious remote access.**
+
+This needs practical human threat modeling, not only protocol review.
+
+### External Review Gate
+
+Remote control must not graduate from v-infinity merely because the implementation works.
+
+By the time this is considered seriously, Owlenshell should already be a mature enough project to provide reviewers with an actual implementation, protocol description, threat model and reproducible test environment rather than a speculative concept.
+
+Before enabling general remote-control functionality, seek independent review from several perspectives:
+
+- offensive security / security engineering
+- fraud, scam and social-engineering practitioners/researchers
+- Linux desktop/Wayland/portal security expertise
+- accessibility and human-factors/UX expertise
+- independent protocol/cryptographic review where custom protocol elements exist
+
+Potential outreach examples, if appropriate at that future point, include practitioners/educators such as John Hammond, Scammer Payback/Pierogi, NetworkChuck, and others with directly relevant experience. These names are examples of useful perspectives, not endorsements, commitments or dependencies.
+
+Useful review questions include:
+
+- **Security:** How would you compromise or abuse this implementation?
+- **Fraud/social engineering:** How would you talk a victim into defeating these safeguards themselves?
+- **Human factors:** Can a normal user understand what is being granted without learning the underlying cryptography?
+- **Linux integration:** Are portal/session/capability boundaries represented accurately?
+
+Any serious remote-control release should treat unresolved high-impact findings from this review as blockers.
+
+### Dependency Ladder
+
+The remote-support idea should emerge from foundations Owlenshell already needs rather than pulling those foundations forward solely for remote support:
+
+```text
+v1
+├── daily-driver shell
+├── typed providers
+├── settings and diagnostics
+├── i18n
+└── AGS can be turned off
+
+later
+├── capability model
+├── sandbox/policy foundations
+├── deeper Linux visibility
+├── portal integration
+└── mature diagnostics
+
+much later
+├── structured support bundles
+├── cryptographic support identities
+├── trusted-contact enrollment
+└── passive/read-only assistance
+
+v-infinity
+└── remote control
+    ├── social-engineering threat model
+    ├── external security review
+    ├── accessibility/human-factors review
+    └── only then consider general availability
+```
+
+The existence of this roadmap must not pull remote-support work into v1 or delay core shell functionality.
 
 ### Why This Fits Owlenshell
 
@@ -382,9 +499,12 @@ The end-to-end idea is:
 Diagnose
   -> offer safe self-fix
   -> create inspectable/redactable support bundle
-  -> send to trusted support contact
+  -> sign/encrypt for an enrolled support identity
+  -> send over an untrusted transport
   -> optionally request consensual remote assistance
-  -> grant only required capabilities
+  -> verify both identities
+  -> start with the least powerful useful capability set
+  -> explicitly grant any escalation
   -> automatically revoke everything at session end
 ```
 
