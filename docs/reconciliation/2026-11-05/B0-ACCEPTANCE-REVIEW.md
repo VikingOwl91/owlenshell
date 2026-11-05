@@ -1,0 +1,15 @@
+# Independent review — formal B0 acceptance preparation and B1 proposal
+
+2026-11-05. **PASS for documentation handoff.** [B0 checklist](B0-FORMAL-ACCEPTANCE.md), [B1 authorization plan](B1-AUTHORIZATION-PLAN.md), [provenance](B0-ACCEPTANCE-SOURCES.json).
+
+Scope: contract completeness/policy alignment, generation/retirement safety, B1 containment, current-versus-historical environment binding, command accuracy, verification/rollback and preservation of existing evidence. This is documentation review, not runtime or production acceptance. Formal B0 acceptance and B1 implementation/execution remain maintainer decisions.
+
+A read-only Sol planner read the full twenty-one-document reconciliation/consolidation/closure package and checked relevant accepted ADRs/current source. It found no new policy contradiction, supported GO for contract acceptance review, and identified the need to keep experimental CLI/navigation/control paths out of canonical B1 claims. A bounded read-only harness investigation inspected retained source at its named commit; it found the historical five-scale runner and prototype control-pipe runner unsuitable unchanged. These findings are reflected in the new plan without editing prior records.
+
+Parent discovery used only source/filesystem/hash reads, version/help commands and locked offline no-dependency Cargo metadata. Installed Niri/host binaries match historical hashes, but no private compositor, application, build, test, IPC query, screenshot or input injection ran. Help/version success does not establish backend support or input/presentation correctness. Parent static checks verified preservation, source/document/executable hashes and historical harness blob identities, local links/anchors/source-line bounds and targeted privacy patterns; no historical PASS/NO-GO is changed.
+
+## Final verdict
+
+**PASS for documentation handoff; no BLOCKER, HIGH, MEDIUM or LOW findings.** A separate read-only Sol reviewer checked policy/ADR consistency, generation/retirement contracts, the bounded B1 slices, current-versus-historical bindings, actual Cargo targets, absent canonical binaries/harness and command limitations. It independently confirmed all twenty-one preserved-document hashes, fifty-six source hashes, three new Markdown hashes, sixteen executable snapshots, retained harness blobs, forty local links/anchors/source-line references and the unchanged unrelated handoff. Tracked and staged diffs were empty; targeted privacy checks reported no matches.
+
+This verdict concerns documentation completeness and consistency. The recommended B0 GO remains a recommendation for maintainer contract acceptance, not formal acceptance, B1 authorization or runtime correctness. Installed versions/hashes and CLI syntax do not establish a private Nested-Niri environment or presentation/input compatibility. No tests, builds, candidates, compositors, active-session queries or measurements were performed. No implementation, formal acceptance, staging, commit or publication is authorized by this record.

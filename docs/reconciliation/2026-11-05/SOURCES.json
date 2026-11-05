@@ -1,0 +1,876 @@
+{
+  "schema_version": 1,
+  "purpose": "Documentation-only architecture reconciliation input/provenance; not execution receipts or implementation approval",
+  "date": "2026-11-05",
+  "canonical_baseline": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+  "upstream_pin": "06616a02662621af84f0841dba3c48db1560bc82",
+  "source_entries": [
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "Cargo.lock",
+      "sha256": "8d4ad8670e750384a53813c76a03be60eeaf896fcba24e1f9c3d1987fc7d04e5",
+      "git_blob": "2f1a45532614ed4abd110cc2a8c64d64dbf5200b",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "Cargo.toml",
+      "sha256": "28db0803bdb0307d0250a8b7a33f3b77eaa22dcf613167984b5a407d2a9b57c6",
+      "git_blob": "a732833415d499a5f93d1eceb169a2540ac8fcb3",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "LICENSE",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "git_blob": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "README.md",
+      "sha256": "b70e7d874820fba7ea4144302e24321623d3c0a569d9a9551017c9c32fc164de",
+      "git_blob": "dac8b0d0084de0087831f0b1100f5a8d8d2abd07",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "build.rs",
+      "sha256": "d069bd76b5be7cbf1994ad43c92f4add94c5ab190db24af58e971f4bbdd60892",
+      "git_blob": "c19a7b886bdfd07c491f791af55c7a5c651eb83d",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/ADR/0001-slint.md",
+      "sha256": "3fdeca942ac0df8f33faf456a264151a8cb3a6b911823fdb85838b49241b91ea",
+      "git_blob": "4c4189609a0e4dec9711a76c5297f7597f14f6cd",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/ADR/0002-atomic-surfaces.md",
+      "sha256": "a3183536b359a3a9c2ab0450820a7a1f364d4643494a11b971d0753d84bceb42",
+      "git_blob": "2bd7434cc5ef4fd79ad8dd8205efddb32d1987bc",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/ADR/0003-custom-wayland-platform.md",
+      "sha256": "77acf50f914505cbdbf634803ab803a8d6a379635fea32fe22af3571f429e786",
+      "git_blob": "196434f48a10a1ab41a07cee14f55630b21a33e4",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/ADR/0004-placement-separation.md",
+      "sha256": "be95c377814fdda19552c201f9047db395a4632f76c7f3ddefb6e03c2dfe9e43",
+      "git_blob": "2b350ed7dd8c9f04d3f2e8a1c4b69466dea022f5",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/ADR/0005-compositor-adapters.md",
+      "sha256": "28f026a75a8241856fff2e727a9c76742dc8cf47708a437b054f88f2a156a960",
+      "git_blob": "ff3837c4a0ac9b41c6e48f3d0bf68b3c5508240e",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/ADR/0006-renderer-selection.md",
+      "sha256": "6bf78c0c8d086ffdc38db760e8252f43cfb4e2bbf787b3d6a296724412b62b21",
+      "git_blob": "336a1adfbedeb7778a9201af1aae1f8d8fd708b8",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/ADR/0007-renderer-bakeoff-evidence-scope.md",
+      "sha256": "96edc623aa5def5e4212e4cf9bde2a4f17ddd7eabeb2e6abcc2126051464a81c",
+      "git_blob": "419e02287c04e2c0fe38602f8842a90038007ce9",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/ARCHITECTURE.md",
+      "sha256": "6bcbe66029357dbe3c165a17e792d5c0e6ec367a3904ef162214498433a7679c",
+      "git_blob": "c06f54d9f1fcd4f76806ed108a2746fc17377bfa",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/ATOMIC-SURFACES.md",
+      "sha256": "3fc128fa95a1fc84395c73606a2f24193ec8d3724f44974792fca671de67d8ff",
+      "git_blob": "18ef7bfa12142ee0206f24b9c8cd3033062ddd82",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/CONFIGURATION.md",
+      "sha256": "856e5a6d56954adbb69c270b27b05a97881a3a1cb4927f178b95141d1c7cd84a",
+      "git_blob": "4139840a9335473abf5ef643a63b1bd55b3e302e",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/EXTENSIONS.md",
+      "sha256": "a81d20ec9aa9b444147816e6fbfe24b276407cc13e922cd7fcaef866e0fbbd09",
+      "git_blob": "4364676643595fe5b0a490602222c389d54ce7a9",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/FIRST-RUN.md",
+      "sha256": "5521dbe919fa369b7543fba5df45725f35525c526f03c0d7d7596393338f1f85",
+      "git_blob": "613c6ee34349e8f6c4070751fd06ddf0322ad1bc",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/IDENTITY.md",
+      "sha256": "2df41a2cb698ab7bebc03bc500ac9554510082d481c677c7bcc2e86fd9f413ce",
+      "git_blob": "b3c55361563036c6cf114608131c0481b763fb3f",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/LICENSING.md",
+      "sha256": "12d3d857ccc8d35fe5b52047ea6771129be5249b17a9eabb9c65bd70c856555f",
+      "git_blob": "4726382f1e59fc9f294c4f81b3bf6b18b9f93948",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/PORTABILITY-REQUIREMENTS.md",
+      "sha256": "10c498cfe2119b9394c5e41b55fa9a8d4ae423364e926ee70970c2da54c67eda",
+      "git_blob": "a747516cebfb609634e5e9bd5317d6666138cd6d",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/PRODUCTION-ARCHITECTURE-PLAN.md",
+      "sha256": "7ee3bb50ef0e126e213d151958afc9f2057495b378c780b5237c9d94ddfbb2e8",
+      "git_blob": "d0a0a84dc847962b97b999377fac6838ddb3d1eb",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/SHARED-SESSIONS.md",
+      "sha256": "95f3401846d4ac01ed37f5e4c64d94130ef7574f2f1900d46995176262c730c3",
+      "git_blob": "d0a13f4129b0cb5c6b674b843c6080c75dae7fcd",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/STAGE-3-IMPLEMENTATION-PLAN.md",
+      "sha256": "3e1a1497661e8f81b8f56444cb81d8ff171be9baebde2bdfabbb1442ec41dfc8",
+      "git_blob": "552d9e66409e81b1a370b4f00eb90368990e4fec",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/UPDATE-INTELLIGENCE.md",
+      "sha256": "d1d1e590668c3d2580ff1a4271fd4182681f698bb39e8e63fda5cb50506966b2",
+      "git_blob": "58165494b9f96f676bb2e22e65e4529f871cfeca",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/V1.md",
+      "sha256": "fe5e83c708f4e8921ded5341188428251701290f5ccdf511c7ac8ed09e61c18f",
+      "git_blob": "a275e653d96d9f5082422f83e9ad8a0a135a5dab",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/bakeoffs/renderer/EVIDENCE-SUMMARY.md",
+      "sha256": "e774ca99cb904c01f3a5cb6c17f068e6a8f93c7e5a3ec8f08636755081638ad9",
+      "git_blob": "dd8906f6a4228289d2dbc3007a8584c67fd4870b",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/bakeoffs/renderer/POST-S6-DECISION-READINESS.md",
+      "sha256": "83a4ff00a44875bb342b393bd098bfac61ef9449e1e73668bca649e6db8632ab",
+      "git_blob": "28472cce1d80b70013f6cbb264d9e8fb56845ad5",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/bakeoffs/renderer/SLINT-BASE-PLANNING-HANDOFF.md",
+      "sha256": "bd7ce43685b982759d45688a285510b5e8ce2e8ef0d09b8656803fd24942940c",
+      "git_blob": "74ba300e36a00640c9423ca629182059b3deee14",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/domain.rs",
+      "sha256": "1c2b5cbddd80d05d578750f5a0696178755f4a4b25cebe5ef8831882ee30b5e2",
+      "git_blob": "3fed3f6b36234150d57dd8d7763eb287cf3bc74e",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/domain/default_shell.rs",
+      "sha256": "a012ca36f40ff44ece8d87d9d7570b65570e93cf7538149e484da98c31e50eda",
+      "git_blob": "154105e26c5c609014f6de7f5fb1cacd17fc2f56",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/domain/host.rs",
+      "sha256": "e748737388ad75f55bbe16e3195ff06b86a4c3819d5835e015399997cbf847c0",
+      "git_blob": "869eabf3d44dc9128851ac3ee982fc448ac454d9",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/domain/ids.rs",
+      "sha256": "e6f6511b1a394433977f01757761cf3712cdfdd4c20b2eca4cd3297aceba3ad7",
+      "git_blob": "c9ee5d26ff17a73969ceb4dd5aea32143c06e141",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/domain/input.rs",
+      "sha256": "cb096242904bf04f99123a35b496a5efd7c6c530a2343d4e2c18845fd90798c9",
+      "git_blob": "ee11ffdcca48cf13a5112707a7c223441b46b5a1",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/domain/output.rs",
+      "sha256": "af00603238e3cec5a871aec8c110a9ae39775235b519ce78e8101d0a11efe130",
+      "git_blob": "765ad30bd121362f452ec89744d6a50581ae868a",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/domain/placement.rs",
+      "sha256": "e71e85ce64dac85ae82be24d438f3b98985658475fcaf670dcf6a5706f0b8ab8",
+      "git_blob": "5adaf14c5518bf15973fe8506569d66b5d736908",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/domain/widget.rs",
+      "sha256": "a1e1f549eb550c94a7e4275e22a8369a7121ea25236ef4b3f24649c07bdbb6fb",
+      "git_blob": "b00992c53f45db5a80b523c7df7da3256c389d84",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/instrumentation.rs",
+      "sha256": "6607065aecc925f378798532411c27b32028655f5ce7efea2659286c7e9526b8",
+      "git_blob": "2bf56c5ff7386907a5575dc4c15866ffb43f474a",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/lib.rs",
+      "sha256": "55f4d85e5974d64646228bd50bd9e9f430ac8c8691f63486b3755e403387206e",
+      "git_blob": "a13efac7e1b9c6bcee0157ab43922ebdcc6b0e9c",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/main.rs",
+      "sha256": "abaa5607b934f4ea82bde64219839de092d888fbf31c03a2f6a97b6bfda8c17a",
+      "git_blob": "c8d6ffc983f32be1d6844407d1bb2ef11755b167",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/model.rs",
+      "sha256": "56c8a6d4ae58a5ed6dffb57b7fdfbd03fa9421de62eaeac66639e97770cafc6c",
+      "git_blob": "c366ba32641de1517527e4156fdf8b0812cdfb86",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/persistence.rs",
+      "sha256": "b266db510741df7d7556ef39f4dee0c58fe11bde7287902339ef45a646a22dec",
+      "git_blob": "793956fce420428d6a4f5a2e0f8598873c50714d",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/persistence/repository.rs",
+      "sha256": "8e22f0b1273cb1795c3bdc9fae7bf5b39acc95b30d5ac99fafad278114b3929c",
+      "git_blob": "ed0f67963348cdc2cded369237235d2c80b8488a",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/persistence/schema.rs",
+      "sha256": "c6dc3ee35f6405f362bfadbeec3b7e64a6c86ade9c2f564d023c56d36aa4cea5",
+      "git_blob": "c9980cdf952ca309afae1ba20a19ad867bf473a4",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/placement.rs",
+      "sha256": "50b3c13aedb1ae622372ed8b5f8e47c4355890d970ff9ef62c4e841c5f517d38",
+      "git_blob": "52705c0381e9d8020e54b1869f57f03ff1fe6198",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/platform.rs",
+      "sha256": "3e63da35422b5d2507ef5ad8de1ca7b5a90ec6b099243425ce50bb1d4b5cad08",
+      "git_blob": "84b2c93ffbdd2bf1651703da885cfca1b2304e3c",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/platform/compositor.rs",
+      "sha256": "f8842c7834f734597ccd5461b0cca48433e92eaa6d30a01efce1a90e7623bad0",
+      "git_blob": "f834e586f2df9366beca3b296b1c89504ddb7b31",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/platform/output_manager.rs",
+      "sha256": "c3104e9945febdabc8687b625405572231f6d1b2c27758d498807cf28efae16e",
+      "git_blob": "3d6fdaedf64ab0035a4c0c9df956ab95562b0ada",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/platform/render_bridge.rs",
+      "sha256": "431b3ba515979eee4bcd7f3cb08d14558fe16bf25a3dea4d0fde52a9067d4528",
+      "git_blob": "f3ee44c39ccdc0a99044feb86c5b415c06a80d74",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/platform/session.rs",
+      "sha256": "fad01b15ec33b544261659d87721b5385a9cb452190fea0ff35ab55a4bbbcc3f",
+      "git_blob": "bad85cb8e9a95cb3aeddb620e8d563bb25beb7c6",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/platform/session/standalone.rs",
+      "sha256": "9267b53edff22d89244cd9b07a9e47ce63bd80ce8bf76a18ac423f39174f45c8",
+      "git_blob": "1300efba9b2789cb24f84e51f49c1132b2f2c9de",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/platform/session/uwsm.rs",
+      "sha256": "9113cf3ba778c14dac975cef14e83e0f0866dbd0d09f9d0ef585472bc7eba233",
+      "git_blob": "cf917b90bea6ac9d7f1bcd1563d401455b55140f",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/platform/surface_manager.rs",
+      "sha256": "ec8dcfe108436ca9075f12157a4131e6b4aa5b019a1580ddd46f7a1afbc9bd9e",
+      "git_blob": "d23dce104e2bcc17fce38687e67441823c042ccc",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/platform/wayland.rs",
+      "sha256": "f15b7399da552c65effd62635e67e2c108e0e17d2798ba98868caca2d711ce0c",
+      "git_blob": "fa236862a98f6356b1cacc97381f4e8027e65d5d",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/runtime.rs",
+      "sha256": "6495dce04209a6c0aa42e99ae5c7c0d6ea410bb41b08e1988426849f2e4eacc8",
+      "git_blob": "04e4f45acaf28a848f800f86b4090518b48c5a3a",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/runtime/calendar_widget.rs",
+      "sha256": "e711378e6492ae4730152a9b8b6dafd4ccf5b42fab0f919dbaf4ebc3d3544e24",
+      "git_blob": "435d8d9d6d8cd55e994214a4f800f148dab487ea",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/runtime/clock_widget.rs",
+      "sha256": "0b2316896eb595af2e3d378fb6d75e094663fecbb76acca67865eb884f45924f",
+      "git_blob": "e515f23fe42eac7036a94da4afc217eab3d561b4",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/runtime/coordinator.rs",
+      "sha256": "94ec0977bed6a4fc0d5d5eb563bbc19b4d83ce05333d4fb41bfa7075eea2b4da",
+      "git_blob": "e4ef251ae5f4b7da73a15aa0c95526a215ffca90",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "src/runtime/placement_engine.rs",
+      "sha256": "f7a7b084c042d2ed836cee168a4365e2fd51f1f648d10e3aaf5c14052d0ef948",
+      "git_blob": "cf358305d2783f3e08aa30b0a8308974f7863126",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "tests/coordinator.rs",
+      "sha256": "1e9c095e768b99050d842e1ac8cecc8a9d2b9aa5811b6b3bea1d6308a953415c",
+      "git_blob": "c0b71fed4033eee0f32e43aa19443d3f40005761",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "tests/domain.rs",
+      "sha256": "658576eeb5880e4d5b7f091d566d48dd6018a57da4104c5c16ba38d2baaff75e",
+      "git_blob": "96cd277c45a8cadc96431c8fd8f302b7c58d9d39",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "tests/persistence.rs",
+      "sha256": "e0d6c9c716df0c59f85da3dd4f4b93f4df14e005783e9019aa49e2ebe906ffc7",
+      "git_blob": "b50c7b18149627fafa25bc29b7b9be7d9ebac9b7",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "tests/placement.rs",
+      "sha256": "03883922c69e374b19e5d61e8990a8ca7469a6f95ae2ca98363f6b68b4d00c5e",
+      "git_blob": "3824646a652ca630d42a87c0323846ad98b60179",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "tests/platform_state.rs",
+      "sha256": "2c22b7ca5f7243a8e6b9bca4109e97dcbff4ca96621b888acb1db9873d071fb4",
+      "git_blob": "f68250dc09de87fa56950b06214331a0d1a33871",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "tests/render_bridge.rs",
+      "sha256": "e9a1d38e759d5679425879b8089f00459b0befb51a2c25c9f674e5e18817d2eb",
+      "git_blob": "ee3bceb26b1c20ece245de86b2b57137205c9a7b",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "tests/session.rs",
+      "sha256": "027741db8adb84d848038a33a64836bb678a4f1fb9bfe18a4038753936bceab3",
+      "git_blob": "16d76c5641bb99d5db04e8e240ca60132eb4fd65",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "ui/app.slint",
+      "sha256": "f58ff52dd4ac9ce621195f62d7b7e5b35f31a087f303b263430cb95d9ace4943",
+      "git_blob": "f8f5b1bba1081b086e488bb73f1c370842ade20b",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "ui/bar.slint",
+      "sha256": "21d6b617f982303027a2c746d0e3e46fedd4b57822097da0cddb1ae16af5d7e9",
+      "git_blob": "b15e369f0e560660cf66849882cc2117223445b5",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "ui/calendar.slint",
+      "sha256": "2dd4f07ed0031bbc867cc3422cfa88dab4577620e48d351558406064720f1884",
+      "git_blob": "63246522879df344a6d5e549c0e2464926128aa5",
+      "kind": "current-source-or-design-input"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "Cargo.lock",
+      "sha256": "7303c20e73745208937545c9a281fd665cc415097971826a7993cd5c53fd76de",
+      "git_blob": "f50099303f8f64f0c5b8de6d0401adc3b1ce5e02",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "Cargo.toml",
+      "sha256": "7dd1415b6c9ed11f339f3b8e031e8a09bed9429c19da3ced8a4737bfe46f9d61",
+      "git_blob": "cc9653901852d58fd1503139b64f1dfe6e3544ab",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/app/src/ipc/messages.rs",
+      "sha256": "70c43a066cb31816f965d4ab96b827925136562305723aa5e2300ac3cb73bf6b",
+      "git_blob": "b3442b4af9a016ee369d86638ac4dfc6fddb4a4c",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/app/src/ipc/service.rs",
+      "sha256": "1aa8401f57cb3c0aebe1e45e7d0ec6321c028866a49f77eb2fe23c620c33f9e7",
+      "git_blob": "becc7ea65bd6cdea5ba6e35727bd1185ca62d815",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/app/src/state.rs",
+      "sha256": "c52bb67020ac4b210d9083489f43288ff9abfb51701b973e98c705777c78217a",
+      "git_blob": "08f95aa1cabddf87c3f1d1ef2299c3ea4f781363",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/assets/icons/LICENSE",
+      "sha256": "4d9c5fd0eeb6249bab4d3e8813a6c43b1acf077c2a6b8e0fa7be19c5623a4afc",
+      "git_blob": "76c83130450d6cd9106e992a3999f7515c612688",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/Cargo.toml",
+      "sha256": "2de620b02ddc8ac41b278db650c211876c398212cfce700e0ba1a3d06eb92043",
+      "git_blob": "c341234d46eb572f6f4541aaf917afe8039892f6",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/audio/mod.rs",
+      "sha256": "f196f8c284d7a866b518357cb6c74c43be802dbec4e7d06ea9f294e53c367509",
+      "git_blob": "e9ea4198eeb694b69eae78ba43858194d1493587",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/bluetooth/dbus.rs",
+      "sha256": "a15b7a21d3f8455a32c5df48320f3f948defbb4ad2473fd0bc8d3370ffa26d83",
+      "git_blob": "9d5777ed2cae54ceacfcebd565d51a5215c8869f",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/bluetooth/mod.rs",
+      "sha256": "7415f16a073a1318e2862200e0200d66316f28b768cbce9522af02bcd4aa723f",
+      "git_blob": "2d77a09abd621f7f372217e262e949ae8a071b77",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/brightness/mod.rs",
+      "sha256": "d4641975c682689755be24a79e8990dcc6429593373ba01ee60fcb17d1ed2b88",
+      "git_blob": "32dab8eff0691dece962786ebdff24ec3ceee01f",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/bus.rs",
+      "sha256": "be5900c7a730edad3f7d123326c49254af7266d7ed36d871e77b30fefdfabcc1",
+      "git_blob": "033d0ff2ab4ed3b413611af39698938794875981",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/compositor/mod.rs",
+      "sha256": "5b844864d131805b9c5a9b9f9da75e02d26b1809f13cb0a27948d30cf5edbda8",
+      "git_blob": "946cde9188ce084b9542fd05d3a177ee62ec19b3",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/compositor/niri.rs",
+      "sha256": "2b9b97cb0be65e74e754dc949c0a6d460cda0f862129e06c8b92b0155cf0e5b4",
+      "git_blob": "bd75ca80a3c125a320c19485e8781621bb466ffb",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/core.rs",
+      "sha256": "7539d6536ea9e02e3579a8d27b1df1c17e6bfb889ace51beddf83eccd562f291",
+      "git_blob": "58c28ec5264d0784e087edb2953fd39b2be56355",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/jobs.rs",
+      "sha256": "a800c8f5db63e63ec24847d3a585f49cb7b8e7298af47db12b893f2a1fe0c660",
+      "git_blob": "8783cc17b0fc47a149e8c8074f3e14054ab5f5f2",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/lifecycle.rs",
+      "sha256": "a30431d28cb58137438502e0a8eae5ea79060fc4be7b9878a35ec05d9b598a8d",
+      "git_blob": "8e4ff8dfe339af3f166d71ca5bcf36d998452b7c",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/mpris/mod.rs",
+      "sha256": "20f5abc9d40580e07746466374498b7b598845a28d26078a9e9097e7e78d8180",
+      "git_blob": "233ed23973ce651bee5b6b4c249bf717ea7e44a6",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/network/mod.rs",
+      "sha256": "ff35625d4121ed43a9001525f4808e150ee747847187f9dcb8872cb2be2f35d4",
+      "git_blob": "de518e9523f8f50fdf79c42cf650ddbfc1b70cf6",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/network/nm.rs",
+      "sha256": "d981daaae9486b2cf9e55492acaa347bafc1cbf4147ba9ed872cb8d9c42e006a",
+      "git_blob": "026532af252167ac760c7853164cc284d2c9b66c",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/network/types.rs",
+      "sha256": "e5e40ca4beee4bbd9f5a6f2a2a510be3c4cbc4595acccc08e716d2c2e3a9e941",
+      "git_blob": "014d49bb1d2e9594561c2be7669314d3cfd3ba47",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/notification/mod.rs",
+      "sha256": "9bebc59454e1a8b62d54ac7b22302300ba751f5bf4099bed649b47750815f48f",
+      "git_blob": "1f3c00c66dd0c7633400408eb2520973dbf11532",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/privacy/mod.rs",
+      "sha256": "ea803a7684cca2cd18ad2cde6cd1b8f53af1930456999f698babfc881b1d7bad",
+      "git_blob": "5944546d345010d21e2e2abe228d0cc90cc543e9",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/tray/dbus.rs",
+      "sha256": "102c1bf4bf1b6bbf37168afc9028466fb3f8ff9dc5d944031fc0507e2d7123fc",
+      "git_blob": "8431e1d54d873eb30d6ff42db147c24343e2a877",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/tray/mod.rs",
+      "sha256": "06b620ed5db648e92f06f66f833eefceecde42f99af8de17eb94517fb0d1f2bf",
+      "git_blob": "765fc2aa725bc032a5ec389babf60b9f1d37195c",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "andre-brandao/gpui-shell",
+      "commit": "06616a02662621af84f0841dba3c48db1560bc82",
+      "path": "crates/services/src/upower/mod.rs",
+      "sha256": "bda06af9ab83048a9f9519ccd628a964a60c13a1b63772e661b9680516d978e2",
+      "git_blob": "6d0760ecc81e43dfd2e356651bfc41d277890d8d",
+      "kind": "upstream-reference-only-no-code-copied"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/README.md",
+      "sha256": "82b6081d7628894650233719990fc2e8691a2b2f65ff9ff3a8d21bc2311e7090",
+      "git_blob": "160a4f8388a293632c9daa1fef294011d43f9b72",
+      "kind": "linked-canonical-source-or-evidence-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/bakeoffs/renderer/results/2026-11-05-s2-user-open-focus/README.md",
+      "sha256": "0d2b43eaa98def54e5d7edc6c029d8cce4d6e8414a13fabd9fd9774ac8fd2853",
+      "git_blob": "4391b2455e9ed433c6c058ecffd73dc57a1511f6",
+      "kind": "linked-canonical-source-or-evidence-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/bakeoffs/renderer/results/2026-11-05-s3-scheduling/README.md",
+      "sha256": "8ec6b251da7c473c4abf552519c820ad45d3d117f89d6992c1da0425d03036c7",
+      "git_blob": "61f1b695c6d81228dbfa0cc5a8f3fa5981fcd367",
+      "kind": "linked-canonical-source-or-evidence-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/bakeoffs/renderer/results/2026-11-05-s4-scaling/README.md",
+      "sha256": "c230a2141c2f97782280282a343f814adfe083d7c897da8e019404674239940c",
+      "git_blob": "81e787d7968638b52ccbeb1f870ba40911066df3",
+      "kind": "linked-canonical-source-or-evidence-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/README.md",
+      "sha256": "34a0f8ff4c4ce92e9523ece9b607fdda0ad6ccd63889923fa175b3deedf9e19d",
+      "git_blob": "31663ec5ff834d4ef9693fe25590eee8dd5303ae",
+      "kind": "linked-canonical-source-or-evidence-input"
+    },
+    {
+      "repository": "VikingOwl91/owlenshell",
+      "commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+      "path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/README.md",
+      "sha256": "c8adf546aa631689d37fbaeb9c0a4101fff039c022ad15e9ef17b2cc2f536d2e",
+      "git_blob": "9bbe6d840828eae07211a214ceb8b75fcb3e4c82",
+      "kind": "linked-canonical-source-or-evidence-input"
+    }
+  ],
+  "dependency_source_entries": [
+    {
+      "package": "smithay-client-toolkit",
+      "version": "0.21.1",
+      "package_relative_path": "src/shell/wlr_layer/dispatch.rs",
+      "sha256": "21fbeada4c2f7a79cfd4a9d14d816791f2e3b544884ac790346da721c523f2c1",
+      "git_revision": "ed43e40d32ef5e0bf09187606792639d3320b914",
+      "referenced_lines": [
+        69
+      ],
+      "observation": "cached pinned source inspection, not native-wire verification"
+    },
+    {
+      "package": "smithay-client-toolkit",
+      "version": "0.21.1",
+      "package_relative_path": "src/shell/wlr_layer/mod.rs",
+      "sha256": "ee42a08e32547c4abca512228167462f2587fee2c8dd92a5e46b929760b3dc05",
+      "git_revision": "ed43e40d32ef5e0bf09187606792639d3320b914",
+      "referenced_lines": [
+        323
+      ],
+      "observation": "cached pinned source inspection, not native-wire verification"
+    }
+  ],
+  "automated_validation": {
+    "command": "cargo test --locked --offline",
+    "baseline": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+    "passed": 115,
+    "failed": 0,
+    "ignored": 0,
+    "private_home_and_xdg_state": true,
+    "display_and_compositor_socket_environment_unset": true,
+    "candidate_execution": false,
+    "benchmark": false,
+    "limitations": [
+      "Current unit/integration suites, not live Wayland/compositor acceptance",
+      "Initial non-hermetic invocation retained but not used as isolation evidence"
+    ]
+  },
+  "test_isolation_notes": {
+    "initial_invocation_not_clean_isolation_evidence": true,
+    "strict_rerun_private_home_xdg_tmp": true,
+    "existing_state_stat_unchanged_during_strict_run": true,
+    "raw_logs_included": false
+  },
+  "scope": {
+    "application_changes": false,
+    "dependency_changes": false,
+    "accepted_adr_changes": false,
+    "historical_evidence_changes": false,
+    "upstream_code_copied": false,
+    "push_or_pr": false,
+    "live_shell_or_compositor_execution": false,
+    "automated_test_execution": true,
+    "benchmark_execution": false
+  },
+  "draft_content_hashes": {
+    "BASE-ARCHITECTURE-V1-PROPOSAL.md": "ef060e569e09151b399755342d29f328f0f5669ed88cdca3c3697b3559f8c69f",
+    "CONFLICT-REGISTER.md": "0cbf9b049c91769bebb77ed710566c0c0e05d09406b59032d1d188d828aa9df2",
+    "GPUI-LINUX-REFERENCE.md": "7e784fe4db78f2b76d0390fddd5870cfee0f8bae227fca0f779bd2f6b3c10285",
+    "IMPLEMENTATION-EVIDENCE.md": "96bd7fa7f52f5967d632027459b19e2b6636348f93c84d2d2fc02a99b18e70c7",
+    "MILESTONES-AND-GATES.md": "777ec6267dd0c09c0bbb561eb8049114ed0d5bb5acedc17a5da1a22045ec3628",
+    "OPEN-DECISIONS.md": "a1dc13ba26db431f0bd43e6c2e58d5eeaa9067e132f7c4f457fdd1319c71fd47",
+    "README.md": "f2a2d5deea1651484f39c76af6f76e9c40598b78bbd7e10dc8edaefd2ae86f35",
+    "REVIEW.md": "c375c34ca87fa6a99580c9128ab996600aa14f8898331d326a7e98cf05a2a826"
+  },
+  "self_hash": "Not embedded; this draft manifest is uncommitted and its own file digest is not recursive."
+}

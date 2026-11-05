@@ -1,0 +1,160 @@
+{
+  "record_kind": "MDR-0001/B0 documentation consolidation provenance",
+  "date": "2026-11-05",
+  "repository_baseline": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+  "branch": "docs/architecture-reconciliation",
+  "authority": {
+    "record": "MAINTAINER-DECISIONS.md",
+    "source": "explicit maintainer Base Architecture v1 Decision Consolidation instruction",
+    "scope": "documentation-only consolidation and B0 contract planning",
+    "D_status": "approved in principle",
+    "P_status": "approved policy",
+    "K_status": "proposed contract specification; not implementation acceptance"
+  },
+  "original_nine_draft_hashes": {
+    "BASE-ARCHITECTURE-V1-PROPOSAL.md": "ef060e569e09151b399755342d29f328f0f5669ed88cdca3c3697b3559f8c69f",
+    "CONFLICT-REGISTER.md": "0cbf9b049c91769bebb77ed710566c0c0e05d09406b59032d1d188d828aa9df2",
+    "GPUI-LINUX-REFERENCE.md": "7e784fe4db78f2b76d0390fddd5870cfee0f8bae227fca0f779bd2f6b3c10285",
+    "IMPLEMENTATION-EVIDENCE.md": "96bd7fa7f52f5967d632027459b19e2b6636348f93c84d2d2fc02a99b18e70c7",
+    "MILESTONES-AND-GATES.md": "777ec6267dd0c09c0bbb561eb8049114ed0d5bb5acedc17a5da1a22045ec3628",
+    "OPEN-DECISIONS.md": "a1dc13ba26db431f0bd43e6c2e58d5eeaa9067e132f7c4f457fdd1319c71fd47",
+    "README.md": "f2a2d5deea1651484f39c76af6f76e9c40598b78bbd7e10dc8edaefd2ae86f35",
+    "REVIEW.md": "c375c34ca87fa6a99580c9128ab996600aa14f8898331d326a7e98cf05a2a826",
+    "SOURCES.json": "4003c5c6972fdbb953c9186d9fad8a5cd778e7669edff449c99a60c6279c0376"
+  },
+  "original_drafts_are_uncommitted": true,
+  "source_inputs": [
+    {
+      "path": "docs/ADR/0003-custom-wayland-platform.md",
+      "sha256": "77acf50f914505cbdbf634803ab803a8d6a379635fea32fe22af3571f429e786",
+      "kind": "unchanged canonical source or accepted decision",
+      "source_commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000"
+    },
+    {
+      "path": "docs/ADR/0004-placement-separation.md",
+      "sha256": "be95c377814fdda19552c201f9047db395a4632f76c7f3ddefb6e03c2dfe9e43",
+      "kind": "unchanged canonical source or accepted decision",
+      "source_commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000"
+    },
+    {
+      "path": "docs/ADR/0005-compositor-adapters.md",
+      "sha256": "28f026a75a8241856fff2e727a9c76742dc8cf47708a437b054f88f2a156a960",
+      "kind": "unchanged canonical source or accepted decision",
+      "source_commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000"
+    },
+    {
+      "path": "docs/ADR/0006-renderer-selection.md",
+      "sha256": "6bf78c0c8d086ffdc38db760e8252f43cfb4e2bbf787b3d6a296724412b62b21",
+      "kind": "unchanged canonical source or accepted decision",
+      "source_commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000"
+    },
+    {
+      "path": "docs/PORTABILITY-REQUIREMENTS.md",
+      "sha256": "10c498cfe2119b9394c5e41b55fa9a8d4ae423364e926ee70970c2da54c67eda",
+      "kind": "unchanged canonical source or accepted decision",
+      "source_commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000"
+    },
+    {
+      "path": "docs/reconciliation/2026-11-05/BASE-ARCHITECTURE-V1-PROPOSAL.md",
+      "sha256": "ef060e569e09151b399755342d29f328f0f5669ed88cdca3c3697b3559f8c69f",
+      "kind": "preserved uncommitted reconciliation draft",
+      "source_commit": null
+    },
+    {
+      "path": "docs/reconciliation/2026-11-05/CONFLICT-REGISTER.md",
+      "sha256": "0cbf9b049c91769bebb77ed710566c0c0e05d09406b59032d1d188d828aa9df2",
+      "kind": "preserved uncommitted reconciliation draft",
+      "source_commit": null
+    },
+    {
+      "path": "docs/reconciliation/2026-11-05/GPUI-LINUX-REFERENCE.md",
+      "sha256": "7e784fe4db78f2b76d0390fddd5870cfee0f8bae227fca0f779bd2f6b3c10285",
+      "kind": "preserved uncommitted reconciliation draft",
+      "source_commit": null
+    },
+    {
+      "path": "docs/reconciliation/2026-11-05/IMPLEMENTATION-EVIDENCE.md",
+      "sha256": "96bd7fa7f52f5967d632027459b19e2b6636348f93c84d2d2fc02a99b18e70c7",
+      "kind": "preserved uncommitted reconciliation draft",
+      "source_commit": null
+    },
+    {
+      "path": "docs/reconciliation/2026-11-05/MILESTONES-AND-GATES.md",
+      "sha256": "777ec6267dd0c09c0bbb561eb8049114ed0d5bb5acedc17a5da1a22045ec3628",
+      "kind": "preserved uncommitted reconciliation draft",
+      "source_commit": null
+    },
+    {
+      "path": "docs/reconciliation/2026-11-05/OPEN-DECISIONS.md",
+      "sha256": "a1dc13ba26db431f0bd43e6c2e58d5eeaa9067e132f7c4f457fdd1319c71fd47",
+      "kind": "preserved uncommitted reconciliation draft",
+      "source_commit": null
+    },
+    {
+      "path": "docs/reconciliation/2026-11-05/README.md",
+      "sha256": "f2a2d5deea1651484f39c76af6f76e9c40598b78bbd7e10dc8edaefd2ae86f35",
+      "kind": "preserved uncommitted reconciliation draft",
+      "source_commit": null
+    },
+    {
+      "path": "docs/reconciliation/2026-11-05/REVIEW.md",
+      "sha256": "c375c34ca87fa6a99580c9128ab996600aa14f8898331d326a7e98cf05a2a826",
+      "kind": "preserved uncommitted reconciliation draft",
+      "source_commit": null
+    },
+    {
+      "path": "docs/reconciliation/2026-11-05/SOURCES.json",
+      "sha256": "4003c5c6972fdbb953c9186d9fad8a5cd778e7669edff449c99a60c6279c0376",
+      "kind": "preserved uncommitted reconciliation draft",
+      "source_commit": null
+    },
+    {
+      "path": "src/persistence/repository.rs",
+      "sha256": "8e22f0b1273cb1795c3bdc9fae7bf5b39acc95b30d5ac99fafad278114b3929c",
+      "kind": "unchanged canonical source or accepted decision",
+      "source_commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000"
+    },
+    {
+      "path": "src/persistence/schema.rs",
+      "sha256": "c6dc3ee35f6405f362bfadbeec3b7e64a6c86ade9c2f564d023c56d36aa4cea5",
+      "kind": "unchanged canonical source or accepted decision",
+      "source_commit": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000"
+    }
+  ],
+  "approved_policy_text_sha256": {
+    "P01": "120ab787d02f23719c2371a9636b207abe29b93c6ddf18ab2261fc1e062f538b",
+    "P02": "e659c594bdf82513896316621f6557d4c6aa1b85fba6c3022878381590deb841",
+    "P03": "940179521682294ed5ded72399095f40aed48fb1cb4db787265c3f68cc21b622",
+    "P04": "d1505ea1ab0ca73ed4500d1d1c860961ab8b3c030a6437d40b3abb880b8d300c",
+    "P05": "941d7349bc6152784ed1db88c6e26c22de0671ecb6be412e8ba8b6c14f1e1e44",
+    "P06": "799e0cd48b51cd78057ed357935a099e658aad7f5cc1d71c24d2e098149ff97c",
+    "P07": "c3296de69a7eb8e98c0d0fb6c94d4aac0633b99bb0569ee6c749241faa508586",
+    "P08": "7f77d81c15941297574558b796ada60cc28c724ee637bf932d07e5e5db575c09",
+    "P09": "3402b64788a3dc636fec94d6441b97e527a59861391f1e6e94429081e6b0aa99",
+    "P10": "b6a8b3ebbe51bb0e6fc7c3ee898e4585d4127ae5ae94307607f958698f986e9d",
+    "P11": "9c2716b02597fcc0fc0032c755dd404cb67584f51e510c2e1dc717219a82fdef"
+  },
+  "new_document_sha256": {
+    "MAINTAINER-DECISIONS.md": "77296853732c96f25bb20b61cad64166278ca47a8349238686fe6f99cda821f9",
+    "B0-ARCHITECTURE-CONTRACTS.md": "c7ebc009c3d28b8af0e41adbb4bdc778be88be6d8e05912234a9e5c6e94c3ebc",
+    "SPECIFICATION-GAPS.md": "f6ce762ac20c5ba27a08ebb7e76070e1a394786e3dd194c7e7fb87ae23af6ca8",
+    "CONSOLIDATION-AND-MILESTONES.md": "ed2e1f3242db94a429448932ad0339b14cfe0d518af0796a7c9f0e889d6b10e9",
+    "B0-CONSOLIDATION-REVIEW.md": "b73fc1b1b8ca70692465f622bb9d69f2f72d2fa481812da38d751b3ae3ede5a4"
+  },
+  "coverage": {
+    "decisions_approved_in_principle": 11,
+    "approved_policies": 11,
+    "proposed_contracts": 11,
+    "open_gaps": 15,
+    "open_conflicts": 19
+  },
+  "validation_scope": {
+    "static_documentation_checks": true,
+    "new_automated_test_execution": false,
+    "live_candidate_or_compositor_execution": false,
+    "new_benchmark": false,
+    "implementation_or_adr_changes": false,
+    "commits_pushes_or_prs": false
+  },
+  "self_hash": "Not embedded. This is a new uncommitted record; it does not replace historical SOURCES.json."
+}

@@ -1,0 +1,228 @@
+{
+  "date": "2026-11-05",
+  "status": "DRAFT for maintainer review; formal B0 acceptance and B1 implementation/execution not authorized",
+  "branch": "docs/architecture-reconciliation",
+  "source_head": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+  "new_maintainer_direction": "Nested Niri selected as primary B1 validation strategy, not current session validation",
+  "preserved_21_document_sha256": {
+    "B0-ARCHITECTURE-CONTRACTS.md": "c7ebc009c3d28b8af0e41adbb4bdc778be88be6d8e05912234a9e5c6e94c3ebc",
+    "B0-CLOSURE-REVIEW.md": "2f006e955e6a4d533cd94dac1c82339b54432a67dcb50628ba43a8e25fcf4f1f",
+    "B0-CLOSURE-SOURCES.json": "4ec8da8c00d5c5559f258291db3c359f7719827e81c18424c9d1810978600068",
+    "B0-CONSOLIDATION-REVIEW.md": "b73fc1b1b8ca70692465f622bb9d69f2f72d2fa481812da38d751b3ae3ede5a4",
+    "B0-CONSOLIDATION-SOURCES.json": "0b827da0321846e0f5b9fe15158e95e53355b679ca3abb04c945e36cd3618275",
+    "B0-GAP-DISPOSITION.md": "1ea4351e22c5269d9bb46049a87563460f8f615e7e1d9676ff249d74717f8dd5",
+    "B0-GENERATION-TOKEN-CONTRACT.md": "cc7dd526e37283ec30775557b761d75804d595ba5d4e7932e83bc947699bdf76",
+    "B0-RETIREMENT-CONTRACT.md": "d7d389369e8273e88d42ec522e5e52f7b8c827ce46b36bde066f0848b73bab35",
+    "B1-IMPLEMENTATION-BRIEF.md": "6c43910653119b9a11be1e2d831b939a9db8d55ccb7a358f7e4e3174a44378fa",
+    "BASE-ARCHITECTURE-V1-PROPOSAL.md": "ef060e569e09151b399755342d29f328f0f5669ed88cdca3c3697b3559f8c69f",
+    "CONFLICT-REGISTER.md": "0cbf9b049c91769bebb77ed710566c0c0e05d09406b59032d1d188d828aa9df2",
+    "CONSOLIDATION-AND-MILESTONES.md": "ed2e1f3242db94a429448932ad0339b14cfe0d518af0796a7c9f0e889d6b10e9",
+    "GPUI-LINUX-REFERENCE.md": "7e784fe4db78f2b76d0390fddd5870cfee0f8bae227fca0f779bd2f6b3c10285",
+    "IMPLEMENTATION-EVIDENCE.md": "96bd7fa7f52f5967d632027459b19e2b6636348f93c84d2d2fc02a99b18e70c7",
+    "MAINTAINER-DECISIONS.md": "77296853732c96f25bb20b61cad64166278ca47a8349238686fe6f99cda821f9",
+    "MILESTONES-AND-GATES.md": "777ec6267dd0c09c0bbb561eb8049114ed0d5bb5acedc17a5da1a22045ec3628",
+    "OPEN-DECISIONS.md": "a1dc13ba26db431f0bd43e6c2e58d5eeaa9067e132f7c4f457fdd1319c71fd47",
+    "README.md": "f2a2d5deea1651484f39c76af6f76e9c40598b78bbd7e10dc8edaefd2ae86f35",
+    "REVIEW.md": "c375c34ca87fa6a99580c9128ab996600aa14f8898331d326a7e98cf05a2a826",
+    "SOURCES.json": "4003c5c6972fdbb953c9186d9fad8a5cd778e7669edff449c99a60c6279c0376",
+    "SPECIFICATION-GAPS.md": "f6ce762ac20c5ba27a08ebb7e76070e1a394786e3dd194c7e7fb87ae23af6ca8"
+  },
+  "source_sha256": {
+    "src/domain/default_shell.rs": "a012ca36f40ff44ece8d87d9d7570b65570e93cf7538149e484da98c31e50eda",
+    "src/domain/host.rs": "e748737388ad75f55bbe16e3195ff06b86a4c3819d5835e015399997cbf847c0",
+    "src/domain/ids.rs": "e6f6511b1a394433977f01757761cf3712cdfdd4c20b2eca4cd3297aceba3ad7",
+    "src/domain/input.rs": "cb096242904bf04f99123a35b496a5efd7c6c530a2343d4e2c18845fd90798c9",
+    "src/domain/output.rs": "af00603238e3cec5a871aec8c110a9ae39775235b519ce78e8101d0a11efe130",
+    "src/domain/placement.rs": "e71e85ce64dac85ae82be24d438f3b98985658475fcaf670dcf6a5706f0b8ab8",
+    "src/domain/widget.rs": "a1e1f549eb550c94a7e4275e22a8369a7121ea25236ef4b3f24649c07bdbb6fb",
+    "src/domain.rs": "1c2b5cbddd80d05d578750f5a0696178755f4a4b25cebe5ef8831882ee30b5e2",
+    "src/instrumentation.rs": "6607065aecc925f378798532411c27b32028655f5ce7efea2659286c7e9526b8",
+    "src/lib.rs": "55f4d85e5974d64646228bd50bd9e9f430ac8c8691f63486b3755e403387206e",
+    "src/main.rs": "abaa5607b934f4ea82bde64219839de092d888fbf31c03a2f6a97b6bfda8c17a",
+    "src/model.rs": "56c8a6d4ae58a5ed6dffb57b7fdfbd03fa9421de62eaeac66639e97770cafc6c",
+    "src/persistence/repository.rs": "8e22f0b1273cb1795c3bdc9fae7bf5b39acc95b30d5ac99fafad278114b3929c",
+    "src/persistence/schema.rs": "c6dc3ee35f6405f362bfadbeec3b7e64a6c86ade9c2f564d023c56d36aa4cea5",
+    "src/persistence.rs": "b266db510741df7d7556ef39f4dee0c58fe11bde7287902339ef45a646a22dec",
+    "src/placement.rs": "50b3c13aedb1ae622372ed8b5f8e47c4355890d970ff9ef62c4e841c5f517d38",
+    "src/platform/compositor.rs": "f8842c7834f734597ccd5461b0cca48433e92eaa6d30a01efce1a90e7623bad0",
+    "src/platform/output_manager.rs": "c3104e9945febdabc8687b625405572231f6d1b2c27758d498807cf28efae16e",
+    "src/platform/render_bridge.rs": "431b3ba515979eee4bcd7f3cb08d14558fe16bf25a3dea4d0fde52a9067d4528",
+    "src/platform/session/standalone.rs": "9267b53edff22d89244cd9b07a9e47ce63bd80ce8bf76a18ac423f39174f45c8",
+    "src/platform/session/uwsm.rs": "9113cf3ba778c14dac975cef14e83e0f0866dbd0d09f9d0ef585472bc7eba233",
+    "src/platform/session.rs": "fad01b15ec33b544261659d87721b5385a9cb452190fea0ff35ab55a4bbbcc3f",
+    "src/platform/surface_manager.rs": "ec8dcfe108436ca9075f12157a4131e6b4aa5b019a1580ddd46f7a1afbc9bd9e",
+    "src/platform/wayland.rs": "f15b7399da552c65effd62635e67e2c108e0e17d2798ba98868caca2d711ce0c",
+    "src/platform.rs": "3e63da35422b5d2507ef5ad8de1ca7b5a90ec6b099243425ce50bb1d4b5cad08",
+    "src/runtime/calendar_widget.rs": "e711378e6492ae4730152a9b8b6dafd4ccf5b42fab0f919dbaf4ebc3d3544e24",
+    "src/runtime/clock_widget.rs": "0b2316896eb595af2e3d378fb6d75e094663fecbb76acca67865eb884f45924f",
+    "src/runtime/coordinator.rs": "94ec0977bed6a4fc0d5d5eb563bbc19b4d83ce05333d4fb41bfa7075eea2b4da",
+    "src/runtime/placement_engine.rs": "f7a7b084c042d2ed836cee168a4365e2fd51f1f648d10e3aaf5c14052d0ef948",
+    "src/runtime.rs": "6495dce04209a6c0aa42e99ae5c7c0d6ea410bb41b08e1988426849f2e4eacc8",
+    "tests/coordinator.rs": "1e9c095e768b99050d842e1ac8cecc8a9d2b9aa5811b6b3bea1d6308a953415c",
+    "tests/domain.rs": "658576eeb5880e4d5b7f091d566d48dd6018a57da4104c5c16ba38d2baaff75e",
+    "tests/persistence.rs": "e0d6c9c716df0c59f85da3dd4f4b93f4df14e005783e9019aa49e2ebe906ffc7",
+    "tests/placement.rs": "03883922c69e374b19e5d61e8990a8ca7469a6f95ae2ca98363f6b68b4d00c5e",
+    "tests/platform_state.rs": "2c22b7ca5f7243a8e6b9bca4109e97dcbff4ca96621b888acb1db9873d071fb4",
+    "tests/render_bridge.rs": "e9a1d38e759d5679425879b8089f00459b0befb51a2c25c9f674e5e18817d2eb",
+    "tests/session.rs": "027741db8adb84d848038a33a64836bb678a4f1fb9bfe18a4038753936bceab3",
+    "Cargo.toml": "28db0803bdb0307d0250a8b7a33f3b77eaa22dcf613167984b5a407d2a9b57c6",
+    "Cargo.lock": "8d4ad8670e750384a53813c76a03be60eeaf896fcba24e1f9c3d1987fc7d04e5",
+    "build.rs": "d069bd76b5be7cbf1994ad43c92f4add94c5ab190db24af58e971f4bbdd60892",
+    "ui/bar.slint": "21d6b617f982303027a2c746d0e3e46fedd4b57822097da0cddb1ae16af5d7e9",
+    "ui/calendar.slint": "2dd4f07ed0031bbc867cc3422cfa88dab4577620e48d351558406064720f1884",
+    "ui/app.slint": "f58ff52dd4ac9ce621195f62d7b7e5b35f31a087f303b263430cb95d9ace4943",
+    "docs/ADR/0001-slint.md": "3fdeca942ac0df8f33faf456a264151a8cb3a6b911823fdb85838b49241b91ea",
+    "docs/ADR/0002-atomic-surfaces.md": "a3183536b359a3a9c2ab0450820a7a1f364d4643494a11b971d0753d84bceb42",
+    "docs/ADR/0003-custom-wayland-platform.md": "77acf50f914505cbdbf634803ab803a8d6a379635fea32fe22af3571f429e786",
+    "docs/ADR/0004-placement-separation.md": "be95c377814fdda19552c201f9047db395a4632f76c7f3ddefb6e03c2dfe9e43",
+    "docs/ADR/0005-compositor-adapters.md": "28f026a75a8241856fff2e727a9c76742dc8cf47708a437b054f88f2a156a960",
+    "docs/ADR/0006-renderer-selection.md": "6bf78c0c8d086ffdc38db760e8252f43cfb4e2bbf787b3d6a296724412b62b21",
+    "docs/ADR/0007-renderer-bakeoff-evidence-scope.md": "96edc623aa5def5e4212e4cf9bde2a4f17ddd7eabeb2e6abcc2126051464a81c",
+    "docs/PORTABILITY-REQUIREMENTS.md": "10c498cfe2119b9394c5e41b55fa9a8d4ae423364e926ee70970c2da54c67eda",
+    "docs/ARCHITECTURE.md": "6bcbe66029357dbe3c165a17e792d5c0e6ec367a3904ef162214498433a7679c",
+    "docs/ATOMIC-SURFACES.md": "3fc128fa95a1fc84395c73606a2f24193ec8d3724f44974792fca671de67d8ff",
+    "docs/PRODUCTION-ARCHITECTURE-PLAN.md": "7ee3bb50ef0e126e213d151958afc9f2057495b378c780b5237c9d94ddfbb2e8",
+    "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/README.md": "82b6081d7628894650233719990fc2e8691a2b2f65ff9ff3a8d21bc2311e7090",
+    "docs/bakeoffs/renderer/SOURCE-REFERENCES.md": "6b72d1979b5957693878839b439908c060bde19dfd2b026bf9babdcb8985113a"
+  },
+  "new_document_sha256": {
+    "B0-FORMAL-ACCEPTANCE.md": "1aefbee8347651b05623e6ae18c0a50d52b031580b010d6ba6abf8319590c0b1",
+    "B1-AUTHORIZATION-PLAN.md": "185e528b31ae95f277831568493344f83741f6eed1c9f4fd4b3eb8d9073a0cd4",
+    "B0-ACCEPTANCE-REVIEW.md": "0a1a08700d6a53e62630e24f3d67ab50c53c770fe74e40581cbb57b651ceab2a"
+  },
+  "local_executable_snapshots": {
+    "env": {
+      "path": "/usr/bin/env",
+      "sha256": "a9ba02dcad338ee7f0b03e58a1cf44009b2bd645b09c2b423242e9791d202301",
+      "inspection_only": true
+    },
+    "timeout": {
+      "path": "/usr/bin/timeout",
+      "sha256": "629cb6e82df4bb47188eec340f2ceb5f45def2e7b1aac1bd7443beecdcb42a6a",
+      "inspection_only": true
+    },
+    "niri": {
+      "path": "/usr/bin/niri",
+      "sha256": "8ed88914b511a818fc55927d7992729f3652c4e10d777a1269b33f5d3428162d",
+      "inspection_only": true
+    },
+    "sway": {
+      "path": "/usr/bin/sway",
+      "sha256": "d7ec5122840f56f99d59cb426e830947105c499ed43902fa0a8370a08f6fc23c",
+      "inspection_only": true
+    },
+    "swaymsg": {
+      "path": "/usr/bin/swaymsg",
+      "sha256": "b2fd26f16b6a91cc37afb39d6b5e5c128471678b017a67f77a05ddafe0365fbe",
+      "inspection_only": true
+    },
+    "wayland-info": {
+      "path": "/usr/bin/wayland-info",
+      "sha256": "23af9bb45ae4ebe530cb6b5bad57549393b43bbed249f4aa7d66398e447cbe65",
+      "inspection_only": true
+    },
+    "grim": {
+      "path": "/usr/bin/grim",
+      "sha256": "023f4333e81d5d704d770ac3a10d096f3f59bf15c2c8082fe25b57a87aeb3618",
+      "inspection_only": true
+    },
+    "python3": {
+      "path": "/usr/bin/python3",
+      "sha256": "f30d29f7ba42413e45e3a3cba2a8e17c3bb5a4e3f39f4facecdc6aca709c2805",
+      "inspection_only": true
+    },
+    "wtype": {
+      "path": "/usr/bin/wtype",
+      "sha256": "6c891ca81a2edb735678123cace2ec62586eb50c84094f3ed5bf5095966efed7",
+      "inspection_only": true
+    },
+    "cargo": {
+      "path": "/usr/bin/cargo",
+      "sha256": "55f484e83029a099c6f7c9fd87af49848b7e363c29e9dee51b4e72bba8b724b4",
+      "inspection_only": true,
+      "frontend_is_proxy": true
+    },
+    "rustc": {
+      "path": "/usr/bin/rustc",
+      "sha256": "55f484e83029a099c6f7c9fd87af49848b7e363c29e9dee51b4e72bba8b724b4",
+      "inspection_only": true,
+      "frontend_is_proxy": true
+    },
+    "rustup": {
+      "path": "/usr/bin/rustup",
+      "sha256": "55f484e83029a099c6f7c9fd87af49848b7e363c29e9dee51b4e72bba8b724b4",
+      "inspection_only": true
+    },
+    "make": {
+      "path": "/usr/bin/make",
+      "sha256": "e1be0b69b2fd6d7287625fec07eb4470021f3d5f1f318299b223e2cf86c038b5",
+      "inspection_only": true
+    },
+    "cc": {
+      "path": "/usr/bin/cc",
+      "sha256": "8aac907d6fbf40394b424b5fa4a2ad1aa291dac7d3a0315c5b415c1f5ace1287",
+      "inspection_only": true
+    },
+    "pkg-config": {
+      "path": "/usr/bin/pkg-config",
+      "sha256": "bda80b0522203576cacd0457556afba2b1ffcf4aee0711af8c64a14efd394bab",
+      "inspection_only": true
+    },
+    "wayland-scanner": {
+      "path": "/usr/bin/wayland-scanner",
+      "sha256": "c1092055a6a77226da78794b26e1b14a63fa335be0cb12af085e0bb77983298b",
+      "inspection_only": true
+    }
+  },
+  "active_rustc": {
+    "version": "1.99.1",
+    "commit": "58cf8f9c35b355199727627d07ae34a4e2846d67",
+    "host": "x86_64-unknown-linux-gnu",
+    "llvm": "23.1.1",
+    "sha256": "b53b780f77f952062f8ca8a3b70aef2390b1e45ad91939be94afdc9543026853",
+    "private_toolchain_path_omitted": true
+  },
+  "retained_harness": {
+    "source_revision": "6304979719f1388e6ff98d549224107d0d45f284",
+    "git_blobs": {
+      "experiment/niri-harness/run.sh": "ed5e0f860662fb4e84be81a9d0cbfd245f8f783a",
+      "experiment/niri-harness/common.sh": "eb5a776105341e3e644a6de26b6c36648d592c1f",
+      "experiment/niri-harness/host-sway.conf": "f7b320a812ac7ba0624f269e4cee0130172bf898",
+      "experiment/niri-harness/niri.kdl": "af138b8eb6efe8ed3e2c5e85ed4d0c4ddcd4a661",
+      "experiment/functional-parity/validation/validate.py": "f16189a0dbc6c461182396e4916a5299f25babd3",
+      "experiment/functional-parity/validation/input/s2-input.c": "b4f16db3de4c9f263b7895aa33e4ff29cb19f66b",
+      "experiment/functional-parity/validation/input/Makefile": "45a644efa35dcd7af6bd5a7b798f5c69e333902f"
+    },
+    "canonical_availability": false,
+    "executed": false
+  },
+  "discovery": {
+    "niri": "26.04 (8ed0da4)",
+    "host_sway": "swayfx 0.6 based on sway 1.12.0",
+    "cargo": "1.99.1 (5f94df478 2026-08-27)",
+    "wayland_scanner": "1.26.0",
+    "libwayland_client_pkg_config": "1.26.0",
+    "cc": "GCC 16.2.1",
+    "offline_metadata": "PASS; no dependencies built/fetched",
+    "wtype_help": {
+      "exit": 1,
+      "message": "Missing argument to --help",
+      "injection_not_executed": true
+    },
+    "canonical_binaries_present": false,
+    "current_private_environment": "UNVERIFIED",
+    "current_cli_options_vs_runtime": "help/version only, no IPC or compositor launch"
+  },
+  "validation": {
+    "preservation": "PASS: all21 prior files and unrelated handoff unchanged; tracked/staged diffs empty",
+    "links_anchors_privacy": "PASS:40 local links/anchors/line bounds and targeted private-path/address/credential-pattern scan; not comprehensive secret detection",
+    "independent_review": "PASS for documentation handoff; no BLOCKER/HIGH/MEDIUM/LOW findings",
+    "application_tests_run": false,
+    "builds_run": false,
+    "candidate_or_compositor_execution": false,
+    "measurements": false,
+    "active_session_queries": false,
+    "tracked_or_staged_changes": false,
+    "commits_or_publication": false
+  }
+}

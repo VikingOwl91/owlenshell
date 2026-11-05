@@ -1,0 +1,80 @@
+{
+  "date": "2026-11-05",
+  "status": "PROPOSED documentation closure; maintainer acceptance and B1 authorization not granted",
+  "canonical_source_revision": "0cb96dcdbe0f94f35db3f8d30ab91765402ba000",
+  "branch": "docs/architecture-reconciliation",
+  "preserved_15_document_sha256": {
+    "B0-ARCHITECTURE-CONTRACTS.md": "c7ebc009c3d28b8af0e41adbb4bdc778be88be6d8e05912234a9e5c6e94c3ebc",
+    "B0-CONSOLIDATION-REVIEW.md": "b73fc1b1b8ca70692465f622bb9d69f2f72d2fa481812da38d751b3ae3ede5a4",
+    "B0-CONSOLIDATION-SOURCES.json": "0b827da0321846e0f5b9fe15158e95e53355b679ca3abb04c945e36cd3618275",
+    "BASE-ARCHITECTURE-V1-PROPOSAL.md": "ef060e569e09151b399755342d29f328f0f5669ed88cdca3c3697b3559f8c69f",
+    "CONFLICT-REGISTER.md": "0cbf9b049c91769bebb77ed710566c0c0e05d09406b59032d1d188d828aa9df2",
+    "CONSOLIDATION-AND-MILESTONES.md": "ed2e1f3242db94a429448932ad0339b14cfe0d518af0796a7c9f0e889d6b10e9",
+    "GPUI-LINUX-REFERENCE.md": "7e784fe4db78f2b76d0390fddd5870cfee0f8bae227fca0f779bd2f6b3c10285",
+    "IMPLEMENTATION-EVIDENCE.md": "96bd7fa7f52f5967d632027459b19e2b6636348f93c84d2d2fc02a99b18e70c7",
+    "MAINTAINER-DECISIONS.md": "77296853732c96f25bb20b61cad64166278ca47a8349238686fe6f99cda821f9",
+    "MILESTONES-AND-GATES.md": "777ec6267dd0c09c0bbb561eb8049114ed0d5bb5acedc17a5da1a22045ec3628",
+    "OPEN-DECISIONS.md": "a1dc13ba26db431f0bd43e6c2e58d5eeaa9067e132f7c4f457fdd1319c71fd47",
+    "README.md": "f2a2d5deea1651484f39c76af6f76e9c40598b78bbd7e10dc8edaefd2ae86f35",
+    "REVIEW.md": "c375c34ca87fa6a99580c9128ab996600aa14f8898331d326a7e98cf05a2a826",
+    "SOURCES.json": "4003c5c6972fdbb953c9186d9fad8a5cd778e7669edff449c99a60c6279c0376",
+    "SPECIFICATION-GAPS.md": "f6ce762ac20c5ba27a08ebb7e76070e1a394786e3dd194c7e7fb87ae23af6ca8"
+  },
+  "source_sha256": {
+    "src/domain/ids.rs": "e6f6511b1a394433977f01757761cf3712cdfdd4c20b2eca4cd3297aceba3ad7",
+    "src/domain/default_shell.rs": "a012ca36f40ff44ece8d87d9d7570b65570e93cf7538149e484da98c31e50eda",
+    "src/domain/host.rs": "e748737388ad75f55bbe16e3195ff06b86a4c3819d5835e015399997cbf847c0",
+    "src/domain/widget.rs": "a1e1f549eb550c94a7e4275e22a8369a7121ea25236ef4b3f24649c07bdbb6fb",
+    "src/main.rs": "abaa5607b934f4ea82bde64219839de092d888fbf31c03a2f6a97b6bfda8c17a",
+    "src/platform/wayland.rs": "f15b7399da552c65effd62635e67e2c108e0e17d2798ba98868caca2d711ce0c",
+    "src/platform/surface_manager.rs": "ec8dcfe108436ca9075f12157a4131e6b4aa5b019a1580ddd46f7a1afbc9bd9e",
+    "src/platform/output_manager.rs": "c3104e9945febdabc8687b625405572231f6d1b2c27758d498807cf28efae16e",
+    "src/platform/render_bridge.rs": "431b3ba515979eee4bcd7f3cb08d14558fe16bf25a3dea4d0fde52a9067d4528",
+    "src/runtime/coordinator.rs": "94ec0977bed6a4fc0d5d5eb563bbc19b4d83ce05333d4fb41bfa7075eea2b4da",
+    "src/runtime/clock_widget.rs": "0b2316896eb595af2e3d378fb6d75e094663fecbb76acca67865eb884f45924f",
+    "src/runtime/calendar_widget.rs": "e711378e6492ae4730152a9b8b6dafd4ccf5b42fab0f919dbaf4ebc3d3544e24",
+    "src/persistence/repository.rs": "8e22f0b1273cb1795c3bdc9fae7bf5b39acc95b30d5ac99fafad278114b3929c",
+    "tests/platform_state.rs": "2c22b7ca5f7243a8e6b9bca4109e97dcbff4ca96621b888acb1db9873d071fb4",
+    "tests/render_bridge.rs": "e9a1d38e759d5679425879b8089f00459b0befb51a2c25c9f674e5e18817d2eb",
+    "tests/coordinator.rs": "1e9c095e768b99050d842e1ac8cecc8a9d2b9aa5811b6b3bea1d6308a953415c",
+    "ui/calendar.slint": "2dd4f07ed0031bbc867cc3422cfa88dab4577620e48d351558406064720f1884",
+    "src/model.rs": "56c8a6d4ae58a5ed6dffb57b7fdfbd03fa9421de62eaeac66639e97770cafc6c",
+    "Cargo.toml": "28db0803bdb0307d0250a8b7a33f3b77eaa22dcf613167984b5a407d2a9b57c6",
+    "Cargo.lock": "8d4ad8670e750384a53813c76a03be60eeaf896fcba24e1f9c3d1987fc7d04e5",
+    "docs/ADR/0006-renderer-selection.md": "6bf78c0c8d086ffdc38db760e8252f43cfb4e2bbf787b3d6a296724412b62b21",
+    "docs/PORTABILITY-REQUIREMENTS.md": "10c498cfe2119b9394c5e41b55fa9a8d4ae423364e926ee70970c2da54c67eda",
+    "docs/ARCHITECTURE.md": "6bcbe66029357dbe3c165a17e792d5c0e6ec367a3904ef162214498433a7679c",
+    "docs/ATOMIC-SURFACES.md": "3fc128fa95a1fc84395c73606a2f24193ec8d3724f44974792fca671de67d8ff",
+    "docs/PRODUCTION-ARCHITECTURE-PLAN.md": "7ee3bb50ef0e126e213d151958afc9f2057495b378c780b5237c9d94ddfbb2e8",
+    "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/README.md": "82b6081d7628894650233719990fc2e8691a2b2f65ff9ff3a8d21bc2311e7090",
+    "docs/bakeoffs/renderer/SOURCE-REFERENCES.md": "6b72d1979b5957693878839b439908c060bde19dfd2b026bf9babdcb8985113a"
+  },
+  "new_document_sha256": {
+    "B0-CLOSURE-REVIEW.md": "2f006e955e6a4d533cd94dac1c82339b54432a67dcb50628ba43a8e25fcf4f1f",
+    "B0-GAP-DISPOSITION.md": "1ea4351e22c5269d9bb46049a87563460f8f615e7e1d9676ff249d74717f8dd5",
+    "B0-GENERATION-TOKEN-CONTRACT.md": "cc7dd526e37283ec30775557b761d75804d595ba5d4e7932e83bc947699bdf76",
+    "B0-RETIREMENT-CONTRACT.md": "d7d389369e8273e88d42ec522e5e52f7b8c827ce46b36bde066f0848b73bab35",
+    "B1-IMPLEMENTATION-BRIEF.md": "6c43910653119b9a11be1e2d831b939a9db8d55ccb7a358f7e4e3174a44378fa"
+  },
+  "retained_environment_evidence": {
+    "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+    "provenance_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/provenance.json",
+    "run_environment_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/runs/owlen-s1-slint-functional-01/environment.json",
+    "availability": "raw files excluded from canonical curated snapshot; historical fields inspected read-only in retained evidence",
+    "source_catalogue_anchors": [
+      "source-9351b4dc08beb6d0",
+      "source-0328e897c05bae07"
+    ],
+    "current_runtime_availability": "UNVERIFIED"
+  },
+  "validation": {
+    "application_tests_run": false,
+    "candidate_execution": false,
+    "network_or_service_access": false,
+    "tracked_or_staged_changes": false,
+    "prior_documents_and_unrelated_handoff_preserved": true,
+    "commits_or_publication": false,
+    "scope": "static hashes, source crosscheck, links/anchors/line bounds and targeted privacy patterns; independent correction re-review PASS for documentation handoff",
+    "independent_review": "PASS for documentation handoff; no remaining findings after one MEDIUM and one LOW correction"
+  }
+}
