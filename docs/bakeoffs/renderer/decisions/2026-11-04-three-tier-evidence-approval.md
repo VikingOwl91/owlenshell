@@ -1,0 +1,9 @@
+# Maintainer decision — three-tier renderer evidence framework
+
+> **Curated publication copy.** Source: `6304979719f1388e6ff98d549224107d0d45f284`, `docs/bakeoffs/renderer/decisions/2026-11-04-three-tier-evidence-approval.md`. Private paths/identifiers are redacted and links to omitted material lead to the [excluded-source catalogue](../SOURCE-REFERENCES.md). Original source and hashes are listed in [provenance](../provenance.json). This is a dated record: historical ADR statuses, approvals and test counts describe their original scope, not new acceptance. Current initial selection is [Accepted ADR-0006](../../../ADR/0006-renderer-selection.md); Gate P remains NO-GO. References to the repository, its history, implementations or raw evidence describe the retained original experimental repository, not this curated branch. Commands are historical descriptions, not runnable reproduction instructions or execution authorization for this curated snapshot.
+
+Date: 2026-11-04. The maintainer confirmed **Accepted now** for [ADR-0007](../../../ADR/0007-renderer-bakeoff-evidence-scope.md) and adopted its Exploratory / Gate R / Gate P framework.
+
+Exploratory findings are permanently labeled non-decision-grade and must never be silently promoted into comparative benchmark evidence. The approved Gate R/P requirements and all historical NO-GOs remain in force. This decision does **not** authorize exploratory or benchmark measurement execution, renderer selection, production integration or an ADR-0006 acceptance. Each measurement requires separate explicit maintainer authorization; final renderer selection belongs exclusively to maintainers.
+
+The prior proposed ADR and previous evidence remain available in Git history; the status change does not retroactively convert any observation or gate result into a pass.
