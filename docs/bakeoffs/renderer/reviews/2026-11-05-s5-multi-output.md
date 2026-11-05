@@ -1,0 +1,61 @@
+# Independent S5 Phase1 review — 2026-11-05
+
+> **Curated publication copy.** Source: `6304979719f1388e6ff98d549224107d0d45f284`, `docs/bakeoffs/renderer/reviews/2026-11-05-s5-multi-output.md`. Private paths/identifiers are redacted and links to omitted material lead to the [excluded-source catalogue](../SOURCE-REFERENCES.md). Original source and hashes are listed in [provenance](../provenance.json). This is a dated record: historical ADR statuses, approvals and test counts describe their original scope, not new acceptance. Current initial selection is [Accepted ADR-0006](../../../ADR/0006-renderer-selection.md); Gate P remains NO-GO. References to the repository, its history, implementations or raw evidence describe the retained original experimental repository, not this curated branch. Commands are historical descriptions, not runnable reproduction instructions or execution authorization for this curated snapshot.
+
+Read-only Sol planner and reviewer; no candidate/compositor launch by either. Base signed352fdf978cd07206622a282ddc659d48c8f4c23e.
+
+## Plan and Rust review
+
+Planner validated two concrete pairs in one connection/Coordinator/manager, shared process64-intent budget, one Slint platform/bridge/timer advance and per-host contexts/presenters. No new Core ownership or generic registry required. Reviewer found no BLOCKER/HIGH/MEDIUM Rust ownership findings. Added observational Slint ui-input generation identity to match existing Core/egui evidence; dispatch unchanged. Final parent fixture40library+8main tests PASS, Core132 tests PASS.
+
+## Initial harness review — NO-GO preserved
+
+Independent76-test harness run passed but reviewer falsified two claimed readiness cases using disposable protocol fixtures: a final attachment without commit, and a final committed submission without its callback, both incorrectly reused an older completed callback. These are evidence-oracle defects, not observed presenter failures.
+
+MEDIUM: state() retried all ValueErrors, including critical cross-output mutation/ambiguous identity/presenter errors. MEDIUM: stale submission/callback false positives above. MEDIUM: B deadline fired marker alone did not establish indicator state/redraw/new submission/callback, and A expiration lacked coverage. LOW: instantaneous quiescence did not support sustained functional idle. LOW: prospective B navigation description differed from actual negative scroll sequence.
+
+**Initial execution recommendation NO-GO**. No candidate launched under the defective driver. All findings require remediation and fresh review before execution; passing tests alone are insufficient.
+
+## Remediation review — execution GO
+
+Only explicit PendingReadiness retries; critical invariant failures propagate. Reviewer independently reproduced both prior false positives and verified they now cannot PASS. Latest committed attachment needs its own completed target callback. Both A/B deadline paths require indicator state, exact generation, redraw, new submission, matching callback and fixed-position indicator pixels. Retired A deadline gets an explicit1.1s cancellation observation; final functional idle uses fixed350ms stable_window. Navigation prose aligned prospectively to B−1→November.
+
+Independent80 Python tests PASS and40library+8main fixture tests PASS. No remaining BLOCKER/HIGH/MEDIUM/LOW findings. Frozen driverSHA72616497e98021b4b7092cf8622dcffe6bef3e06538a9476213a37d1dfc60d25; testsSHAff97f58f28dd926e87c301e11a5fa5b6236ed6b08be9ccf76199fc2efdbe0a2a. **GO for signed source preservation then one Slint S5 attempt; inspect before egui.** Runtime/screenshots/cleanup still pending. Shared clock ticks unexercised; not newly passed. No live execution by reviewer.
+
+## Slint01 runtime triage and narrowly reviewed oracle correction
+
+First attempt at signed a3310c4eac9cbf6c4a01b69ef31da095eb8c2400 stopped before first render with wrong-software-presenter assertion. Real bars-1 snapshot configured=null/native_presenter=false/pool_none=true/buffer_none=true. Reviewer traced existing Core attach initializing empty resources; draw_surface returns while unconfigured and allocates pool/buffer only during first configured paint. Configure/ack follows the failed snapshot. This establishes premature harness readiness classification, not a competing presenter or failed buffer submission. Original FAILED/BLOCKED trace preserved. Guardian cleanup errors[], all3 owned PIDs/groups/sessions absent and runtime empty; graceful shutdown not claimed for this attempt.
+
+Correction keeps Slint native_presenter=true immediately fatal; missing first software resources remains bounded PendingReadiness. Actual shm attachment/commit/latest matching callback requirements unchanged. Reviewer replayed real failed snapshot as nonPASS pending and competing-presenter mutation as fatal. Independent81 Python tests PASS. **GO for signed correction and one Slint02 attempt using unchanged binary/config; inspect before egui.** No runtime executed by reviewer.
+
+## Slint02 incomplete run and bounded observer correction
+
+Raw Slint02 FAILED/BLOCKED after child-exited detection around91.32s after observer startup. Reviewer verified alarm(90) in pinned source and exact binary disassembly; client EOF and compositor cleanup follow detection. Observer expiry is strongly supported; missing original wait status means exact exited child/signal remains UNVERIFIED, not an established Slint defect. Reviewed raw full screenshots show simultaneous distinct months, isolation/navigation, close/reopen, both complete deadline→redraw→submission→callback chains, preference swap and full calendars at mixed scales. Final mixed-scale interaction, position change, sustained idle and full graceful shutdown remain unfinished. All15 owned PIDs/groups/sessions absent; runtime empty/cleanup errors[]. Original failed run immutable.
+
+Planner judged a fixed S5-only whole-observer240s safety window within this authorization, preserving default90s and all5s IPC/action/10s startup bounds. No functional threshold relaxation. Explicit --s5-functional-window only; unknown flags/arbitrary values rejected. Selected lifetime/argv/new binary hash recorded. S5-only failure receipts now record label/PID/starttime and non-reaping WNOWAIT status, preserving the leader pin. Collector unchanged.
+
+Reviewer independently83 Python tests PASS, including compiled actual C selector90/240/invalid and disposable non-reaping status proof. Native socket guards unchanged, old observer/candidate binary unchanged; no BLOCKER/HIGH/MEDIUM/LOW. **GO for signed preservation then one Slint03; stop if240s insufficient and inspect before egui.** New observerSHA1dc3fb6b4abe8f13c69ea10c6b1dfdfad9dd8204968f198c49b1208df2737069. Parent additionally reran2 existing refusal tests against this new binary with disposable sockets: PASS. No runtime by reviewer.
+
+## Slint03 scoped S5 acceptance
+
+Independent review supports scoped S5 functional PASS, preserving raw PARTIAL as-is. Replayed46accepted/settled state-wire associations, five stable distinct output registry/IPC checkpoints, seventeen native lifetimes all retired, fifteen click actions plus one stale UI rejection, both deadline chains and350ms idle. Client/observer exit0, shutdownfailedfalse/instances0, twenty owned PIDs/groups/sessions absent/runtime empty. Sixteen complete screenshots independently inspected across initial distinct months, navigation, swap, mixed scales, deadline targets and moved-output scenes: complete headers/grid/close and intended placement visible, no obvious clipping; no pixel/font/alpha-buffer equality. Native leaves12/6/2/2 retained; repeated policy cancellation idempotent/no extra domain actions. Keyboard/focus, S5 shared clock ticks and newly controlled delayed-native-callback timing UNVERIFIED. No blockers; GO one egui01 with same source/binary/config/probe.
+
+## egui01 false deadline-oracle rejection and reviewed correction
+
+Original egui01 FAILED/BLOCKED at deadline helper retained. Raw A generation2 own arm11945, redraw-request(renderer-deadline)11976/11995/12020, indicator-fired12029 during paint, wirecommit12038, Coresubmit12040 and owncallback12046 establish a real update/submission; oracle expected Slint's event name and after-fire order. Source confirms egui mark_dirty emits redraw-request only on clean→dirty and can coalesce the earlier request. Sibling indicator-expired request before marker is also source-supported. This is not an established missing redraw/import/presentation failure. Nine owned PIDs/groups/sessions absent; runtime empty/cleanup[]. Deadline capture and full normal teardown remain UNVERIFIED for this aborted trial.
+
+Correction accepts only known causal reasons after the matching arm and before the new presentation for egui, retains Slint post-fire ordering and requires updated indicator state/new-after-fire Core+wire submission/own latest callback/visible indicator. Reviewer independently84PythonPASS and replayed actual egui01A plus Slint03A/B. Negatives reject pre-arm/post-commit/unrelated/wronghost/wronggeneration/missingarm/oldsubmit/missingcallback. No app/GPU/Core/compositor change, no blocker. **GO sign correction then one egui02 with unchanged binary/config/240s observer.** Old failed trial not promoted. DriverSHA1e22deb36cf3a52ebf3c072c32e5c7b575ff9799cb6d14bb5b7ae1d025656713.
+
+## egui02 scoped S5 acceptance — final runtime review
+
+Independent read-only review supports scoped S5 functional PASS; no BLOCKER/HIGH/MEDIUM/LOW. Replayed46 state/protocol associations and five stable distinct output identities/checkpoints. Seventeen native lifetimes all release GPU before role/surface destruction; fifteen intended one-click Coordinator actions, one rejected old UI intent, both deadline chains verified with records truncated at the matching state snapshot (no future evidence), visible magenta indicators,350ms idle. Client/observer exit0, failedfalse/instances0, twenty owned PID/group/session identities absent, empty runtime/cleanup[].
+
+Sixteen complete current egui02 screenshots inspected across distinct initial months, navigation, preference swap, both scale phases, both deadline targets and independent position/reopen scenes. Full title/grid/close and intended placement visible, no obvious clipping; rasterization differs and no font/pixel/alpha-buffer equality is claimed. All17 format receipts verify advertised Bgra8Unorm, Vulkan/RADV9070XT/Mesa26.2.6 and actual empty optional features; effective compositor remains SceneFX/GLES/radeonsi/GBM.
+
+Raw PARTIAL remains unchanged; supplemental PASS is scoped to S5. Duplicate Core/UI native leaves12/6/2/2 retained and repeated cancellation idempotent/no extra actions. Each trace also separately retains28 wire leaves (22 surface-bound,6nil), avoiding conflation with semantic cancellation. Keyboard/focus, shared S5 clock ticks and controlled delayed-native-callback timing remain UNVERIFIED. No more live execution is needed or warranted. No Gate R/P, Niri multi-output, S6, production or renderer-selection inference. Final artifact preservation audit follows separately.
+
+## Final artifact review — GO for signed evidence preservation
+
+Independent reviewer reran offline audit.py: PASS with output exactly matching stored JSON; all1196 originals compared byte-for-byte against raw runs including sizes/SHA256/lossless gzip/mtime0. Exact implementation patch, source/candidate/observer hashes, all report/review/index links, original checkout/handoff and ADR-0006 Proposed verified; production src/ui/Cargo/ADR unchanged. No BLOCKER/HIGH/MEDIUM/LOW findings. Scoped S5 PASS supplements remain distinct from immutable raw PARTIAL and three failed attempts; UNVERIFIED gaps explicit.
+
+One wording NIT about pending supplemental acceptance was corrected to record completed review separately while retaining raw pending-review labels. Temporary Python caches excluded. **GO for final manifest generation/verification and signed preservation.** No further live execution, benchmark, production integration or renderer selection is implied. Parent final Rust formatting check passed; all67 recorded owned PID/PPID/PGRP/SID identities from five attempts absent in a final metadata scan.

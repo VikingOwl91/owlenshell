@@ -1,0 +1,1933 @@
+{
+  "schema_version": 1,
+  "snapshot_kind": "curated-documentation-only",
+  "experimental_source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+  "canonical_base_commit": "c28a04ce11f456b481df5e93ddf38a2b1db35d08",
+  "original_history_imported": false,
+  "raw_artifacts_included": false,
+  "source_availability": "Original experimental history and omitted artifacts retained locally; no public availability implied.",
+  "documents": [
+    {
+      "published_path": "docs/ADR/0006-renderer-selection.md",
+      "published_sha256": "6bf78c0c8d086ffdc38db760e8252f43cfb4e2bbf787b3d6a296724412b62b21",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/ADR/0006-renderer-selection.md",
+          "source_git_object": "599e4f0db05c260f67026086b0f187685d2b3dcb",
+          "source_sha256": "bcfd5566ffd9d027a938a21ac6dd3bc4810575d525859fd74ee10647fb6e4311"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/ADR/0007-renderer-bakeoff-evidence-scope.md",
+      "published_sha256": "96edc623aa5def5e4212e4cf9bde2a4f17ddd7eabeb2e6abcc2126051464a81c",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/ADR/0007-renderer-bakeoff-evidence-scope.md",
+          "source_git_object": "78652466aa4c8c2433ceb262805a5655f6278d00",
+          "source_sha256": "d633a0e50b711639e7882e4144b97d9ec954d5303eaf0493ce8e1e3b8ef23556"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/PORTABILITY-REQUIREMENTS.md",
+      "published_sha256": "10c498cfe2119b9394c5e41b55fa9a8d4ae423364e926ee70970c2da54c67eda",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/PORTABILITY-REQUIREMENTS.md",
+          "source_git_object": "a319d99bbe949bfc2e6c7c3478d67049fdcf3647",
+          "source_sha256": "e0bf3c5c303eba73da5ceddcc26f5b890c888b0c964f0b267bfe1513bc817867"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/GATE-PROPOSAL.md",
+      "published_sha256": "60c1626382299465ba3726a5a98a2a2717c2d2b3c2b24e243a76964b40d02966",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/GATE-PROPOSAL.md",
+          "source_git_object": "0b35dbd09a80291f532c71a78d7d12d81f6975a6",
+          "source_sha256": "abbe4d6b06daf7765fb54244740582a19cb215db7e10bd39041604b0b82dc6d3"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/POST-S6-DECISION-READINESS.md",
+      "published_sha256": "83a4ff00a44875bb342b393bd098bfac61ef9449e1e73668bca649e6db8632ab",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/POST-S6-DECISION-READINESS.md",
+          "source_git_object": "d7b89cfa18b5814fc2e77c29cd8d129ce0fac8c9",
+          "source_sha256": "7f4820f6b764ec4ddce5f2c15337120a3c173624b97ea1306822010c9d1937f6"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/SLINT-BASE-PLANNING-HANDOFF.md",
+      "published_sha256": "bd7ce43685b982759d45688a285510b5e8ce2e8ef0d09b8656803fd24942940c",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/SLINT-BASE-PLANNING-HANDOFF.md",
+          "source_git_object": "4f46d306705b8dae43ddd2bcffa1668a868cb452",
+          "source_sha256": "71ff5a1830b9085c49f567ffab25391174122d7387912a96a4b508846ae0a5b1"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/decisions/2026-11-04-gate-r-p-approval.md",
+      "published_sha256": "09aebec1e28600865b4ecdaa9d28bc574e301ea0ce4435fe456941f37d80a08c",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/decisions/2026-11-04-gate-r-p-approval.md",
+          "source_git_object": "24a4afd77b0103a5a22f7bf42460cd567b1674e2",
+          "source_sha256": "9d9c46fcb333ca0316d938c5f6a155de600e73fc1b73fb78f1b8ba41f7b04226"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/decisions/2026-11-04-three-tier-evidence-approval.md",
+      "published_sha256": "3b99905825198531da0afc8fbd27e50e70c029e680b3ddd349335bd7122ca4c5",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/decisions/2026-11-04-three-tier-evidence-approval.md",
+          "source_git_object": "37ccc56c65592b165ab97fd9efb6a88032ebe036",
+          "source_sha256": "464b5f8cae44c2f976721bc45323346db542905b9e62b331909264cd8031031e"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/decisions/2026-11-05-initial-slint-selection.md",
+      "published_sha256": "73852d6f4adf3c71859c7fca33978c875fd29d25807d12f3cfbccc416e10e507",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/decisions/2026-11-05-initial-slint-selection.md",
+          "source_git_object": "632fae815e9faf2349a051907da051d55599dcb6",
+          "source_sha256": "c38e55be7c3366da442685e208b20750ad10bf23f056ec3eac2b0b3b2da208c5"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/decisions/2026-11-05-s2-user-open-focus-adoption.md",
+      "published_sha256": "7b48d3f544bf1e751690bbf06df3f6351a2057bccd1838004d82142d89774752",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/decisions/2026-11-05-s2-user-open-focus-adoption.md",
+          "source_git_object": "1fce1e4fc4339c6f7fb26c18257ae6b1dd558c2c",
+          "source_sha256": "e9f68a5a3c4635b85a5e32fccb2e963faddb334480158eeef7891fac2fc14d43"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/README.md",
+      "published_sha256": "82b6081d7628894650233719990fc2e8691a2b2f65ff9ff3a8d21bc2311e7090",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/README.md",
+          "source_git_object": "ecf859b73bec84ca46daaf3d2bbfc1b3f4c1a065",
+          "source_sha256": "a64c4b1a62c3c9cec706b2119649bc65b1962292ca8f4c12739888ce55a6267c"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "privacy-redaction",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-user-open-focus/README.md",
+      "published_sha256": "0d2b43eaa98def54e5d7edc6c029d8cce4d6e8414a13fabd9fd9774ac8fd2853",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-user-open-focus/README.md",
+          "source_git_object": "95d13728da5bceba61efbf770b3b890161ba7fa3",
+          "source_sha256": "01dace69862879e19e635b091f6f7e5056a1693788c662c7ab1583446bbdddc1"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/results/2026-11-05-s3-scheduling/README.md",
+      "published_sha256": "8ec6b251da7c473c4abf552519c820ad45d3d117f89d6992c1da0425d03036c7",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s3-scheduling/README.md",
+          "source_git_object": "8b59e1545faf5dd35b6efc2dd1f3176419f07b12",
+          "source_sha256": "27c6d4416ac9a6ee6d4974763bf293cfd25eb618247c3769c83ef252824f589c"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/results/2026-11-05-s4-scaling/README.md",
+      "published_sha256": "c230a2141c2f97782280282a343f814adfe083d7c897da8e019404674239940c",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s4-scaling/README.md",
+          "source_git_object": "70d3311d8ea98390b316ffb1a5334afb94d59f0c",
+          "source_sha256": "a0966a8115fb502890ff86b44383a9d2cc1b094d8a86f7913f4b97f10fd50bbd"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/README.md",
+      "published_sha256": "34a0f8ff4c4ce92e9523ece9b607fdda0ad6ccd63889923fa175b3deedf9e19d",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/README.md",
+          "source_git_object": "86e5cbd104c9a04481bb28920a799dadcc288da8",
+          "source_sha256": "4f4f009941f5c39bc37d07cbec9df0a0c8ce019c4330eb9513d181edc3391ff8"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "privacy-redaction",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/README.md",
+      "published_sha256": "c8adf546aa631689d37fbaeb9c0a4101fff039c022ad15e9ef17b2cc2f536d2e",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/README.md",
+          "source_git_object": "092363100139325005107b0b70a6e5dc871c2046",
+          "source_sha256": "859b4af427cf6daec9e97ed169f1ddf269a922bce8ea6222cd06f9e81f91a008"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "privacy-redaction",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/reviews/2026-11-04-s1-functional-parity.md",
+      "published_sha256": "4d4f65dba9a28adada7b8a1511f99dfa414ab0f9bf85f5f68313d43347bf768e",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/reviews/2026-11-04-s1-functional-parity.md",
+          "source_git_object": "5b46195f4c38573ed21dc8c82bd0742bd665b854",
+          "source_sha256": "a8cfcc00be2b634ad130e127136357699611ce6eedb76c0a006ccccab89bc03e"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/reviews/2026-11-05-initial-slint-selection.md",
+      "published_sha256": "c4851b7da3713d29f71aab24145cd0a79a2342f31093927ee0cc4a3c3360fcb7",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/reviews/2026-11-05-initial-slint-selection.md",
+          "source_git_object": "58e043bb7bafaf2957ba51a17745924e273f5e8c",
+          "source_sha256": "2fbce4cd50ab66b01f57dc7eac64f54e941e527f85f29af9a43bfaa9e388a7e6"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/reviews/2026-11-05-post-s6-decision-readiness.md",
+      "published_sha256": "9ca47da8353d2511bf1dc17c961843405e1a3d9058f0a23e5be71c1060ce0b1e",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/reviews/2026-11-05-post-s6-decision-readiness.md",
+          "source_git_object": "aa0674accb2218a1e379e1e5a84ad02428c2e93d",
+          "source_sha256": "7ce9a65e53f49a7a0ff93b092ec75ad5b0b8ca4cbf33012db95cfa68618ec486"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/reviews/2026-11-05-s2-user-open-focus.md",
+      "published_sha256": "e4b59b01672475e7097b63f98c11b184aed9cd4cef9f5cd7b862b7bd256990c8",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/reviews/2026-11-05-s2-user-open-focus.md",
+          "source_git_object": "dd32ed485c833d4928af0b0c7100174e84221cda",
+          "source_sha256": "ffc49b3cbaa15ed8eb615eb970b797699bba5f1ed784867b9c9baab3761fb8d2"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/reviews/2026-11-05-s3-scheduling.md",
+      "published_sha256": "4d0b4f568ff0f04324e9faa249599ba6f397d923031afe4237cc58b3611c0085",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/reviews/2026-11-05-s3-scheduling.md",
+          "source_git_object": "fb565b4f7c07cf99c875fc3349cfc2a18319d2e3",
+          "source_sha256": "9ae48f0a806a85f26a3d6ebd33bc92085a749a8335f1024098e0219464d9cf47"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/reviews/2026-11-05-s4-scaling.md",
+      "published_sha256": "580d6ad899e1f6f41a6ca88fa4ae14655b7757e3f21f6ea5b73df5fd3c071dd1",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/reviews/2026-11-05-s4-scaling.md",
+          "source_git_object": "cdeb04f5f7b45d7e8204f681d5e33b46dc549854",
+          "source_sha256": "af249c7e4efaabe6c9fa4936e3f55fafda2d3142c094d5dcef251b2292506c81"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/reviews/2026-11-05-s5-multi-output.md",
+      "published_sha256": "fc030d65c94593ac5cc91d1fb9bf56be7ddb09ae2bdf72060c0b88c15b651e33",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/reviews/2026-11-05-s5-multi-output.md",
+          "source_git_object": "eb7f8f26fee6818aaaeb2c2888fe935773adbb46",
+          "source_sha256": "1f15818d6c0bf50146ed7df56ddb446c426bec03c0589e54f1771fe1aee3115f"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/reviews/2026-11-05-s6-lifecycle.md",
+      "published_sha256": "54cbf73623b09aa763ebad29a0ad666a84c37155767aa81e42f8caa169ac7b6e",
+      "kind": "curated-source-document",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/reviews/2026-11-05-s6-lifecycle.md",
+          "source_git_object": "400cfbfb3e61e790e5ecb6978f1cee265300b8cf",
+          "source_sha256": "c2f757647c20d5770669f81130558d824b968404225beb005c2251900ae7f265"
+        }
+      ],
+      "transformations": [
+        "publication-context-banner",
+        "excluded-link-catalogue",
+        "explicit-original-repository-scope"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/EVIDENCE-SUMMARY.md",
+      "published_sha256": "e774ca99cb904c01f3a5cb6c17f068e6a8f93c7e5a3ec8f08636755081638ad9",
+      "kind": "derived-summary",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/ADR/0006-renderer-selection.md",
+          "source_git_object": "599e4f0db05c260f67026086b0f187685d2b3dcb",
+          "source_sha256": "bcfd5566ffd9d027a938a21ac6dd3bc4810575d525859fd74ee10647fb6e4311"
+        },
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/POST-S6-DECISION-READINESS.md",
+          "source_git_object": "d7b89cfa18b5814fc2e77c29cd8d129ce0fac8c9",
+          "source_sha256": "7f4820f6b764ec4ddce5f2c15337120a3c173624b97ea1306822010c9d1937f6"
+        },
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/PORTABILITY-REQUIREMENTS.md",
+          "source_git_object": "a319d99bbe949bfc2e6c7c3478d67049fdcf3647",
+          "source_sha256": "e0bf3c5c303eba73da5ceddcc26f5b890c888b0c964f0b267bfe1513bc817867"
+        },
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/README.md",
+          "source_git_object": "ecf859b73bec84ca46daaf3d2bbfc1b3f4c1a065",
+          "source_sha256": "a64c4b1a62c3c9cec706b2119649bc65b1962292ca8f4c12739888ce55a6267c"
+        },
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-user-open-focus/README.md",
+          "source_git_object": "95d13728da5bceba61efbf770b3b890161ba7fa3",
+          "source_sha256": "01dace69862879e19e635b091f6f7e5056a1693788c662c7ab1583446bbdddc1"
+        },
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s3-scheduling/README.md",
+          "source_git_object": "8b59e1545faf5dd35b6efc2dd1f3176419f07b12",
+          "source_sha256": "27c6d4416ac9a6ee6d4974763bf293cfd25eb618247c3769c83ef252824f589c"
+        },
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s4-scaling/README.md",
+          "source_git_object": "70d3311d8ea98390b316ffb1a5334afb94d59f0c",
+          "source_sha256": "a0966a8115fb502890ff86b44383a9d2cc1b094d8a86f7913f4b97f10fd50bbd"
+        },
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/README.md",
+          "source_git_object": "86e5cbd104c9a04481bb28920a799dadcc288da8",
+          "source_sha256": "4f4f009941f5c39bc37d07cbec9df0a0c8ce019c4330eb9513d181edc3391ff8"
+        },
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/README.md",
+          "source_git_object": "092363100139325005107b0b70a6e5dc871c2046",
+          "source_sha256": "859b4af427cf6daec9e97ed169f1ddf269a922bce8ea6222cd06f9e81f91a008"
+        }
+      ],
+      "transformations": [
+        "selection-and-scope-synthesis",
+        "no-new-runtime-evidence"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/README.md",
+      "published_sha256": "148ea28068216cb8a2aae10e2700f1728ef1a7c2cc33aef284cc9f3d8ce354bb",
+      "kind": "derived-publication-index",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/ADR/0006-renderer-selection.md",
+          "source_git_object": "599e4f0db05c260f67026086b0f187685d2b3dcb",
+          "source_sha256": "bcfd5566ffd9d027a938a21ac6dd3bc4810575d525859fd74ee10647fb6e4311"
+        },
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/PORTABILITY-REQUIREMENTS.md",
+          "source_git_object": "a319d99bbe949bfc2e6c7c3478d67049fdcf3647",
+          "source_sha256": "e0bf3c5c303eba73da5ceddcc26f5b890c888b0c964f0b267bfe1513bc817867"
+        },
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/SLINT-BASE-PLANNING-HANDOFF.md",
+          "source_git_object": "4f46d306705b8dae43ddd2bcffa1668a868cb452",
+          "source_sha256": "71ff5a1830b9085c49f567ffab25391174122d7387912a96a4b508846ae0a5b1"
+        }
+      ],
+      "transformations": [
+        "curation-policy",
+        "privacy-and-reproduction-limitations"
+      ]
+    },
+    {
+      "published_path": "README.md",
+      "published_sha256": "12bd8c78d5ebf79431c6c29614f678cbe48c94862ae1cc7d9dfb0c1ece9d63a2",
+      "kind": "derived-publication-entry",
+      "sources": [
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/ADR/0006-renderer-selection.md",
+          "source_git_object": "599e4f0db05c260f67026086b0f187685d2b3dcb",
+          "source_sha256": "bcfd5566ffd9d027a938a21ac6dd3bc4810575d525859fd74ee10647fb6e4311"
+        },
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/PORTABILITY-REQUIREMENTS.md",
+          "source_git_object": "a319d99bbe949bfc2e6c7c3478d67049fdcf3647",
+          "source_sha256": "e0bf3c5c303eba73da5ceddcc26f5b890c888b0c964f0b267bfe1513bc817867"
+        },
+        {
+          "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+          "source_path": "docs/bakeoffs/renderer/SLINT-BASE-PLANNING-HANDOFF.md",
+          "source_git_object": "4f46d306705b8dae43ddd2bcffa1668a868cb452",
+          "source_sha256": "71ff5a1830b9085c49f567ffab25391174122d7387912a96a4b508846ae0a5b1"
+        }
+      ],
+      "transformations": [
+        "curated-discoverability",
+        "development-status"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/SOURCE-REFERENCES.md",
+      "published_sha256": "6b72d1979b5957693878839b439908c060bde19dfd2b026bf9babdcb8985113a",
+      "kind": "generated-source-catalogue",
+      "sources": [],
+      "transformations": [
+        "excluded-reference-inventory"
+      ]
+    },
+    {
+      "published_path": "docs/bakeoffs/renderer/PUBLICATION-REVIEW.md",
+      "published_sha256": "159a8dd9401fe4c00ee4458d3f47a594116b5b95edf3f1ce1529d339b12ddb01",
+      "kind": "new-independent-publication-review",
+      "sources": [],
+      "source_commit": null,
+      "source_path": null,
+      "transformations": [
+        "new-static-review-record-no-original-experimental-source"
+      ]
+    }
+  ],
+  "excluded_references": [
+    {
+      "anchor": "source-7bfab1482e925315",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/ADR/0001-slint.md",
+      "source_anchor": null,
+      "source_git_object": "4c4189609a0e4dec9711a76c5297f7597f14f6cd",
+      "source_object_type": "blob",
+      "source_sha256": "3fdeca942ac0df8f33faf456a264151a8cb3a6b911823fdb85838b49241b91ea",
+      "excluded": true
+    },
+    {
+      "anchor": "source-fafd874e426c2eeb",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/ADR/0003-custom-wayland-platform.md",
+      "source_anchor": null,
+      "source_git_object": "196434f48a10a1ab41a07cee14f55630b21a33e4",
+      "source_object_type": "blob",
+      "source_sha256": "77acf50f914505cbdbf634803ab803a8d6a379635fea32fe22af3571f429e786",
+      "excluded": true
+    },
+    {
+      "anchor": "source-75fa4debaa46f91a",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/ADR/0004-placement-separation.md",
+      "source_anchor": null,
+      "source_git_object": "2b350ed7dd8c9f04d3f2e8a1c4b69466dea022f5",
+      "source_object_type": "blob",
+      "source_sha256": "be95c377814fdda19552c201f9047db395a4632f76c7f3ddefb6e03c2dfe9e43",
+      "excluded": true
+    },
+    {
+      "anchor": "source-eea96193892d525f",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/ADR/0005-compositor-adapters.md",
+      "source_anchor": null,
+      "source_git_object": "ff3837c4a0ac9b41c6e48f3d0bf68b3c5508240e",
+      "source_object_type": "blob",
+      "source_sha256": "28f026a75a8241856fff2e727a9c76742dc8cf47708a437b054f88f2a156a960",
+      "excluded": true
+    },
+    {
+      "anchor": "source-44baccb73b186f1d",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "src/platform/render_bridge.rs",
+      "source_anchor": "L542",
+      "source_git_object": "0bfb1cc2e22fcc9043344e5ff6b2dad72518f6d4",
+      "source_object_type": "blob",
+      "source_sha256": "b992b57faea4bfed0c8681d3d0aba9bf7ede5a1e42058dc5a7c5cb4a3e7c46dc",
+      "excluded": true
+    },
+    {
+      "anchor": "source-81cd532c3d0525f8",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "src/platform/surface_manager.rs",
+      "source_anchor": "L809",
+      "source_git_object": "f54e632673b3c1514d9f8f5f8320878c733aad30",
+      "source_object_type": "blob",
+      "source_sha256": "ee03f17259caea1f6a5c4943962ac4721d5ad787c245e56b91b4141e23b09304",
+      "excluded": true
+    },
+    {
+      "anchor": "source-e2a9690cc59100a9",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "src/platform/ui_host.rs",
+      "source_anchor": "L112",
+      "source_git_object": "3107355ffddc77408dd8066494c386be27b0da47",
+      "source_object_type": "blob",
+      "source_sha256": "6ca4b03081f3ca110608f4d717df4ebc900e8b7ef721b4191221a02a6b894584",
+      "excluded": true
+    },
+    {
+      "anchor": "source-9c0846679bfdd261",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "src/main.rs",
+      "source_anchor": "L19",
+      "source_git_object": "bc933eae2f5edb6927473d920dc1b2b1a6ff9052",
+      "source_object_type": "blob",
+      "source_sha256": "03ed9f1f77530c7b54bc370f7ae33afe1b40bc9bd4da11504f01de9e1d4626c8",
+      "excluded": true
+    },
+    {
+      "anchor": "source-829c5ac42f4f1d1a",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "experiment/functional-parity/ui/parity.slint",
+      "source_anchor": "L1",
+      "source_git_object": "6b914f8f18d9be7a31571f129caca3faede34200",
+      "source_object_type": "blob",
+      "source_sha256": "f371354de6b434764a6086750f6df543afbc812cfd6a6ad6192bf56e3f98e81f",
+      "excluded": true
+    },
+    {
+      "anchor": "source-e7c0480d239b7289",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-04-calendar-functional-closure/README.md",
+      "source_anchor": null,
+      "source_git_object": "7a32e86ff160cc883dc6f863b47a15091dd0ea5b",
+      "source_object_type": "blob",
+      "source_sha256": "83037f7b5109d264166f3ca5f8ba4e652c509a65f9c9204595a27f9b20cc43c7",
+      "excluded": true
+    },
+    {
+      "anchor": "source-590bbbadab5ec52e",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-egui-format-fix/README.md",
+      "source_anchor": null,
+      "source_git_object": "335333540a0abf344b36f873d22439d12a416bcc",
+      "source_object_type": "blob",
+      "source_sha256": "a2184cf2c92f63ba17249e839322d8987beefe41c62f90ee326a9fa394f41b18",
+      "excluded": true
+    },
+    {
+      "anchor": "source-e965c84ec042341d",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/ARCHITECTURE-FUNCTIONAL-REVIEW.md",
+      "source_anchor": null,
+      "source_git_object": "52924fe0edbc09a325570b3292847d202cb998a8",
+      "source_object_type": "blob",
+      "source_sha256": "cefc629452e29ac8be06af0a75fe155958407d784cb00dbeba3e70fdd4827f0e",
+      "excluded": true
+    },
+    {
+      "anchor": "source-4f8ae4cfe1184b81",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/FEASIBILITY-MATRIX.md",
+      "source_anchor": null,
+      "source_git_object": "0e2b2e7f010404e7f5b132badc423a1a3b6873fc",
+      "source_object_type": "blob",
+      "source_sha256": "88971ea2b285e1ebf26f084313e17a72e98fd198a87e0f15f7df8b7b1bda53ff",
+      "excluded": true
+    },
+    {
+      "anchor": "source-ee9aeb2c5b99b9d5",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "renderer-bakeoffs/README.md",
+      "source_anchor": null,
+      "source_git_object": "0a25d6e6ca7826aebb42b6a1bb2dfa3a0facfab6",
+      "source_object_type": "blob",
+      "source_sha256": "431f6ed4d177a14eca1d9f84c7408c4af5f4bda20c8ce7339e6cd11e92d530c9",
+      "excluded": true
+    },
+    {
+      "anchor": "source-650d9c951033d2ac",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/exploratory/2026-11-04-authorized-idle/README.md",
+      "source_anchor": null,
+      "source_git_object": "de698a717648d280953e9298ebf10f834d284abb",
+      "source_object_type": "blob",
+      "source_sha256": "e3e05818af0d17d103affbe2d61c9d7d158322c2fde657e8157a7478826ad225",
+      "excluded": true
+    },
+    {
+      "anchor": "source-a41eff4735c296d2",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/exploratory/2026-11-04-authorized-idle/evidence-analysis.md",
+      "source_anchor": null,
+      "source_git_object": "07d425567c0f199dc5ab7e6fe53c573038809fea",
+      "source_object_type": "blob",
+      "source_sha256": "9c5869025b5af8e506111e07eb13b430f1ec8471158c5f6163aced4433df7439",
+      "excluded": true
+    },
+    {
+      "anchor": "source-ae5ff82ea0a7f64c",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/ARCHITECTURE-AUDIT.md",
+      "source_anchor": null,
+      "source_git_object": "9e3d58c98438a3043da1712857b084be8a212bc6",
+      "source_object_type": "blob",
+      "source_sha256": "3c0b59e23ec1b53633a2b4778f15530b293ed4ed632c685722500e99aa067444",
+      "excluded": true
+    },
+    {
+      "anchor": "source-d4a7fc96adaca83e",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/comparison-matrix.md",
+      "source_anchor": null,
+      "source_git_object": "c86e55416f16cea63eb8cd033fb8e074adeb3c08",
+      "source_object_type": "blob",
+      "source_sha256": "3181fbb625a97afd698177f064a3312dbbb6421d7c2f561847e362d62aeb08ff",
+      "excluded": true
+    },
+    {
+      "anchor": "source-3971f4d3ce98f43f",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/RENDERER-BAKEOFF-PROTOCOL.md",
+      "source_anchor": null,
+      "source_git_object": "d8cee04c15413c450aff433f898e1acaa59b0502",
+      "source_object_type": "blob",
+      "source_sha256": "8c8c2e09273f94a8eb9e4d6768cdcd72c6b1eaa81ecb215f1b48ca81d0457e97",
+      "excluded": true
+    },
+    {
+      "anchor": "source-2140e71b8be7ba02",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/static-gate-r-readiness.md",
+      "source_anchor": null,
+      "source_git_object": "95284c31a1b39bd3ec0602009e54403d9993d8d2",
+      "source_object_type": "blob",
+      "source_sha256": "c2a053d2782e3ea79e79bba4630533a14ce1f396259e6d3f1ee48bc966972a74",
+      "excluded": true
+    },
+    {
+      "anchor": "source-d2a49822d62345b9",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/reviews/2026-11-04-focused-gate-r.md",
+      "source_anchor": null,
+      "source_git_object": "c2836df0bbe64ae16a01cfaf8b10c8d2315d1152",
+      "source_object_type": "blob",
+      "source_sha256": "c78c6905b5c1027a9f1b69bc8b199affb67e42dc665e87bf2a28ab3c07c2afe3",
+      "excluded": true
+    },
+    {
+      "anchor": "source-958da9b78383a4c3",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/STATIC-VISUAL-METHOD-PROPOSAL.md",
+      "source_anchor": null,
+      "source_git_object": "4b30f07c1d60a08b5a25b1138786c90e6198078d",
+      "source_object_type": "blob",
+      "source_sha256": "c52afb0d20d056c83883a96e4583a5287f20de46c6d674257aeaafcd12997841",
+      "excluded": true
+    },
+    {
+      "anchor": "source-4f25c8a3b21a2581",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/runs/2026-11-04-temp-cleanup/README.md",
+      "source_anchor": null,
+      "source_git_object": "5166cf022361f3e77a9702d5c01b35cc750f72ce",
+      "source_object_type": "blob",
+      "source_sha256": "86678d0b801ec09945ca8541b4b97c205c048c61a6e953d2cd9edcfffcfb9d34",
+      "excluded": true
+    },
+    {
+      "anchor": "source-f59fac9abf662caa",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-04-private-niri-resource-preflight.md",
+      "source_anchor": null,
+      "source_git_object": "0155523c6c337c12afe09d853ab57c9cb20de543",
+      "source_object_type": "blob",
+      "source_sha256": "c9e8ad03e688b1c86fc042d111c506900a556ea918d0399ce3dbe15556eb61ba",
+      "excluded": true
+    },
+    {
+      "anchor": "source-82f2d46e27015fea",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/runs/2026-11-04-private-niri-check/README.md",
+      "source_anchor": null,
+      "source_git_object": "76d3442727c7bb52bcde04da61eff962ac2adad1",
+      "source_object_type": "blob",
+      "source_sha256": "bd832648c5e7c0ff7f9a1690057fc8dc1f915a9a96657d9f9e481e1c1b5c8a0d",
+      "excluded": true
+    },
+    {
+      "anchor": "source-750833e16d16f9d3",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/runs/2026-11-04-niri-diagnostic-sketch/README.md",
+      "source_anchor": null,
+      "source_git_object": "313116af4a3b8f2e5bc1952fbe1de2c1c9f9a604",
+      "source_object_type": "blob",
+      "source_sha256": "d4ec242f53f1aac5c5a2d1beaec57aa54e7107a527dde222201bb0897373ad31",
+      "excluded": true
+    },
+    {
+      "anchor": "source-42a8c54bc2752d2c",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/reviews/2026-11-04-scope-cleanup-review.md",
+      "source_anchor": null,
+      "source_git_object": "65f8af5437e07b4ae5ce82a9bba045f4d3898779",
+      "source_object_type": "blob",
+      "source_sha256": "91aca926121747c099a17f7b000490e8759847bd9ed77745b4d0535381a754bf",
+      "excluded": true
+    },
+    {
+      "anchor": "source-86bbf6943147c0e4",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "experiment/functional-parity/README.md",
+      "source_anchor": null,
+      "source_git_object": "de6dadcab386d8045481de2ef478d378c6de31cc",
+      "source_object_type": "blob",
+      "source_sha256": "dede25dc625600eababaa95b229780b3c54cd8796739144a3e34c3c743195798",
+      "excluded": true
+    },
+    {
+      "anchor": "source-152e70ea128027c3",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-capability/README.md",
+      "source_anchor": null,
+      "source_git_object": "def918855bc21e24b7803f4acc54c5f024a8fe54",
+      "source_object_type": "blob",
+      "source_sha256": "88d87d9f1297e8452fda18aaec8607ac7aa0ff5ee16f8938fd893862b9fd60b1",
+      "excluded": true
+    },
+    {
+      "anchor": "source-94f5e983620e0c45",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/acceptance-matrix.md",
+      "source_anchor": null,
+      "source_git_object": "60a3af9f8db28ac851932a0256f6b8fb5d0eb307",
+      "source_object_type": "blob",
+      "source_sha256": "59e5d13cbb04b8fca119e216d3a858b95294ac9b7db26fbe16fdd21505aa63bd",
+      "excluded": true
+    },
+    {
+      "anchor": "source-3ef4a9848284378d",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/benchmark-readiness.md",
+      "source_anchor": null,
+      "source_git_object": "494f31e0296db66462474358559bc791f3f4494d",
+      "source_object_type": "blob",
+      "source_sha256": "072e353723ddcac0b69c4d4bbc85d7a4b093e2640deea90b5626b1595e4db436",
+      "excluded": true
+    },
+    {
+      "anchor": "source-cc8901064d9ff045",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/comparison.md",
+      "source_anchor": null,
+      "source_git_object": "8f71ba334d855248dfab12a095b026d8d9e23bb8",
+      "source_object_type": "blob",
+      "source_sha256": "e328721ff72bf93f14289b6e052ecce684c499c95777022fa9a43778453fdff4",
+      "excluded": true
+    },
+    {
+      "anchor": "source-f9010ce1f05280e6",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/decisions/2026-11-05-post-s6-review-authorization.md",
+      "source_anchor": null,
+      "source_git_object": "9d9e180a18b9b6ae424c03e4dfec1e0a68e4a62e",
+      "source_object_type": "blob",
+      "source_sha256": "14cc26aaa918f8c3aa2a69ec85c20677d6a19cd50b94b0b0d37eafcc57aa67bc",
+      "excluded": true
+    },
+    {
+      "anchor": "source-9351b4dc08beb6d0",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/provenance.json",
+      "source_anchor": null,
+      "source_git_object": "ed3d66123b2a4fd06f1dff4fe90104e9f3920989",
+      "source_object_type": "blob",
+      "source_sha256": "5fb79b8ce4220c3d2682873125fe3910ee9f10ae05b6a9f29d4e701a0f18d701",
+      "excluded": true
+    },
+    {
+      "anchor": "source-dc2f658b56f18a04",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-input-parity/README.md",
+      "source_anchor": null,
+      "source_git_object": "7a626bed73022f458d65992a1df8a8caf125e13e",
+      "source_object_type": "blob",
+      "source_sha256": "b01331941fde1e47327ec97dc364d7f50e804f7c30b0576f5861431e849f7ca1",
+      "excluded": true
+    },
+    {
+      "anchor": "source-6e7b16093eb099a4",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/facts.json",
+      "source_anchor": null,
+      "source_git_object": "5da68e6064b4a1f90b5bb437746efc507754dfea",
+      "source_object_type": "blob",
+      "source_sha256": "89379950c46dd06f0278b2280db36779bb673662315c6d510918cf00d8c797a2",
+      "excluded": true
+    },
+    {
+      "anchor": "source-600a606df37323eb",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/acceptance.json",
+      "source_anchor": null,
+      "source_git_object": "45fa6c3fc4d37967a909cd452392cf76415603be",
+      "source_object_type": "blob",
+      "source_sha256": "37344ccf559653b9c36ef118d74406cafc4f5a5258b4f0c89c1f2b6bbb2dae06",
+      "excluded": true
+    },
+    {
+      "anchor": "source-40a26b7d69975bec",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-sway-capability/README.md",
+      "source_anchor": null,
+      "source_git_object": "a2f1982b0848f3f805ea0cbe6d0db8d5b53d1014",
+      "source_object_type": "blob",
+      "source_sha256": "b24c13d213815603d4aadf354baddfbb6ca42e373b718bff11a7393216245b68",
+      "excluded": true
+    },
+    {
+      "anchor": "source-0c557c86ec82b100",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/runs/2026-11-04-renderer-metadata/README.md",
+      "source_anchor": null,
+      "source_git_object": "a39138e89bff8ccb3f7475f9f420556cb6a9a4a2",
+      "source_object_type": "blob",
+      "source_sha256": "8daab6050581cbf6f35828f4ed2ba8cfdd958c28f44d075cf31dbc78b87d5bb3",
+      "excluded": true
+    },
+    {
+      "anchor": "source-94f72791f964d7ff",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-egui-texture-triage/README.md",
+      "source_anchor": null,
+      "source_git_object": "4d41b845f79a1f567ea14c4a63dd0ee190445014",
+      "source_object_type": "blob",
+      "source_sha256": "4cad6e3dc2bd9ebbd9392d8ee81338ae1c67862714286f5dd84c55ccec4cf413",
+      "excluded": true
+    },
+    {
+      "anchor": "source-18b73e4bd312cf77",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/NATIVE-OWNERSHIP-MIGRATION-SKETCH.md",
+      "source_anchor": null,
+      "source_git_object": "c942c1bb9efe2b6d2566401b4a07b04b25e70fc3",
+      "source_object_type": "blob",
+      "source_sha256": "ae6666eaff401f035698bd8b619d435945b5cbf4349d09e801c3376ff00174ee",
+      "excluded": true
+    },
+    {
+      "anchor": "source-36d36ba96d923d46",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/plans/FUNCTIONAL-PARITY-MILESTONE.md",
+      "source_anchor": null,
+      "source_git_object": "935a6a7801e6e0bd6006b4cc14be2ec984120163",
+      "source_object_type": "blob",
+      "source_sha256": "4ed25efc51225f17e4e8e3d1156f565b76c0b23806265cc58825e0221f128ab5",
+      "excluded": true
+    },
+    {
+      "anchor": "source-4af69d2c413c07b8",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "src/platform/ui_host.rs",
+      "source_anchor": "L21",
+      "source_git_object": "3107355ffddc77408dd8066494c386be27b0da47",
+      "source_object_type": "blob",
+      "source_sha256": "6ca4b03081f3ca110608f4d717df4ebc900e8b7ef721b4191221a02a6b894584",
+      "excluded": true
+    },
+    {
+      "anchor": "source-d6f54851323b5698",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "src/runtime/coordinator.rs",
+      "source_anchor": "L36",
+      "source_git_object": "0267e4f61025490274609896189616f06bbd5593",
+      "source_object_type": "blob",
+      "source_sha256": "0114dbe52f34e01295f014dca6989b8d66efbcfc97f4a69bdcff7d843277e4db",
+      "excluded": true
+    },
+    {
+      "anchor": "source-6c133ac715f74b1c",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "src/platform/surface_manager.rs",
+      "source_anchor": "L448",
+      "source_git_object": "f54e632673b3c1514d9f8f5f8320878c733aad30",
+      "source_object_type": "blob",
+      "source_sha256": "ee03f17259caea1f6a5c4943962ac4721d5ad787c245e56b91b4141e23b09304",
+      "excluded": true
+    },
+    {
+      "anchor": "source-7502b4258f689c6b",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "src/platform/surface_manager.rs",
+      "source_anchor": "L716",
+      "source_git_object": "f54e632673b3c1514d9f8f5f8320878c733aad30",
+      "source_object_type": "blob",
+      "source_sha256": "ee03f17259caea1f6a5c4943962ac4721d5ad787c245e56b91b4141e23b09304",
+      "excluded": true
+    },
+    {
+      "anchor": "source-f6d9e7d77fd516bc",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "src/platform/render_bridge.rs",
+      "source_anchor": "L201",
+      "source_git_object": "0bfb1cc2e22fcc9043344e5ff6b2dad72518f6d4",
+      "source_object_type": "blob",
+      "source_sha256": "b992b57faea4bfed0c8681d3d0aba9bf7ede5a1e42058dc5a7c5cb4a3e7c46dc",
+      "excluded": true
+    },
+    {
+      "anchor": "source-241c79985c415f65",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "src/platform/render_bridge.rs",
+      "source_anchor": "L384",
+      "source_git_object": "0bfb1cc2e22fcc9043344e5ff6b2dad72518f6d4",
+      "source_object_type": "blob",
+      "source_sha256": "b992b57faea4bfed0c8681d3d0aba9bf7ede5a1e42058dc5a7c5cb4a3e7c46dc",
+      "excluded": true
+    },
+    {
+      "anchor": "source-c94543c5bea071d1",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "experiment/functional-parity/src/model.rs",
+      "source_anchor": "L41",
+      "source_git_object": "07f652ee4814cef1a23f7f516554c969b1745742",
+      "source_object_type": "blob",
+      "source_sha256": "dc101fc09ffa5d5306e03df0f476ffd43d947fa7bcd78df8f66019ed4b9a2efb",
+      "excluded": true
+    },
+    {
+      "anchor": "source-a515c1fc5d94841d",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "experiment/functional-parity/src/s6.rs",
+      "source_anchor": "L103",
+      "source_git_object": "86321df91667761f7e06ed55000a3263e6d1fa9d",
+      "source_object_type": "blob",
+      "source_sha256": "26c40a110ec8a0dc3fa71642d18cec5e2496dc325cb59ccb31ce5e8a7c8d15e0",
+      "excluded": true
+    },
+    {
+      "anchor": "source-55adb9ef8943b35c",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "experiment/functional-parity/src/s5.rs",
+      "source_anchor": "L18",
+      "source_git_object": "23134d90dcea34bdefde7a4ecabbe15929810c1e",
+      "source_object_type": "blob",
+      "source_sha256": "96591a78862f5bf278e9f2f482f2774d7f550f5b53f9fb85bbacb841d6efcb49",
+      "excluded": true
+    },
+    {
+      "anchor": "source-5f49334c6c0fd764",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "experiment/functional-parity/src/input.rs",
+      "source_anchor": "L1",
+      "source_git_object": "0a94e66168f7e8bd6ff60779d10bb31b9fc59ea1",
+      "source_object_type": "blob",
+      "source_sha256": "9e0b7392c732b10b73010dad9e541d27310e5694b4f413211147ff10360e5188",
+      "excluded": true
+    },
+    {
+      "anchor": "source-b6a9c8daae17cba7",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "experiment/functional-parity/src/slint_ui.rs",
+      "source_anchor": "L489",
+      "source_git_object": "d850b6e545d871b64668bbdf666f191346f1a0a2",
+      "source_object_type": "blob",
+      "source_sha256": "7527837548076980bdb5546365ba5d5952f4bc10a79892ddd195a72e817e8856",
+      "excluded": true
+    },
+    {
+      "anchor": "source-dfbc46c61cca3552",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "experiment/functional-parity/src/egui.rs",
+      "source_anchor": "L216",
+      "source_git_object": "75edc3f78b1150a964cdf340de659aa08a5bb0a8",
+      "source_object_type": "blob",
+      "source_sha256": "ab83db704df0ccb9ed54f35dd6ed463fada507bcf4c51c0317b00961d813a4e9",
+      "excluded": true
+    },
+    {
+      "anchor": "source-d5917d13c4ab0f23",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "experiment/functional-parity/src/egui.rs",
+      "source_anchor": "L637",
+      "source_git_object": "75edc3f78b1150a964cdf340de659aa08a5bb0a8",
+      "source_object_type": "blob",
+      "source_sha256": "ab83db704df0ccb9ed54f35dd6ed463fada507bcf4c51c0317b00961d813a4e9",
+      "excluded": true
+    },
+    {
+      "anchor": "source-cfa784e912f82453",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "experiment/functional-parity/src/egui.rs",
+      "source_anchor": "L775",
+      "source_git_object": "75edc3f78b1150a964cdf340de659aa08a5bb0a8",
+      "source_object_type": "blob",
+      "source_sha256": "ab83db704df0ccb9ed54f35dd6ed463fada507bcf4c51c0317b00961d813a4e9",
+      "excluded": true
+    },
+    {
+      "anchor": "source-38292def1aeaf55e",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "experiment/functional-parity/src/gpu.rs",
+      "source_anchor": "L38",
+      "source_git_object": "bdc68d422902ad46f6fa4dd1b12f7b45b2bd2a43",
+      "source_object_type": "blob",
+      "source_sha256": "e53b55ab5e56c03bc5206951a0c8229264a8865d6676c25c1b0717ce0e329da5",
+      "excluded": true
+    },
+    {
+      "anchor": "source-3baa510e925256e4",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "experiment/functional-parity/src/main.rs",
+      "source_anchor": "L715",
+      "source_git_object": "6303c20d12fbcdcc923e458516a11b920b1f6eef",
+      "source_object_type": "blob",
+      "source_sha256": "db8fe8a6a25d3bc599a9f4b43675838d071203706d6b17495a505e0e65e2ac2f",
+      "excluded": true
+    },
+    {
+      "anchor": "source-fc34526216b9bd91",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "experiment/functional-parity/Cargo.toml",
+      "source_anchor": "L9",
+      "source_git_object": "0b775ffcc9a5752589bd9632803e02402d73923e",
+      "source_object_type": "blob",
+      "source_sha256": "d1cbec7106486551251c6d1dc00b8c99fdbb6d3a2f0dbaa80acdec0c93b35680",
+      "excluded": true
+    },
+    {
+      "anchor": "source-9846e8e61b9a020b",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "Cargo.toml",
+      "source_anchor": "L7",
+      "source_git_object": "8289e10465fc4fecad50e3522b8338ea1f89cc39",
+      "source_object_type": "blob",
+      "source_sha256": "9e0b0811348247b8ba98430a4ffa81e5bf5523d8bd49ba820f14551fd3e4b748",
+      "excluded": true
+    },
+    {
+      "anchor": "source-78a46e75d39e0689",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/decisions/2026-11-04-gate-r-p.md",
+      "source_anchor": null,
+      "source_git_object": "28a4f828acaa9834424b3d273e62318edcef6dd5",
+      "source_object_type": "blob",
+      "source_sha256": "3f9d124ee64524761f09245c50594606aa07c5f0fee57f39ad53c106d488dbe4",
+      "excluded": true
+    },
+    {
+      "anchor": "source-e432666ee58f21bb",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-focus-triage/README.md",
+      "source_anchor": null,
+      "source_git_object": "1a5dfb556f71a3c75458706f60139c3bb1177947",
+      "source_object_type": "blob",
+      "source_sha256": "100221fb80d0e4a58c0198f577b13765ed56627fdbfe97a561490d99497048cb",
+      "excluded": true
+    },
+    {
+      "anchor": "source-9ef817af07db91c2",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/comparison.json",
+      "source_anchor": null,
+      "source_git_object": "579cd1863a0f43b4e8943d2f368dc63ca6114058",
+      "source_object_type": "blob",
+      "source_sha256": "b9ae77fd5ca486235290b1762602e1909029504e805062eb7fe77e6d0703994f",
+      "excluded": true
+    },
+    {
+      "anchor": "source-58695e1eb7526b5b",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/offline-audit.json",
+      "source_anchor": null,
+      "source_git_object": "6800ffabd9493b4506f6adb071fe73a600289202",
+      "source_object_type": "blob",
+      "source_sha256": "aeadbee90273d3f85fe2bcea0a8b5f70bba7a5c2c40237f4cf199eb10cc7fd73",
+      "excluded": true
+    },
+    {
+      "anchor": "source-ca3f86ccc4782e13",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/audit-evidence.py",
+      "source_anchor": null,
+      "source_git_object": "ee4cb59564264a71374d61d7375df1fac491ca66",
+      "source_object_type": "blob",
+      "source_sha256": "8ce5820fef8a229fbabb49dd60a0718bc2458d319c21bd297b53e983d3b94aea",
+      "excluded": true
+    },
+    {
+      "anchor": "source-ea89c9be75ac40f8",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/owned-group-audit.json",
+      "source_anchor": null,
+      "source_git_object": "a57e01e606eca39020d8d99ceb1af382df47da80",
+      "source_object_type": "blob",
+      "source_sha256": "38efa2760b7329bf2719bb94abe008f920c7c2f4cee79a6259db3f705130d440",
+      "excluded": true
+    },
+    {
+      "anchor": "source-0328e897c05bae07",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/runs",
+      "source_anchor": null,
+      "source_git_object": "351f4eabeb14a19a4c5c1dfacd70c39a11f8cf32",
+      "source_object_type": "tree",
+      "source_sha256": "2e729c83147131ab3843c5ba5e54a142cdea003a3c4f5f0dfa9e2b32603a5e1b",
+      "excluded": true
+    },
+    {
+      "anchor": "source-7d50ce5d369f5a99",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/visual-samples.json",
+      "source_anchor": null,
+      "source_git_object": "f271338489c3f0129f9be6bc3ec44f164eda9d83",
+      "source_object_type": "blob",
+      "source_sha256": "69184da8bd51d6269d883bd3da267fb4dd742f8a0474e76dbe5eadbb465c1acc",
+      "excluded": true
+    },
+    {
+      "anchor": "source-e9317e8b50b64751",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/raw-compression.json",
+      "source_anchor": null,
+      "source_git_object": "ccd0c57ab5eb376d0b7439254f7dabd49ab3fa2c",
+      "source_object_type": "blob",
+      "source_sha256": "31ad5047cdefee120d4b075e1243153be4e6ddc215b449b70e77e9609556a3ce",
+      "excluded": true
+    },
+    {
+      "anchor": "source-765ae557735f9ec0",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-04-s1-functional-parity/storage-after.json",
+      "source_anchor": null,
+      "source_git_object": "064c78f1c263b9a9ad7becc3bc216e3ed98af208",
+      "source_object_type": "blob",
+      "source_sha256": "5132ce4236c799f4f99194c2e921b95d7f885452465f358518b625f97d6545fc",
+      "excluded": true
+    },
+    {
+      "anchor": "source-5bf5501533e775bc",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-user-open-focus/replacement-focus-reconstruction.json",
+      "source_anchor": null,
+      "source_git_object": "e1137a24b232e8540ba5bb3804a3188f408e9d61",
+      "source_object_type": "blob",
+      "source_sha256": "5c5ed55a37df797e6fabf3570327323e32afa2a389e55e04f68ece9b3c1dfd52",
+      "excluded": true
+    },
+    {
+      "anchor": "source-85ff64570b8f1042",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-user-open-focus/offline-audit.json",
+      "source_anchor": null,
+      "source_git_object": "648129141d55aa98fd2a0d5c64669cab64d93209",
+      "source_object_type": "blob",
+      "source_sha256": "66f513e3bfdbcc1112e995202485e8ad55f993b18be55d268d714029b8bc8693",
+      "excluded": true
+    },
+    {
+      "anchor": "source-03c6384bf845d72e",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-user-open-focus/assertion.diff",
+      "source_anchor": null,
+      "source_git_object": "4c286130e2c9da5ff1d1ad8f8c9165f959f916d1",
+      "source_object_type": "blob",
+      "source_sha256": "06c55bbd7ce035d8586783de6a7c428f02b8df607c3fadc10ddac21c5ad97481",
+      "excluded": true
+    },
+    {
+      "anchor": "source-f4bef1421d0ee38c",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-user-open-focus/commands.json",
+      "source_anchor": null,
+      "source_git_object": "b52d8f44c9a3682f86695d9907fd5b8b5011a43c",
+      "source_object_type": "blob",
+      "source_sha256": "ac1b213581198292dee07370397f3df2646726fc071004bd60d499af008206e3",
+      "excluded": true
+    },
+    {
+      "anchor": "source-e928f362b88819bb",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-user-open-focus/provenance.json",
+      "source_anchor": null,
+      "source_git_object": "453f34c2b766c429102a17332446f0ad1d8489d2",
+      "source_object_type": "blob",
+      "source_sha256": "668f8b80043d3e8c7e8e57e3ef18eae24fc676356ad240262b1f20d0d4a765fb",
+      "excluded": true
+    },
+    {
+      "anchor": "source-4982b31b8459fa4c",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-user-open-focus/runs",
+      "source_anchor": null,
+      "source_git_object": "1d3d511d770a2468fe3e9a03de2d6ca0551c870a",
+      "source_object_type": "tree",
+      "source_sha256": "03289128775d879537e393419111106a5d924ee7e18c13d2c3f48f22f3b3367e",
+      "excluded": true
+    },
+    {
+      "anchor": "source-7a89966d066057be",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-user-open-focus/historical-preservation.json",
+      "source_anchor": null,
+      "source_git_object": "a89813c52ae4f77a84718018c8aef1473114c01c",
+      "source_object_type": "blob",
+      "source_sha256": "3902842aac83dc7237fa1afc21840eecb5f747ea82d4fd1be51171ad4e97daf6",
+      "excluded": true
+    },
+    {
+      "anchor": "source-70efd73811944ca7",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-user-open-focus/owned-cleanup-audit.json",
+      "source_anchor": null,
+      "source_git_object": "c4dc1808df9170fc52e331b48783b7f2b71f71d7",
+      "source_object_type": "blob",
+      "source_sha256": "957f795c2eb5e270e6cb45d347dfd4c15c6a8d0c94ca3ff5656ef6167cc7158b",
+      "excluded": true
+    },
+    {
+      "anchor": "source-60a71dcd0f2a2ef8",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s2-user-open-focus/tests",
+      "source_anchor": null,
+      "source_git_object": "37d2e89752e72562b258ceaad2430b8906b564d4",
+      "source_object_type": "tree",
+      "source_sha256": "37ff168c3e75d5a871146dc3a9fd4850c61e3521e1e9f1936218fc400f4a0012",
+      "excluded": true
+    },
+    {
+      "anchor": "source-f2a11ae54efecda4",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/plans/S3-SCHEDULING-CONTRACT.md",
+      "source_anchor": null,
+      "source_git_object": "88ddce17bdcf5e4bfe509670c18c604b23382180",
+      "source_object_type": "blob",
+      "source_sha256": "2ea0381d925e961fc0bf1782f0d4bd63560c1e787c9af201a3b3250d4a9b74ae",
+      "excluded": true
+    },
+    {
+      "anchor": "source-f5e1c64cae5ca4ed",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/decisions/2026-11-05-s3-authorization.md",
+      "source_anchor": null,
+      "source_git_object": "e4ca920f9e7cbb7120e76278ea0c8348bb25273a",
+      "source_object_type": "blob",
+      "source_sha256": "9c0273a7d277e2489ed753f925017123f108ddb503667e0c6d000c82c7bf446b",
+      "excluded": true
+    },
+    {
+      "anchor": "source-c090b7e8d1e1eb08",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s3-scheduling/provenance.json",
+      "source_anchor": null,
+      "source_git_object": "dd4d5278e73ecc53abe53484aa899f5e8507f77e",
+      "source_object_type": "blob",
+      "source_sha256": "42e6fdf60680b5648e491415ce404b77942c4c16ca06e4e7723a234d49398e2a",
+      "excluded": true
+    },
+    {
+      "anchor": "source-56bdc953dc13ee2c",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s3-scheduling/artifact-manifest.json",
+      "source_anchor": null,
+      "source_git_object": "f99267e97a628b3fadfd95ace4e345ad9f3c3a1f",
+      "source_object_type": "blob",
+      "source_sha256": "b4b1ed4f566fc4861815a7e63c981d037b417b81ef3269e3603db3d08c10d3dd",
+      "excluded": true
+    },
+    {
+      "anchor": "source-37b054b139feea11",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s3-scheduling/commands.json",
+      "source_anchor": null,
+      "source_git_object": "6be3e9ef8d6772aae7dfe12f229188b60ea1f4ad",
+      "source_object_type": "blob",
+      "source_sha256": "306b7770c3fdf66f23091887496f923f08aaed3568166f4f446af2011defa7ab",
+      "excluded": true
+    },
+    {
+      "anchor": "source-66de8b958fdc7922",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s3-scheduling/offline-audit.json",
+      "source_anchor": null,
+      "source_git_object": "c00929b8fc21d236502b3f59a9c8cd99f367c32a",
+      "source_object_type": "blob",
+      "source_sha256": "b1fe27bbe20a13457987528743d32eafb7f055fbf078dfa9da7c8fe9d88e69bf",
+      "excluded": true
+    },
+    {
+      "anchor": "source-af09c392435ea187",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s3-scheduling/owned-cleanup-audit.json",
+      "source_anchor": null,
+      "source_git_object": "98063892700865810c44a9f9579e07063530dd45",
+      "source_object_type": "blob",
+      "source_sha256": "54ed8abbc8f1e6473a0d99c49b1f856af6529fe4a5aa1869415e50483a440f2d",
+      "excluded": true
+    },
+    {
+      "anchor": "source-223d6169fff48877",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/plans/S4-SCALING-CONTRACT.md",
+      "source_anchor": null,
+      "source_git_object": "201486ab892c3afd37253334493c0478a2043f60",
+      "source_object_type": "blob",
+      "source_sha256": "6092deadde105e3e5d6405ab0402c7f17900e8b460c8a256e611d8c5124a55bf",
+      "excluded": true
+    },
+    {
+      "anchor": "source-1c5f8197d9a09dd5",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/decisions/2026-11-05-s4-authorization.md",
+      "source_anchor": null,
+      "source_git_object": "ddb65b242faf47b99f302f1d580ea178c8f15600",
+      "source_object_type": "blob",
+      "source_sha256": "ad08ba865dcfbb8cbc5bc89840507611c0e1d3675dea5de176499aacdfa3b3fc",
+      "excluded": true
+    },
+    {
+      "anchor": "source-71c135b498d0aed4",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s4-scaling/coordinate-errors.json",
+      "source_anchor": null,
+      "source_git_object": "78a487175f99e5ff8432c4bf0c3ba0dd93222780",
+      "source_object_type": "blob",
+      "source_sha256": "015af0021d3b9c3e555f69d7a07b665753ea482b7cabcb62701fd5ef54e6d602",
+      "excluded": true
+    },
+    {
+      "anchor": "source-0cb8ef28a7e6952f",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s4-scaling/visual-bounds.json",
+      "source_anchor": null,
+      "source_git_object": "f92c04be2543aca7abd32ad0f977fd299bfdf647",
+      "source_object_type": "blob",
+      "source_sha256": "ceb35f44ed84a36225e45d9ffc780a63ba97b3385b3d627981e59fbe630210e8",
+      "excluded": true
+    },
+    {
+      "anchor": "source-f08e9e2f33de9c38",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s4-scaling/visual-crops.json",
+      "source_anchor": null,
+      "source_git_object": "2e21ac6d862571be04221ec2301cdb3993b8796d",
+      "source_object_type": "blob",
+      "source_sha256": "7b740c61fed2887c2ce485fecd49fb635f5f552c6a2caeef1ebc874c380b0b9d",
+      "excluded": true
+    },
+    {
+      "anchor": "source-aba7dae01d613112",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s4-scaling/clock-crops.json",
+      "source_anchor": null,
+      "source_git_object": "fb762adf101387f9d5d57009d93a40771faae7c8",
+      "source_object_type": "blob",
+      "source_sha256": "a7492b8160b19af7d8917df44e5cae1fc1cad08a2e97582f2e5293b5ebaa17f0",
+      "excluded": true
+    },
+    {
+      "anchor": "source-9c0f3f87cfafbd00",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s4-scaling/manual-visual-inspection.json",
+      "source_anchor": null,
+      "source_git_object": "63322b1b5c7ae9a6c063ac37e832d822f8248b66",
+      "source_object_type": "blob",
+      "source_sha256": "e74433489d443beba2b573ac935c72784f0811b5cfba2dbd788cdab9988860b0",
+      "excluded": true
+    },
+    {
+      "anchor": "source-bdfd604b44e7e2a4",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s4-scaling/provenance.json",
+      "source_anchor": null,
+      "source_git_object": "66a35c049f4a1a49ddbc78c352e3f44848f0a6c4",
+      "source_object_type": "blob",
+      "source_sha256": "595e4d370922ce301e37f5394a4e1dbc3b66476f2d25e967b982c9de6b1171f7",
+      "excluded": true
+    },
+    {
+      "anchor": "source-647783d25b137c20",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s4-scaling/artifact-manifest.json",
+      "source_anchor": null,
+      "source_git_object": "4c989afbd809fe9707b65a614e9ea9aeb9951619",
+      "source_object_type": "blob",
+      "source_sha256": "7cbab5f0303341c5a1cb1fd3df1fbf7663d3b2f081eecb7786ed9683edd46c72",
+      "excluded": true
+    },
+    {
+      "anchor": "source-8a52d8675b3d15d5",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s4-scaling/offline-audit.json",
+      "source_anchor": null,
+      "source_git_object": "ad4df915d20c45ee3818f96f7a23a176b88a8887",
+      "source_object_type": "blob",
+      "source_sha256": "0beede3d2644bd5702bb479c9716b9af69f3c43b15c275b50812cfeb060b0b47",
+      "excluded": true
+    },
+    {
+      "anchor": "source-c326a04f30c1260e",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s4-scaling/owned-cleanup-audit.json",
+      "source_anchor": null,
+      "source_git_object": "41fbef6c5d7982f4f14f09e416a75af04e5a2438",
+      "source_object_type": "blob",
+      "source_sha256": "49978ee9e9d46ce5e6bf3c720d53292499e69feeb953d8f50d2647a517fe84d7",
+      "excluded": true
+    },
+    {
+      "anchor": "source-d64510d25df6d679",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/decisions/2026-11-05-s5-phase1-authorization.md",
+      "source_anchor": null,
+      "source_git_object": "962e856455fa2438cace2266c847365196a56d66",
+      "source_object_type": "blob",
+      "source_sha256": "b46faa85774fa0a83bb915ad3c35ddb8d94e897a573f688ef43f39574190bec0",
+      "excluded": true
+    },
+    {
+      "anchor": "source-b034c88b1d298102",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/CONTRACT.md",
+      "source_anchor": null,
+      "source_git_object": "472a667901647abf69120cefed48874a37ab957b",
+      "source_object_type": "blob",
+      "source_sha256": "04f42f32506f9ca6158295ae3cd33cc01e972824e9b43b4f902fd108b59d56e2",
+      "excluded": true
+    },
+    {
+      "anchor": "source-073171c8fb3ac187",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/build.json",
+      "source_anchor": null,
+      "source_git_object": "4a4f63fc9af572261480e9b7c3550760793cd30c",
+      "source_object_type": "blob",
+      "source_sha256": "07bead01d877e4200e42c2e43d3be3c99965df9c1254dc997425ad0b95f28871",
+      "excluded": true
+    },
+    {
+      "anchor": "source-4bc67224677ed37d",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/observer-build.json",
+      "source_anchor": null,
+      "source_git_object": "c33ec80102e1c3df2d38a90288c3c25f4a9b6058",
+      "source_object_type": "blob",
+      "source_sha256": "dd19947e7592b6297f7f7c869a443294b1ecd916e497ee4d561e808a590ed332",
+      "excluded": true
+    },
+    {
+      "anchor": "source-4d11b94d78720dcd",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/slint-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "a95e982cb9cd66b4fd0500dc0ddd24f1e23832d0",
+      "source_object_type": "blob",
+      "source_sha256": "5897a69bb364edd2bb8a9a277cbf335212c689aaf0c33a14b6c9feaee6823dd4",
+      "excluded": true
+    },
+    {
+      "anchor": "source-be2d6a4afd75d49a",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/slint-02/result.json",
+      "source_anchor": null,
+      "source_git_object": "e923d7c22a24bd5099aa7f1d73482628bad689bf",
+      "source_object_type": "blob",
+      "source_sha256": "1e357efbe47a9318f4dae51d2f7d0a4916780a4a65324f1746d4574e6649766e",
+      "excluded": true
+    },
+    {
+      "anchor": "source-156bc04e7440b0d3",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/egui-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "38b05a472924dbb62b87f8032fe46751470f6244",
+      "source_object_type": "blob",
+      "source_sha256": "d891253fb0fb05dbf662f60607cb0923344f91098eac2d2b890ed937449f88f9",
+      "excluded": true
+    },
+    {
+      "anchor": "source-15be960b692f790c",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/slint-03/initial-outputs.json",
+      "source_anchor": null,
+      "source_git_object": "55a9a2e8647866931ce083758054249316edbb30",
+      "source_object_type": "blob",
+      "source_sha256": "d085611d0bf5cca3226edae4820a58a2ac0a60146adc8446e1bb65d8d48a7909",
+      "excluded": true
+    },
+    {
+      "anchor": "source-4171d720623bca5c",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/slint-03/final-outputs.json",
+      "source_anchor": null,
+      "source_git_object": "8771938ad13de6242dd81a202136eb3e19a109ea",
+      "source_object_type": "blob",
+      "source_sha256": "0665c2c6b7bf71f6f67b281b09015db59173077705f4e1b23f83c244328f70de",
+      "excluded": true
+    },
+    {
+      "anchor": "source-9ae7db7c130657a0",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/facts.json",
+      "source_anchor": null,
+      "source_git_object": "0d39b3b1757011ded8cf8b96cac1b83487aa156b",
+      "source_object_type": "blob",
+      "source_sha256": "98cc481dd7f463b7800e9cfc047574cbec64d27edb36130413df1393d96e4e2f",
+      "excluded": true
+    },
+    {
+      "anchor": "source-2734f612dfc94659",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/offline-audit.json",
+      "source_anchor": null,
+      "source_git_object": "f20072f28202cfd6113bc594ebcc95efe8279dc9",
+      "source_object_type": "blob",
+      "source_sha256": "6be3d6573e5d842e79c0e2c55e49ced55dc24e53027da076c849c2d5f21a27b0",
+      "excluded": true
+    },
+    {
+      "anchor": "source-953db08f873a29c8",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/owned-cleanup-audit.json",
+      "source_anchor": null,
+      "source_git_object": "2f3b59494f1d1fc825f420d8655ccb6ff2835e92",
+      "source_object_type": "blob",
+      "source_sha256": "865d424ec09524de50ffaa9e1ad5826d8a4bb029dba4d07ab872ac43a6d2e821",
+      "excluded": true
+    },
+    {
+      "anchor": "source-545afc372c2b8eb4",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/implementation.patch",
+      "source_anchor": null,
+      "source_git_object": "478aee5c1e4bbd3c7a6070cc7744389eb22ab002",
+      "source_object_type": "blob",
+      "source_sha256": "5359b3577b576ec44e991d927ee9689dc08bac696aa4139ce9c5334b429de1cb",
+      "excluded": true
+    },
+    {
+      "anchor": "source-eb488dbc7f5a8d6f",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/tests/owlen-s5-phase1-core-tests.log",
+      "source_anchor": null,
+      "source_git_object": "519b8593d834582ce31e5e66396380156cce1ef9",
+      "source_object_type": "blob",
+      "source_sha256": "c57f13caf0f2ea7f9f8ad63615e37cea83dc11930d4b68959cded291b988455f",
+      "excluded": true
+    },
+    {
+      "anchor": "source-dc2db4a593fa889f",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/slint-03/result.json",
+      "source_anchor": null,
+      "source_git_object": "0f56c5daeb8c020cbe61b4da7ee58e3be39dcdb3",
+      "source_object_type": "blob",
+      "source_sha256": "653b43236ba40972045350bbb55e7801f6b6d1cce97da82dbca7d90507212664",
+      "excluded": true
+    },
+    {
+      "anchor": "source-6ff1ef80c04d43c4",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/egui-02/result.json",
+      "source_anchor": null,
+      "source_git_object": "e684de468939f4471427b4cbcdd87b717eb3e84d",
+      "source_object_type": "blob",
+      "source_sha256": "047634a8349fcc39c5d818d0fd1af67cd8e1e485408327611ad39e63d2fe0589",
+      "excluded": true
+    },
+    {
+      "anchor": "source-25e961cfaeb5dae0",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/egui-runtime-format-receipts.json",
+      "source_anchor": null,
+      "source_git_object": "760330602427e72d2e69777a687361f4382f95dd",
+      "source_object_type": "blob",
+      "source_sha256": "ebae51bea9b760c291bead646e2a466d6de62b07041613d2295ac9d4bf7a711e",
+      "excluded": true
+    },
+    {
+      "anchor": "source-03805e88f82eb830",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s5-multi-output/environment-inventory.json",
+      "source_anchor": null,
+      "source_git_object": "dd484e3d0bb1cfe09be89da6fd1adc6a99d26acf",
+      "source_object_type": "blob",
+      "source_sha256": "d04557ff7f52694c7cd6c07e488281c27bd43c6f5ed3178f995ed6e8b60507a8",
+      "excluded": true
+    },
+    {
+      "anchor": "source-b53b80bf08ed75e8",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/decisions/2026-11-05-s6-authorization.md",
+      "source_anchor": null,
+      "source_git_object": "53ef2e079c303f3c3e19a547cc77ba131750a83f",
+      "source_object_type": "blob",
+      "source_sha256": "6ffe5a12332bf4cf2414fbb57dbd86675f72bc1232c0cdb515f6774076424eee",
+      "excluded": true
+    },
+    {
+      "anchor": "source-d58f4b4065215b5c",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/CONTRACT.md",
+      "source_anchor": null,
+      "source_git_object": "06636ab6b65eb764955ec264fedb65ba6ccc6624",
+      "source_object_type": "blob",
+      "source_sha256": "aa40cb9a9ea82b153d5cc38b4fc2ee2e2ff97084933e5265f631ffdeca0d224f",
+      "excluded": true
+    },
+    {
+      "anchor": "source-82f7913e99a36e25",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/build.json",
+      "source_anchor": null,
+      "source_git_object": "8597882e7dea3259cc34c59072300d8b3551fdd6",
+      "source_object_type": "blob",
+      "source_sha256": "402c9bd7487777bdcc368ac01e395212efc37000688efea8c6cb7986752d89ae",
+      "excluded": true
+    },
+    {
+      "anchor": "source-dd969fd8b7bf722d",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/parent-launch-reproduction.json",
+      "source_anchor": null,
+      "source_git_object": "95353b47e838f818d6d29524d390f4644baed850",
+      "source_object_type": "blob",
+      "source_sha256": "ffb6d0ff63fc25b60021d226aae3e36b892967ef0e1b58651cb4445e6e4494b1",
+      "excluded": true
+    },
+    {
+      "anchor": "source-07265fb087e37f2b",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/slint-lifecycle-04/result.json",
+      "source_anchor": null,
+      "source_git_object": "2ef2a7df5f6735934cc99972111bcf50e76ccb82",
+      "source_object_type": "blob",
+      "source_sha256": "3d92528b6b17d104089ce3a2ed9102d59680ef9b53c540fb554e69bb47fa7cb3",
+      "excluded": true
+    },
+    {
+      "anchor": "source-5e8e1c4a7496af6d",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/egui-lifecycle-02/result.json",
+      "source_anchor": null,
+      "source_git_object": "82d05c95b34811500a5e387071db781c8968aa3a",
+      "source_object_type": "blob",
+      "source_sha256": "6598f3ffa60d4173bee07de0a2827108b13f42d04295d97244a5195f5f0b65a1",
+      "excluded": true
+    },
+    {
+      "anchor": "source-56c7ddca269ffffb",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/slint-restart-pending-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "e86ad28a3dbb81ef114bed0eb22c5cc07ebb2e38",
+      "source_object_type": "blob",
+      "source_sha256": "8e9ba6a575f6574df5c869d2cdad16584c1016dc221b88ee334d249cc9e86e9f",
+      "excluded": true
+    },
+    {
+      "anchor": "source-09a4f86102ee82c2",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/egui-restart-pending-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "994f2f2056638a299bf3eef2f73dc4e33298d42a",
+      "source_object_type": "blob",
+      "source_sha256": "ea4812455e73b409995ed5730b1e72761683488f2a5a85b4170733c9a732d275",
+      "excluded": true
+    },
+    {
+      "anchor": "source-fcf4dc97fa273f22",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/slint-sigterm-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "2dad5e7c1f2e8b7280ce9f30ae173ec2b6ce0313",
+      "source_object_type": "blob",
+      "source_sha256": "e082e3952432196646ef224a1f888ab77e372b46cc2186625a05a9e6f29fac8f",
+      "excluded": true
+    },
+    {
+      "anchor": "source-c9dd832459327645",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/egui-sigterm-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "72dbfbc498542ab5f10070181ad7675d00065acf",
+      "source_object_type": "blob",
+      "source_sha256": "a4ffe8eb0bb0dd77b23f56ef058492cc0c50a3640e77f80e6c28c4063441167e",
+      "excluded": true
+    },
+    {
+      "anchor": "source-4897a6ada911b124",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/slint-sigint-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "76e095be5dff68e436e82de2639ca1a7d8e0cea5",
+      "source_object_type": "blob",
+      "source_sha256": "df914ccaa60bd61cbc19812a04754585960d0c98d26d57963935891f6e4cd105",
+      "excluded": true
+    },
+    {
+      "anchor": "source-2983f32dafb59f42",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/egui-sigint-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "81a30f197812019e2adac09fc9780bdfa760ae64",
+      "source_object_type": "blob",
+      "source_sha256": "97912ed3c02d7ce0aa1a492aece3ed4d978115fd75d9b62c5ebec6e7c2249c3f",
+      "excluded": true
+    },
+    {
+      "anchor": "source-507f3fc5efb0e013",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/slint-repeat-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "3531b182417721a19806a146dd6d78ab08dd0a24",
+      "source_object_type": "blob",
+      "source_sha256": "d1bab338527415b9219a3678d0aa7eca0df85453d56190cc46477dc27ffe2434",
+      "excluded": true
+    },
+    {
+      "anchor": "source-ed080d3a96dfb013",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/egui-repeat-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "cac33269ed4228bd721e28f0a43ea16ec827fb6e",
+      "source_object_type": "blob",
+      "source_sha256": "32eff02c54e96c24951a8ce1f03fe128fd3b794055c018bc61206309298223d1",
+      "excluded": true
+    },
+    {
+      "anchor": "source-2565be6df2c14c2e",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/slint-fault-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "5ba24e8594081a1e02e82eb18bd934ca0bbe1447",
+      "source_object_type": "blob",
+      "source_sha256": "d4071724e3b161cfb31072e4201cf6b4a8e2416c715ed82bc909d6a2b665a415",
+      "excluded": true
+    },
+    {
+      "anchor": "source-b6434f1d82bca169",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/egui-fault-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "e5021df819aecc6c773baec9910ba9a5b84ebea4",
+      "source_object_type": "blob",
+      "source_sha256": "bb25f821ee6ac4b61c7683bc0f18484f57cb3211b1e1ab6b421bf9b2042b9c42",
+      "excluded": true
+    },
+    {
+      "anchor": "source-98ff4df7629debb3",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/slint-abrupt-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "66e9978c7ff94505e4f49b524d9ce6c0e458edeb",
+      "source_object_type": "blob",
+      "source_sha256": "5dee3d7daefd592ed1ef551e51a3aad5f11ef8c96a592a5c4b8fe34aa517f6ed",
+      "excluded": true
+    },
+    {
+      "anchor": "source-7cd7c8837556fb17",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/egui-abrupt-01/result.json",
+      "source_anchor": null,
+      "source_git_object": "95424bbd3e8379eaf4a1478f119a4aa27c23be21",
+      "source_object_type": "blob",
+      "source_sha256": "2b1fbdf57aeb42a2d18fb1c11b229037380e140af836101d5aa681c17ca48427",
+      "excluded": true
+    },
+    {
+      "anchor": "source-19810a4f6f8188d4",
+      "source_commit": "6304979719f1388e6ff98d549224107d0d45f284",
+      "source_path": "docs/bakeoffs/renderer/results/2026-11-05-s6-lifecycle/tests/callback-offline-replay.json",
+      "source_anchor": null,
+      "source_git_object": "c4a58fdb05c700315e17cfa658b0cec3c5017b42",
+      "source_object_type": "blob",
+      "source_sha256": "067dd9c19c0649f3b06a31d90a41fef68a95ad91718e24ff048d553923227d32",
+      "excluded": true
+    }
+  ],
+  "manifest_self_hash": "Not embedded; the eventual signed snapshot commit binds this manifest.",
+  "new_review_document": "PUBLICATION-REVIEW.md is newly authored for this snapshot; no original experimental source is asserted. Its content hash is listed in documents."
+}

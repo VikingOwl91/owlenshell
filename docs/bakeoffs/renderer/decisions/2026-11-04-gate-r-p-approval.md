@@ -1,0 +1,11 @@
+# 2026-11-04 — Maintainer approval: Gate R / Gate P
+
+> **Curated publication copy.** Source: `6304979719f1388e6ff98d549224107d0d45f284`, `docs/bakeoffs/renderer/decisions/2026-11-04-gate-r-p-approval.md`. Private paths/identifiers are redacted and links to omitted material lead to the [excluded-source catalogue](../SOURCE-REFERENCES.md). Original source and hashes are listed in [provenance](../provenance.json). This is a dated record: historical ADR statuses, approvals and test counts describe their original scope, not new acceptance. Current initial selection is [Accepted ADR-0006](../../../ADR/0006-renderer-selection.md); Gate P remains NO-GO. References to the repository, its history, implementations or raw evidence describe the retained original experimental repository, not this curated branch. Commands are historical descriptions, not runnable reproduction instructions or execution authorization for this curated snapshot.
+
+**Status: APPROVED — protocol adopted.** The maintainer explicitly approved the independently reviewed Gate R / Gate P amendment on 2026-11-04. The earlier [recommendation pending confirmation](../SOURCE-REFERENCES.md#source-78a46e75d39e0689) remains part of the record; this separate decision records the subsequent approval.
+
+Gate R assesses evidence-based research benchmark eligibility for a precisely defined candidate set, workload, metric and environment. Gate P retains complete E1–E11 production acceptance. Performance outcomes do not determine Gate R entry. Prior NO-GOs, failed observations and limitations remain valid; no earlier result is retroactively promoted to PASS.
+
+This approval is **only the protocol decision**. It does not authorize any benchmark execution, renderer selection or production integration. Every matched comparative benchmark still requires separate, explicit maintainer authorization for its reviewed scope. The existing `experiment/niri-harness/benchmark.sh` E1–E11 guard remains unchanged; protocol adoption alone is not an instruction to bypass or weaken it. No current candidate/workload has thereby obtained a Gate R PASS.
+
+Maintainers retain exclusive authority over the final renderer choice. No ranking, winner, merge, migration or deployment is authorized. [ADR 0006](../../../ADR/0006-renderer-selection.md) remains Proposed.
